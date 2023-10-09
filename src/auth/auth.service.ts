@@ -9,6 +9,7 @@ import bcrypt from 'bcrypt';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { ConfigService } from '@nestjs/config';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -121,7 +122,45 @@ export class AuthService {
     }
   }
 
-  async changePassword() {}
+  async changePassword(dto: ChangePasswordDto, id: string) {
+    try {
+      const userExists = await this.checkUserExistsById(id);
+      if (!userExists) {
+        if (!userExists) {
+          throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+        }
+
+        // check if old password is correct
+        const isPasswordCorrect = await bcrypt.compare(
+          dto.oldPassword,
+          userExists.password,
+        );
+        if (!isPasswordCorrect) {
+          throw new HttpException(
+            'Incorrect Password',
+            HttpStatus.UNAUTHORIZED,
+          );
+        }
+
+        const newPasswordHash = await bcrypt.hash(dto.newPassword, 12);
+        await this.prisma.user.update({
+          where: { id: id },
+          data: { password: newPasswordHash },
+        });
+
+        return {
+          statusCode: HttpStatus.OK,
+          message: 'Password changed successfully',
+        };
+      }
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   //   async requestEmailVerification() {}
 
