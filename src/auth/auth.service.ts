@@ -57,11 +57,14 @@ export class AuthService {
         data: { email: dto.email, password: passwordHash },
       });
 
-      delete newUser.password;
-
       return {
         statusCode: HttpStatus.CREATED,
-        message: newUser,
+        message: {
+          id: newUser.id,
+          email: newUser.email,
+          createdAt: newUser.createdAt,
+          updatedAt: newUser.updatedAt,
+        },
       };
     } catch (error) {
       this.logger.error(error);
@@ -77,7 +80,7 @@ export class AuthService {
    * @param dto : login user dto
    * @returns : status code, access and refresh tokens
    */
-  async loginUser(dto: LoginDto) {
+  async loginUser(dto: LoginDto): Promise<ApiResponse> {
     try {
       // check if user exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
@@ -118,11 +121,11 @@ export class AuthService {
     }
   }
 
+  async changePassword() {}
+
   //   async requestEmailVerification() {}
 
   //   async verifyEmail() {}
-
-  //   async changePassword() {}
 
   //   async requestForgotPasswordEmail() {}
 
