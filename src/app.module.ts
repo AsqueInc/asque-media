@@ -3,6 +3,7 @@ import { AuthModule } from './auth/auth.module';
 import { EmailNotificationModule } from './email-notification/email-notification.module';
 import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
+import { ProfileModule } from './profile/profile.module';
 import * as winston from 'winston';
 
 @Module({
@@ -26,6 +27,7 @@ import * as winston from 'winston';
         }),
       ),
     }),
+    ProfileModule,
   ],
   controllers: [],
   providers: [],
