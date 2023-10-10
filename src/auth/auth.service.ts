@@ -48,10 +48,10 @@ export class AuthService {
       // check if user already exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (userExists) {
-        throw new HttpException(
-          'User aready exists',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        return {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          message: { error: 'User already exists' },
+        };
       }
 
       // hash new password
@@ -89,7 +89,10 @@ export class AuthService {
       // check if user exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (!userExists) {
-        throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: { error: 'User does not exist' },
+        };
       }
 
       // check is password is correct
@@ -97,9 +100,12 @@ export class AuthService {
         dto.password,
         userExists.password,
       );
-      console.log(passwordMatches);
+
       if (!passwordMatches) {
-        throw new HttpException('Incorrect password', HttpStatus.UNAUTHORIZED);
+        return {
+          statusCode: HttpStatus.UNAUTHORIZED,
+          message: { error: 'Incorrect password' },
+        };
       }
 
       const payload = { sub: userExists.id, email: userExists.email };
@@ -139,7 +145,10 @@ export class AuthService {
     try {
       const userExists = await this.checkUserExistsById(userId);
       if (!userExists) {
-        throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: { error: 'User does not exist' },
+        };
       }
 
       // check if old password is correct
@@ -148,7 +157,10 @@ export class AuthService {
         userExists.password,
       );
       if (!isPasswordCorrect) {
-        throw new HttpException('Incorrect Password', HttpStatus.UNAUTHORIZED);
+        return {
+          statusCode: HttpStatus.UNAUTHORIZED,
+          message: { error: 'Incorrect password' },
+        };
       }
 
       const newPasswordHash = await bcrypt.hash(dto.newPassword, 12);
