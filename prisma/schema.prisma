@@ -32,4 +32,6 @@ model Profile {
   isMobileNumberVerified  Boolean @default(false)
   firstName   String?
   lastName   String?
+   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
