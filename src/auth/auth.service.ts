@@ -5,7 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { User } from '@prisma/client';
 import { ApiResponse } from 'src/types/response.type';
 import { JwtService } from '@nestjs/jwt';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { Logger } from 'winston';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { ConfigService } from '@nestjs/config';
@@ -47,8 +47,11 @@ export class AuthService {
     try {
       // check if user already exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
-      if (!userExists) {
-        throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
+      if (userExists) {
+        throw new HttpException(
+          'User aready exists',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
 
       // hash new password
@@ -90,7 +93,11 @@ export class AuthService {
       }
 
       // check is password is correct
-      const passwordMatches = bcrypt.compare(dto.password, userExists.password);
+      const passwordMatches = await bcrypt.compare(
+        dto.password,
+        userExists.password,
+      );
+      console.log(passwordMatches);
       if (!passwordMatches) {
         throw new HttpException('Incorrect password', HttpStatus.UNAUTHORIZED);
       }
@@ -126,33 +133,28 @@ export class AuthService {
     try {
       const userExists = await this.checkUserExistsById(id);
       if (!userExists) {
-        if (!userExists) {
-          throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
-        }
-
-        // check if old password is correct
-        const isPasswordCorrect = await bcrypt.compare(
-          dto.oldPassword,
-          userExists.password,
-        );
-        if (!isPasswordCorrect) {
-          throw new HttpException(
-            'Incorrect Password',
-            HttpStatus.UNAUTHORIZED,
-          );
-        }
-
-        const newPasswordHash = await bcrypt.hash(dto.newPassword, 12);
-        await this.prisma.user.update({
-          where: { id: id },
-          data: { password: newPasswordHash },
-        });
-
-        return {
-          statusCode: HttpStatus.OK,
-          message: 'Password changed successfully',
-        };
+        throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
       }
+
+      // check if old password is correct
+      const isPasswordCorrect = await bcrypt.compare(
+        dto.oldPassword,
+        userExists.password,
+      );
+      if (!isPasswordCorrect) {
+        throw new HttpException('Incorrect Password', HttpStatus.UNAUTHORIZED);
+      }
+
+      const newPasswordHash = await bcrypt.hash(dto.newPassword, 12);
+      await this.prisma.user.update({
+        where: { id: id },
+        data: { password: newPasswordHash },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Password changed successfully',
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
