@@ -6,6 +6,14 @@ import { ValidationPipe } from '@nestjs/common';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // setup validation
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      transform: true,
+    }),
+  );
+
   // setup swagger
   const config = new DocumentBuilder()
     .setTitle('Asque Media')
@@ -13,17 +21,9 @@ async function bootstrap() {
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('/api-doc', app, document);
+  SwaggerModule.setup('api-doc', app, document);
 
-  // setup validation
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-    }),
-  );
-
-  app.setGlobalPrefix('api/v1');
-
-  await app.listen(3000);
+  await app.listen(Number(process.env.NODE_PORT) || 3000);
 }
+
 bootstrap();
