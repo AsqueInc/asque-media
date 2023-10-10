@@ -1,8 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createTransport } from 'nodemailer';
 import * as Mail from 'nodemailer/lib/mailer';
-import { SendOtpEmailDto } from './dto/send-otp.dto';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
 
@@ -30,22 +29,20 @@ export class EmailNotificationService {
    * function to send otp email
    * @param dto : send email dto
    */
-  async sendOtpEmail(dto: SendOtpEmailDto) {
+  async sendOtpEmail(to: string, otp: string) {
     const mailOptions = {
       from: 'alahirajeffrey@gmail.com',
-      to: dto.to,
+      to: to,
       subject: 'Verification Otp',
-      text: `Hi there, Here is your verification otp ${dto.otp}`,
+      text: `Hi there, Here is your verification otp ${otp}`,
     };
 
-    await this.nodeMailerTransport
-      .sendMail(mailOptions)
-      .then((response) => {
-        this.logger.info(`Email sent: ${response.response}`);
-      })
-      .catch((error) => {
-        this.logger.error(error);
-        throw error;
-      });
+    await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
+      this.logger.error(error);
+      throw new HttpException(
+        'Email not sent',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
   }
 }
