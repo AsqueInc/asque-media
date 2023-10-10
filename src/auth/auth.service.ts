@@ -308,6 +308,8 @@ export class AuthService {
       // generate and send otp
       const otp = this.util.generateOtp();
 
+      await this.email.sendOtpEmail(dto.email, otp);
+
       // save otp to database
       await this.prisma.otp.create({
         data: { otp: otp, userId: userExists.id },
