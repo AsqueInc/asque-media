@@ -52,6 +52,13 @@ export class ProfileService {
     };
   }
 
+  /**
+   * update profile
+   * @param dto : update profile dto
+   * @param userId : user id
+   * @param profileId : profile id
+   * @returns : status code and message
+   */
   async updatedProfile(
     dto: UpdateProfileDto,
     userId: string,
