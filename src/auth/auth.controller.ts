@@ -20,8 +20,8 @@ export class AuthController {
     return this.authService.loginUser(dto);
   }
 
-  @Patch('change-password')
-  changePassword(@Body('userId') dto: ChangePasswordDto, @Param() id: string) {
+  @Patch('change-password/:id')
+  changePassword(@Body() dto: ChangePasswordDto, @Param('id') id: string) {
     return this.authService.changePassword(dto, id);
   }
 }
