@@ -39,7 +39,7 @@ export class AuthController {
 
   // @UseGuards(AuthGuard)
   // @ApiBearerAuth('token')
-  @Post('verify-email/:userId')
+  @Patch('verify-email/:userId')
   verifyEmail(@Body() dto: VerifyEmailDto, @Param('userId') userId: string) {
     return this.authService.verifyEmail(userId, dto);
   }
