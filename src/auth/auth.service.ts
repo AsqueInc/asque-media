@@ -129,9 +129,15 @@ export class AuthService {
     }
   }
 
-  async changePassword(dto: ChangePasswordDto, id: string) {
+  /**
+   * change user password
+   * @param dto : change password dto
+   * @param id : user id
+   * @returns status code and message
+   */
+  async changePassword(dto: ChangePasswordDto, userId: string) {
     try {
-      const userExists = await this.checkUserExistsById(id);
+      const userExists = await this.checkUserExistsById(userId);
       if (!userExists) {
         throw new HttpException('User does not exist', HttpStatus.NOT_FOUND);
       }
@@ -147,7 +153,7 @@ export class AuthService {
 
       const newPasswordHash = await bcrypt.hash(dto.newPassword, 12);
       await this.prisma.user.update({
-        where: { id: id },
+        where: { id: userId },
         data: { password: newPasswordHash },
       });
 
