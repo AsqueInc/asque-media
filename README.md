@@ -75,3 +75,4 @@ Nest is [MIT licensed](LICENSE).
 ## Todo
 
 - Ensure only owners can access or create or update their profile
+- create functionality for uploading pictures
