@@ -3,6 +3,8 @@ import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { RequestMobileVerificationDto } from './dto/request-mobile-verification.dto';
+import { VerifyMobileDto } from './dto/verify-mobile.dto';
 
 @ApiTags('profile-endpoints')
 @Controller('profile')
@@ -26,5 +28,18 @@ export class ProfileController {
   @Get(':profileId')
   getProfile(@Param('profileId') profileId: string) {
     return this.profileService.getProfile(profileId);
+  }
+
+  @Post('request-mobile-verification')
+  requestMobileNumberVerification(@Body() dto: RequestMobileVerificationDto) {
+    return this.profileService.requestMobileNumberVerification(dto);
+  }
+
+  @Patch('verify-mobile/:userId')
+  verifyMobileNumber(
+    @Body() dto: VerifyMobileDto,
+    @Param('userId') userId: string,
+  ) {
+    return this.profileService.verifyMobileNumber(dto, userId);
   }
 }
