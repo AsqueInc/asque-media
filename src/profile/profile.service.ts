@@ -9,6 +9,7 @@ import { UtilService } from 'src/utils/util.service';
 import { Profile } from '@prisma/client';
 import { RequestMobileVerificationDto } from './dto/request-mobile-verification.dto';
 import { ApiResponse } from 'src/types/response.type';
+import { VerifyMobileDto } from './dto/verify-mobile.dto';
 
 @Injectable()
 export class ProfileService {
@@ -190,7 +191,7 @@ export class ProfileService {
   }
 
   /**
-   *
+   * send mobile verification otp to user via text message
    * @param dto : request mobile verification dto
    * @returns : status code and message
    */
@@ -238,6 +239,56 @@ export class ProfileService {
       return {
         statusCode: HttpStatus.OK,
         message: { message: 'Mobile verification otp sent' },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * verify user mobile number
+   * @param dto : verify mobile dto
+   * @param userId : user id
+   * @returns status code and message
+   */
+  async verifyMobileNumber(dto: VerifyMobileDto, userId: string) {
+    try {
+      // check if otp is valid
+      const otpExists = await this.prisma.otp.findFirst({
+        where: { userId: userId, otp: dto.otp },
+      });
+
+      if (!otpExists) {
+        return {
+          statusCode: HttpStatus.UNAUTHORIZED,
+          message: {
+            error: 'Invalid otp',
+          },
+        };
+      }
+
+      // verify mobile number
+      await this.prisma.profile.update({
+        where: { userId: userId },
+        data: { isMobileNumberVerified: true },
+      });
+
+      // remove otp from database
+      await this.prisma.otp.delete({ where: { id: otpExists.id } });
+
+      // send confirmation message
+      await this.util.sendTestMessage(
+        dto.mobileNumber,
+        `Your mobile number has been verified`,
+      );
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: { message: 'Mobile number succeffully verified' },
       };
     } catch (error) {
       this.logger.error(error);
