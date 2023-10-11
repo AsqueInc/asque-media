@@ -76,3 +76,5 @@ Nest is [MIT licensed](LICENSE).
 
 - Ensure only owners can access or create or update their profile
 - create functionality for uploading pictures
+- Protect profile routes
+- Protect auth routes
