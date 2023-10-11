@@ -73,9 +73,11 @@ export class ProfileService {
       return {
         statusCode: HttpStatus.CREATED,
         message: {
-          id: profile.id,
+          profileId: profile.id,
+          userId: profile.userId,
           firstName: profile.firstName,
           lastName: profile.lastName,
+          mobileNumber: profile.mobileNumber,
         },
       };
     } catch (error) {
