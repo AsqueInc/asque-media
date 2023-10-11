@@ -7,6 +7,8 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UtilService } from 'src/utils/util.service';
 import { Profile } from '@prisma/client';
+import { RequestMobileVerificationDto } from './dto/request-mobile-verification.dto';
+import { ApiResponse } from 'src/types/response.type';
 
 @Injectable()
 export class ProfileService {
@@ -32,7 +34,7 @@ export class ProfileService {
    * @param userId : user id
    * @returns : status code and profile data
    */
-  async createProfile(dto: CreateProfileDto) {
+  async createProfile(dto: CreateProfileDto): Promise<ApiResponse> {
     try {
       // check if user exists
       const userExists = await this.prisma.user.findFirst({
@@ -95,7 +97,7 @@ export class ProfileService {
     dto: UpdateProfileDto,
     userId: string,
     profileId: string,
-  ) {
+  ): Promise<ApiResponse> {
     try {
       // check if user exists
       const userExists = await this.prisma.profile.findFirst({
@@ -150,7 +152,7 @@ export class ProfileService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { error: 'Profile updated' },
+        message: { message: 'Profile updated' },
       };
     } catch (error) {
       this.logger.error(error);
@@ -178,6 +180,65 @@ export class ProfileService {
       }
 
       return { statusCode: HttpStatus.OK, message: { profileExists } };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   *
+   * @param dto : request mobile verification dto
+   * @returns : status code and message
+   */
+  async requestMobileNumberVerification(
+    dto: RequestMobileVerificationDto,
+  ): Promise<ApiResponse> {
+    try {
+      // check if user's mobile number is saved.
+      const numberExists = await this.prisma.profile.findFirst({
+        where: { mobileNumber: dto.mobileNumber },
+      });
+      if (!numberExists) {
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: {
+            error:
+              'You do not have a saved number. Update your profile and try again',
+          },
+        };
+      }
+
+      // check if user is already verified
+      if (numberExists.isMobileNumberVerified === true) {
+        return {
+          statusCode: HttpStatus.BAD_REQUEST,
+          message: {
+            error: 'User has already been verified',
+          },
+        };
+      }
+
+      // generate otp and send message to user
+      const otp = this.util.generateOtp();
+
+      await this.util.sendTestMessage(
+        numberExists.mobileNumber,
+        `your mobile verification otp is : ${otp}. do not share with anyone`,
+      );
+
+      // save otp
+      await this.prisma.otp.create({
+        data: { userId: numberExists.userId, otp: otp },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: { message: 'Mobile verification otp sent' },
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
