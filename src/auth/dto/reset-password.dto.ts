@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
-  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -18,14 +17,12 @@ export class ResetPasswordDto {
 
   @IsString()
   @ApiProperty()
-  @IsOptional()
-  @IsEmail()
+  @IsNotEmpty()
   otp: string;
 
   @IsString()
   @ApiProperty()
-  @IsOptional()
-  @IsEmail()
+  @IsNotEmpty()
   @MinLength(8, {
     message:
       'Password is too short. Minimal length is $constraint1 characters, but actual is $value',
