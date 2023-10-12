@@ -5,6 +5,7 @@
 - Ensure only owners can access or create or update their profile
 - create functionality for uploading pictures and or media
 - Use transactions for routes that interact with otp table
+- refactor function to send email so it sends back error.message as opposed to internal server error to client
 
 ## Installation
 
