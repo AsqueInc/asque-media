@@ -16,17 +16,17 @@ import { VerifyMobileDto } from './dto/verify-mobile.dto';
 import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @ApiTags('profile-endpoints')
+@UseGuards(AuthGuard)
+@ApiSecurity('JWT-auth')
 @Controller('profile')
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @ApiSecurity('JWT-auth')
   @Post('create-profile')
   createProfile(@Body() dto: CreateProfileDto) {
     return this.profileService.createProfile(dto);
   }
 
-  @ApiSecurity('JWT-auth')
   @Patch('update-profile/:userId/:profileId')
   updateProfile(
     @Body() dto: UpdateProfileDto,
@@ -36,20 +36,16 @@ export class ProfileController {
     return this.profileService.updatedProfile(dto, userId, profileId);
   }
 
-  @ApiSecurity('JWT-auth')
-  @UseGuards(AuthGuard)
   @Get(':profileId')
   getProfile(@Param('profileId') profileId: string) {
     return this.profileService.getProfile(profileId);
   }
 
-  @ApiSecurity('JWT-auth')
   @Post('request-mobile-verification')
   requestMobileNumberVerification(@Body() dto: RequestMobileVerificationDto) {
     return this.profileService.requestMobileNumberVerification(dto);
   }
 
-  @ApiSecurity('JWT-auth')
   @Patch('verify-mobile/:userId')
   verifyMobileNumber(
     @Body() dto: VerifyMobileDto,
