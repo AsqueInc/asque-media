@@ -5,6 +5,7 @@ import {
   Post,
   Patch,
   UseGuards,
+  Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -33,8 +34,12 @@ export class AuthController {
 
   @UseGuards(AuthGuard)
   @ApiSecurity('JWT-auth')
-  changePassword(@Body() dto: ChangePasswordDto, @Param('id') id: string) {
-    return this.authService.changePassword(dto, id);
+  @Patch('change-password/:userId')
+  changePassword(
+    @Body() dto: ChangePasswordDto,
+    @Param('userId') userId: string,
+  ) {
+    return this.authService.changePassword(dto, userId);
   }
 
   @UseGuards(AuthGuard)
@@ -59,5 +64,10 @@ export class AuthController {
   @Patch('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
+  }
+
+  @Get('user')
+  getUser(@Param('userId') userId: string) {
+    return this.authService.getUserDetails(userId);
   }
 }
