@@ -153,6 +153,7 @@ export class AuthService {
     userId: string,
   ): Promise<ApiResponse> {
     try {
+      this.logger.info(userId);
       const userExists = await this.checkUserExistsById(userId);
       if (!userExists) {
         return {
@@ -378,6 +379,39 @@ export class AuthService {
       return {
         statusCode: HttpStatus.OK,
         message: { message: 'Password reset successful' },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * get user details
+   * @param userId : user id
+   * @returns : status code and message containing user data
+   */
+  async getUserDetails(userId: string) {
+    try {
+      const userExists = await this.checkUserExistsById(userId);
+      if (!userExists) {
+        return {
+          statusCode: HttpStatus.NOT_FOUND,
+          message: { error: 'User does not exist' },
+        };
+      }
+
+      // strip password
+      delete userExists.password;
+
+      return {
+        statusCode: 200,
+        message: {
+          data: userExists,
+        },
       };
     } catch (error) {
       this.logger.error(error);
