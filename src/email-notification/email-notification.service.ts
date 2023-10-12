@@ -18,9 +18,9 @@ export class EmailNotificationService {
       auth: {
         type: 'OAuth2',
         user: configService.get('USER_EMAIL'),
-        clientId: configService.get('EMAIL_CLIENT_ID'),
-        clientSecret: configService.get('EMAIL_CLIENT_SECRET'),
-        refreshToken: configService.get('EMAIL_REFRESH_TOKEN'),
+        clientId: configService.get('AUTH_CLIENT_ID'),
+        clientSecret: configService.get('AUTH_CLIENT_SECRET'),
+        refreshToken: configService.get('AUTH_REFRESH_TOKEN'),
       },
     });
   }
