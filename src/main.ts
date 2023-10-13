@@ -14,6 +14,8 @@ async function bootstrap() {
     }),
   );
 
+  app.setGlobalPrefix('api/v1');
+
   // setup swagger
   const config = new DocumentBuilder()
     .setTitle('Asque Media')
@@ -33,7 +35,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-doc', app, document);
+  SwaggerModule.setup('api/v1/api-doc', app, document);
 
   await app.listen(Number(process.env.NODE_PORT) || 3000);
 }
