@@ -66,8 +66,17 @@ export class AuthController {
     return this.authService.resetPassword(dto);
   }
 
+  @UseGuards(AuthGuard)
+  @ApiSecurity('JWT-auth')
   @Get('user')
   getUser(@Param('userId') userId: string) {
     return this.authService.getUserDetails(userId);
+  }
+
+  @UseGuards(AuthGuard)
+  @ApiSecurity('JWT-auth')
+  @Post('refresh-access-token/:userId')
+  refreshAccessToken(@Param('userId') userId: string) {
+    return this.authService.refreshAccessToken(userId);
   }
 }
