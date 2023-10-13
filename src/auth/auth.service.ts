@@ -403,6 +403,11 @@ export class AuthService {
     }
   }
 
+  /**
+   * generate new access token for user using refres token
+   * @param userId : user id
+   * @returns : status code and new access token
+   */
   async refreshAccessToken(userId: string) {
     try {
       // get refresh token
