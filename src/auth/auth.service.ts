@@ -79,10 +79,7 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -129,16 +126,18 @@ export class AuthService {
         expiresIn: '7d',
       });
 
+      await this.prisma.user.update({
+        where: { id: userExists.id },
+        data: { refreshToken: refreshToken },
+      });
+
       return {
         statusCode: HttpStatus.OK,
         message: { accessToken: accessToken, refreshToken: refreshToken },
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -186,10 +185,7 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -223,10 +219,7 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -281,10 +274,7 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -322,10 +312,7 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -382,10 +369,7 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -408,19 +392,54 @@ export class AuthService {
       delete userExists.password;
 
       return {
-        statusCode: 200,
+        statusCode: HttpStatus.OK,
         message: {
           data: userExists,
         },
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  //   async refreshAccessToken() {}
+  async refreshAccessToken(userId: string) {
+    try {
+      // get refresh token
+      const refreshTokenExists = await this.prisma.user.findFirst({
+        where: { id: userId },
+      });
+
+      // check refresh token
+      const verifyToken = this.jwtService.verify(
+        refreshTokenExists.refreshToken,
+        {
+          secret: this.config.get('JWT_REFRESH_SECRET'),
+        },
+      );
+      // return response if verify token has expired
+      if (!verifyToken) {
+        throw new HttpException(
+          'Refresh token expired',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const payload = { sub: verifyToken.id, email: verifyToken.email };
+
+      // generate new access token
+      const accessToken = await this.jwtService.signAsync(payload, {
+        expiresIn: '15m',
+        secret: this.config.get('JWT_REFRESH_SECRET'),
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: { accessToken: accessToken },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
