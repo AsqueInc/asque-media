@@ -33,7 +33,7 @@ export class ProfileController {
     @Param('userId') userId: string,
     @Param('profileId') profileId: string,
   ) {
-    return this.profileService.updatedProfile(dto, userId, profileId);
+    return this.profileService.updateProfile(dto, userId, profileId);
   }
 
   @Get(':profileId')
