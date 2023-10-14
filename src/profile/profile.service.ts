@@ -44,10 +44,7 @@ export class ProfileService {
         where: { id: dto.userId },
       });
       if (!userExists) {
-        return {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: { error: 'User does not exists' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // chech if profile already exists
@@ -55,10 +52,10 @@ export class ProfileService {
         where: { userId: dto.userId },
       });
       if (profileExists) {
-        return {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: { error: 'Profile already exists' },
-        };
+        throw new HttpException(
+          'Profile already exists',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
 
       // create user
@@ -85,8 +82,8 @@ export class ProfileService {
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -109,10 +106,7 @@ export class ProfileService {
         where: { userId: userId },
       });
       if (!userExists) {
-        return {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: { error: 'User does not exists' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // check if profile exists
@@ -120,10 +114,10 @@ export class ProfileService {
         where: { id: profileId },
       });
       if (!profileExists) {
-        return {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: { error: 'User does not exists' },
-        };
+        throw new HttpException(
+          'Profile does not exists',
+          HttpStatus.NOT_FOUND,
+        );
       }
 
       // change mobile verification status to false if new mobile number is provided
@@ -162,8 +156,8 @@ export class ProfileService {
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -178,18 +172,18 @@ export class ProfileService {
       // check if profile exists
       const profileExists = await this.checkProfileExistsById(profileId);
       if (!profileExists) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'Profile does not exist' },
-        };
+        throw new HttpException(
+          'Profile does not exists',
+          HttpStatus.NOT_FOUND,
+        );
       }
 
       return { statusCode: HttpStatus.OK, message: { profileExists } };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -208,23 +202,18 @@ export class ProfileService {
         where: { mobileNumber: dto.mobileNumber },
       });
       if (!numberExists) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: {
-            error:
-              'You do not have a saved number. Update your profile and try again',
-          },
-        };
+        throw new HttpException(
+          'You do not have a saved number. Update your profile and try again',
+          HttpStatus.NOT_FOUND,
+        );
       }
 
       // check if user is already verified
       if (numberExists.isMobileNumberVerified === true) {
-        return {
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: {
-            error: 'User has already been verified',
-          },
-        };
+        throw new HttpException(
+          'User has already been verified',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // generate otp and send message to user
@@ -247,8 +236,8 @@ export class ProfileService {
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -267,12 +256,7 @@ export class ProfileService {
       });
 
       if (!otpExists) {
-        return {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: {
-            error: 'Invalid otp',
-          },
-        };
+        throw new HttpException('Invalid otp', HttpStatus.UNAUTHORIZED);
       }
 
       // verify mobile number
@@ -297,8 +281,8 @@ export class ProfileService {
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
-        'Internal server error',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }

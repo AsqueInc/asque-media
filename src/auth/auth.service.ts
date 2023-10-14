@@ -55,10 +55,7 @@ export class AuthService {
       // check if user already exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (userExists) {
-        return {
-          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-          message: { error: 'User already exists' },
-        };
+        throw new HttpException('User already exists', HttpStatus.UNAUTHORIZED);
       }
 
       // hash new password
@@ -79,7 +76,11 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -93,10 +94,7 @@ export class AuthService {
       // check if user exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (!userExists) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'User does not exist' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // check is password is correct
@@ -106,10 +104,7 @@ export class AuthService {
       );
 
       if (!passwordMatches) {
-        return {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: { error: 'Incorrect password' },
-        };
+        throw new HttpException('Incorrect password', HttpStatus.UNAUTHORIZED);
       }
 
       const payload = { sub: userExists.id, email: userExists.email };
@@ -137,7 +132,10 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -155,10 +153,7 @@ export class AuthService {
       this.logger.info(userId);
       const userExists = await this.checkUserExistsById(userId);
       if (!userExists) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'User does not exist' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // check if old password is correct
@@ -167,10 +162,7 @@ export class AuthService {
         userExists.password,
       );
       if (!isPasswordCorrect) {
-        return {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: { error: 'Incorrect password' },
-        };
+        throw new HttpException('Incorrect password', HttpStatus.UNAUTHORIZED);
       }
 
       const newPasswordHash = await bcrypt.hash(dto.newPassword, 12);
@@ -185,7 +177,10 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -198,10 +193,7 @@ export class AuthService {
     try {
       const userExists = await this.checkUserExistsById(userId);
       if (!userExists) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'User does not exist' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // generate otp
@@ -219,7 +211,10 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -234,10 +229,7 @@ export class AuthService {
       // get user details
       const user = await this.checkUserExistsById(userId);
       if (!user) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'User does not exist' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // get otp details
@@ -245,18 +237,12 @@ export class AuthService {
         where: { userId: user.id },
       });
       if (!userOtp) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'Otp does not exist' },
-        };
+        throw new HttpException('Otp does not exists', HttpStatus.NOT_FOUND);
       }
 
       // check if user otp and otp provided are the same
       if (dto.otp !== userOtp.otp) {
-        return {
-          statusCode: HttpStatus.UNAUTHORIZED,
-          message: { error: 'Incorrect otp' },
-        };
+        throw new HttpException('Incorrect otp', HttpStatus.UNAUTHORIZED);
       }
 
       // update user verification status
@@ -274,7 +260,10 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -290,10 +279,7 @@ export class AuthService {
       // get user details
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (!userExists) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'User does not exist' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // generate and send otp
@@ -312,7 +298,10 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -326,10 +315,7 @@ export class AuthService {
       // get user details
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (!userExists) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'User does not exist' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // get current otp in database
@@ -369,7 +355,10 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -382,10 +371,7 @@ export class AuthService {
     try {
       const userExists = await this.checkUserExistsById(userId);
       if (!userExists) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'User does not exist' },
-        };
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
       // strip password
@@ -399,7 +385,10 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 
@@ -444,7 +433,10 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 }
