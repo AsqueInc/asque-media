@@ -32,7 +32,7 @@ export class MessageService {
       .catch((error) => {
         this.logger.error(error);
         throw new HttpException(
-          'Message not sent',
+          error.message,
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       });
