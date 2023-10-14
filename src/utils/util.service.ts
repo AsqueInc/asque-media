@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import * as cloudinary from 'cloudinary';
 
 @Injectable()
 export class UtilService {
@@ -16,38 +15,7 @@ export class UtilService {
   constructor(
     private config: ConfigService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-  ) {
-    (this.client = twilio(
-      config.get('TWILIO_ACCOUNT_SID'),
-      config.get('TWILIO_AUTH_TOKEN'),
-    )),
-      cloudinary.v2.config({
-        cloud_name: this.config.get<string>('CLOUDINARY_CLOUD_NAME'),
-        api_key: this.config.get<string>('CLOUDINARY_API_KEY'),
-        api_secret: this.config.get<string>('CLOUDINARY_API_SECRET'),
-      });
-  }
-
-  /**
-   * send text message via twilio api
-   * @param to : reciever address
-   * @param body : body of message
-   */
-  async sendTestMessage(to: string, body: string) {
-    await this.client.messages
-      .create({
-        to: to,
-        body: body,
-        from: this.config.get('TWILIO_NUMBER'),
-      })
-      .catch((error) => {
-        this.logger.error(error);
-        throw new HttpException(
-          'Message not sent',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      });
-  }
+  ) {}
 
   /**
    * generates a one time password for user
@@ -77,28 +45,5 @@ export class UtilService {
       'Mobile number could not be parsed',
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
-  }
-
-  async uploadMedia(
-    file: any,
-    userName: string,
-    // fileId: string,
-    groupId: string,
-  ) {
-    try {
-      const uploadedFile = await cloudinary.v2.uploader.upload(
-        `http://upload.asque-media/artwork/${userName}/${groupId}/${file}`,
-        {
-          folder: 'uploads', // Set the folder in Cloudinary where the file will be stored
-        },
-      );
-
-      this.logger.log(uploadedFile);
-    } catch (error) {
-      throw new HttpException(
-        'Failed to upload media file',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
   }
 }
