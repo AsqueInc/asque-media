@@ -10,6 +10,7 @@ import { Profile } from '@prisma/client';
 import { RequestMobileVerificationDto } from './dto/request-mobile-verification.dto';
 import { ApiResponse } from 'src/types/response.type';
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
+import { MessageService } from 'src/utils/message.service';
 
 @Injectable()
 export class ProfileService {
@@ -18,6 +19,7 @@ export class ProfileService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly config: ConfigService,
     private util: UtilService,
+    private messageSerive: MessageService,
   ) {}
 
   /**
@@ -96,7 +98,7 @@ export class ProfileService {
    * @param profileId : profile id
    * @returns : status code and message
    */
-  async updatedProfile(
+  async updateProfile(
     dto: UpdateProfileDto,
     userId: string,
     profileId: string,
@@ -228,7 +230,7 @@ export class ProfileService {
       // generate otp and send message to user
       const otp = this.util.generateOtp();
 
-      await this.util.sendTestMessage(
+      await this.messageSerive.sendTestMessage(
         numberExists.mobileNumber,
         `your mobile verification otp is : ${otp}. do not share with anyone`,
       );
@@ -283,7 +285,7 @@ export class ProfileService {
       await this.prisma.otp.delete({ where: { id: otpExists.id } });
 
       // send confirmation message
-      await this.util.sendTestMessage(
+      await this.messageSerive.sendTestMessage(
         dto.mobileNumber,
         `Your mobile number has been verified`,
       );
