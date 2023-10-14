@@ -21,7 +21,8 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   profile   Profile?
-  Otp       Otp?
+  otp       Otp?
+  role      UserRoleEnum    @default(USER)
 }
 
 model Profile {
@@ -35,6 +36,7 @@ model Profile {
   lastName   String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+  artwork     ArtWork[]
 }
 
 model Otp {
@@ -43,4 +45,28 @@ model Otp {
   userId  String  @unique
   otp     String
   createdAt  DateTime  @default(now())
+}
+
+model Category{
+  id          String    @id @default(uuid())
+  name        String
+  detail      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model ArtWork {
+  id          String    @id @default(uuid())
+  title       String
+  detail      String
+  imageUri    String
+  OwnerProfile  Profile  @relation(fields: [ownerProfileId], references: [id])
+  ownerProfileId  String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum UserRoleEnum {
+  ADMIN
+  USER
 }
