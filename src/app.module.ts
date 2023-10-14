@@ -4,6 +4,7 @@ import { EmailNotificationModule } from './email-notification/email-notification
 import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { ProfileModule } from './profile/profile.module';
+import { CategoryModule } from './category/category.module';
 import * as winston from 'winston';
 
 @Module({
@@ -28,6 +29,7 @@ import * as winston from 'winston';
       ),
     }),
     ProfileModule,
+    CategoryModule,
   ],
   controllers: [],
   providers: [],
