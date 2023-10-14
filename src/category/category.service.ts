@@ -33,7 +33,7 @@ export class CategoryService {
       const user = await this.prisma.user.findFirst({
         where: { id: userId },
       });
-      if (user.role !== 'ADMIN') {
+      if (user.isAdmin !== true) {
         throw new HttpException(
           'Only admins can create categories',
           HttpStatus.UNAUTHORIZED,
@@ -72,7 +72,7 @@ export class CategoryService {
       const user = await this.prisma.user.findFirst({
         where: { id: userId },
       });
-      if (user.role !== 'ADMIN') {
+      if (user.isAdmin !== true) {
         throw new HttpException(
           'Only admins can update categories',
           HttpStatus.UNAUTHORIZED,
@@ -165,7 +165,7 @@ export class CategoryService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { data: { categoryExists } },
+        message: { categoryExists },
       };
     } catch (error) {
       this.logger.error(error);
