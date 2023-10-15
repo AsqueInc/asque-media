@@ -13,10 +13,10 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { RequestMobileVerificationDto } from './dto/request-mobile-verification.dto';
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
+import { JwtGuard } from 'src/auth/guards/auth.guard';
 
 @ApiTags('profile-endpoints')
-@UseGuards(AuthGuard)
+@UseGuards(JwtGuard)
 @ApiSecurity('JWT-auth')
 @Controller('profile')
 export class ProfileController {
