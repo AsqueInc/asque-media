@@ -76,7 +76,6 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(error);
-
       throw new HttpException(
         error.message,
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -430,6 +429,21 @@ export class AuthService {
       return {
         statusCode: HttpStatus.OK,
         message: { accessToken: accessToken },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  googleLoginCallback() {
+    try {
+      return {
+        statusCode: HttpStatus.OK,
+        message: { message: 'success' },
       };
     } catch (error) {
       this.logger.error(error);
