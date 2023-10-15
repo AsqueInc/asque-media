@@ -6,6 +6,8 @@ import {
   Patch,
   UseGuards,
   Get,
+  // Req,
+  // Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -15,7 +17,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.otp';
 import { SendResetPasswordEmailDto } from './dto/send-reset-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { AuthGuard } from './guards/auth.guard';
+import { JwtGuard } from './guards/auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('auth-endpoints')
 @Controller('auth')
@@ -32,7 +35,7 @@ export class AuthController {
     return this.authService.loginUser(dto);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Patch('change-password/:userId')
   changePassword(
@@ -42,14 +45,14 @@ export class AuthController {
     return this.authService.changePassword(dto, userId);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Post('request-email-verification/:userId')
   requestEmailVerification(@Param('userId') userId: string) {
     return this.authService.requestEmailVerification(userId);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Patch('verify-email/:userId')
   verifyEmail(@Body() dto: VerifyEmailDto, @Param('userId') userId: string) {
@@ -66,17 +69,27 @@ export class AuthController {
     return this.authService.resetPassword(dto);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Get('user')
   getUser(@Param('userId') userId: string) {
     return this.authService.getUserDetails(userId);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Post('refresh-access-token/:userId')
   refreshAccessToken(@Param('userId') userId: string) {
     return this.authService.refreshAccessToken(userId);
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleLogin() {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleLoginCallback() {
+    return this.authService.googleLoginCallback(); // Redirect to success page after login
   }
 }
