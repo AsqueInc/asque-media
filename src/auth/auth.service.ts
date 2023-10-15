@@ -96,6 +96,14 @@ export class AuthService {
         throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
+      // ensure google user can only login via google
+      if (userExists.isGoogleUser == true) {
+        throw new HttpException(
+          'User can only login via google as user registered via google',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
       // check is password is correct
       const passwordMatches = await bcrypt.compare(
         dto.password,
