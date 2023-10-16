@@ -13,7 +13,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PaginationDto } from './dto/pagination.dto';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from 'src/auth/guards/auth.guard';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @ApiTags('category-endpoints')
 @Controller('category')
