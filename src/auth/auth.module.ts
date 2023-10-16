@@ -19,7 +19,7 @@ import { PassportModule } from '@nestjs/passport';
   ],
   imports: [
     JwtModule.register({}),
-    PassportModule.register({ defaultStrategy: 'google' }),
+    PassportModule.register({ defaultStrategy: 'google', session: false }),
   ],
 })
 export class AuthModule {}
