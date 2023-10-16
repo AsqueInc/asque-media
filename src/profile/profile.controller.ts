@@ -13,7 +13,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { RequestMobileVerificationDto } from './dto/request-mobile-verification.dto';
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
-import { JwtGuard } from 'src/auth/guards/auth.guard';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @ApiTags('profile-endpoints')
 @UseGuards(JwtGuard)
@@ -22,11 +22,15 @@ import { JwtGuard } from 'src/auth/guards/auth.guard';
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Post('create-profile')
   createProfile(@Body() dto: CreateProfileDto) {
     return this.profileService.createProfile(dto);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Patch('update-profile/:userId/:profileId')
   updateProfile(
     @Body() dto: UpdateProfileDto,
@@ -36,16 +40,22 @@ export class ProfileController {
     return this.profileService.updateProfile(dto, userId, profileId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Get(':profileId')
   getProfile(@Param('profileId') profileId: string) {
     return this.profileService.getProfile(profileId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Post('request-mobile-verification')
   requestMobileNumberVerification(@Body() dto: RequestMobileVerificationDto) {
     return this.profileService.requestMobileNumberVerification(dto);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Patch('verify-mobile/:userId')
   verifyMobileNumber(
     @Body() dto: VerifyMobileDto,
