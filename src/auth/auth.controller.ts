@@ -6,8 +6,8 @@ import {
   Patch,
   UseGuards,
   Get,
-  // Req,
-  // Res,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
@@ -89,5 +89,8 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleLoginCallback() {}
+  async googleLoginCallback(@Req() req, @Res() res) {
+    const { accessToken, userId, userEmail } = req.user;
+    return res.send({ accessToken, userId, userEmail });
+  }
 }
