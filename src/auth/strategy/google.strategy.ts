@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, Profile } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
@@ -80,8 +80,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         });
 
         return {
-          statusCode: HttpStatus.OK,
-          message: { accessToken: accessToken, refreshToken: refreshToken },
+          accessToken,
+          userId: userExists.id,
+          userEmail: userExists.email,
         };
       }
 
@@ -114,8 +115,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       });
 
       return {
-        statusCode: HttpStatus.OK,
-        message: { accessToken: accessToken, refreshToken: refreshToken },
+        accessToken,
+        userId: userExists.id,
+        userEmail: userExists.email,
       };
     } catch (error) {
       throw new Error(error.message);
