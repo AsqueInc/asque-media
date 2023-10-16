@@ -446,19 +446,4 @@ export class AuthService {
       );
     }
   }
-
-  googleLoginCallback() {
-    try {
-      return {
-        statusCode: HttpStatus.OK,
-        message: { message: 'success' },
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
 }
