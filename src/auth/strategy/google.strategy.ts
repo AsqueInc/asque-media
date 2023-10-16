@@ -18,7 +18,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: configService.get('AUTH_CLIENT_ID'),
       clientSecret: configService.get('AUTH_CLIENT_SECRET'),
       callbackURL: configService.get('CALLBACK_URL'),
-      passReqToCallback: true,
       scope: ['profile', 'email'],
     });
   }
@@ -47,35 +46,70 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    accessTokened: string,
-    refreshTokened: string,
+    googleAccessToken: string,
+    googleRefreshToken: string,
     profile: Profile,
   ): Promise<any> {
-    const { name, emails } = profile;
+    try {
+      console.log(googleAccessToken);
+      console.log(googleRefreshToken);
 
-    console.log(name, emails, accessTokened, refreshTokened);
-    // check if user with emai already exists
-    const userExists = await this.prisma.user.findFirst({
-      where: { email: profile._json.email },
-    });
-    // create token if user exists
-    if (userExists) {
+      // check if user with email already exists
+      const userExists = await this.prisma.user.findFirst({
+        where: { email: profile._json.email },
+      });
+      // create token if user exists
+      if (userExists) {
+        const accessToken = await this.signToken(
+          userExists.id,
+          userExists.email,
+          this.configService.get('JWT_ACCESS_SECRET'),
+          '15m',
+        );
+        const refreshToken = await this.signToken(
+          userExists.id,
+          userExists.email,
+          this.configService.get('JWT_REFRESH_SECRET'),
+          '7d',
+        );
+
+        // save refresh token to user table
+        await this.prisma.user.update({
+          where: { id: userExists.id },
+          data: { refreshToken: refreshToken },
+        });
+
+        return {
+          statusCode: HttpStatus.OK,
+          message: { accessToken: accessToken, refreshToken: refreshToken },
+        };
+      }
+
+      // create new user if user does not exist
+      const newUser = await this.prisma.user.create({
+        data: {
+          email: profile._json.email,
+          isEmailVerified: true,
+          isGoogleUser: true,
+        },
+      });
+
       const accessToken = await this.signToken(
-        userExists.id,
-        userExists.email,
+        newUser.id,
+        newUser.email,
         this.configService.get('JWT_ACCESS_SECRET'),
         '15m',
       );
       const refreshToken = await this.signToken(
-        userExists.id,
-        userExists.email,
+        newUser.id,
+        newUser.email,
         this.configService.get('JWT_REFRESH_SECRET'),
         '7d',
       );
 
       // save refresh token to user table
       await this.prisma.user.update({
-        where: { id: userExists.id },
+        where: { id: newUser.id },
         data: { refreshToken: refreshToken },
       });
 
@@ -83,39 +117,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         statusCode: HttpStatus.OK,
         message: { accessToken: accessToken, refreshToken: refreshToken },
       };
+    } catch (error) {
+      throw new Error(error.message);
     }
-
-    // create new user if user does not exist
-    const newUser = await this.prisma.user.create({
-      data: {
-        email: profile._json.email,
-        isEmailVerified: true,
-        isGoogleUser: true,
-      },
-    });
-
-    const accessToken = await this.signToken(
-      newUser.id,
-      newUser.email,
-      this.configService.get('JWT_ACCESS_SECRET'),
-      '15m',
-    );
-    const refreshToken = await this.signToken(
-      newUser.id,
-      newUser.email,
-      this.configService.get('JWT_REFRESH_SECRET'),
-      '7d',
-    );
-
-    // save refresh token to user table
-    await this.prisma.user.update({
-      where: { id: newUser.id },
-      data: { refreshToken: refreshToken },
-    });
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: { accessToken: accessToken, refreshToken: refreshToken },
-    };
   }
 }
