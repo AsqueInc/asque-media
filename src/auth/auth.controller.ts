@@ -17,8 +17,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.otp';
 import { SendResetPasswordEmailDto } from './dto/send-reset-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
-import { JwtGuard } from './guards/auth.guard';
-import { AuthGuard } from '@nestjs/passport';
+import { JwtGuard } from './guards/jwt.guard';
+import { GoogleAuthGuard } from './guards/google.guard';
 
 @ApiTags('auth-endpoints')
 @Controller('auth')
@@ -84,12 +84,10 @@ export class AuthController {
   }
 
   @Get('google')
-  @UseGuards(AuthGuard('google'))
+  @UseGuards(GoogleAuthGuard)
   async googleLogin() {}
 
   @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleLoginCallback() {
-    return this.authService.googleLoginCallback(); // Redirect to success page after login
-  }
+  @UseGuards(GoogleAuthGuard)
+  async googleLoginCallback() {}
 }
