@@ -52,6 +52,14 @@ export class AuthService {
    */
   async registerUser(dto: RegisterUserDto): Promise<ApiResponse> {
     try {
+      //check is password and confirm password are similar
+      if (dto.password !== dto.confirmPassword) {
+        throw new HttpException(
+          'Password and confirm password do not match',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
       // check if user already exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (userExists) {
