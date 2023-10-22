@@ -11,59 +11,65 @@ datasource db {
 }
 
 model User {
-  id          String    @id @default(uuid()) 
-  email       String    @unique
-  password    String?
-  isGoogleUser Boolean  @default(false)    
-  isEmailVerified  Boolean   @default(false)
-  isAdmin Boolean @default(false)
-  refreshToken  String? 
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  profile   Profile?
-  otp       Otp?
-  role      UserRoleEnum    @default(USER)
+  id                String    @id @default(uuid()) 
+  email             String    @unique
+  password          String?
+  isGoogleUser      Boolean  @default(false)    
+  isEmailVerified   Boolean   @default(false)
+  isAdmin           Boolean @default(false)
+  refreshToken      String? 
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  profile           Profile?
+  otp               Otp?
 }
 
 model Profile {
-  id          String    @id @default(uuid()) 
-  user  User  @relation(fields: [userId], references: [id])  
-  userId  String  @unique
-  profilePicUri   String?
-  mobileNumber    String?
+  id                      String    @id @default(uuid()) 
+  user                    User  @relation(fields: [userId], references: [id])  
+  userId                  String  @unique
+  profilePicUri           String?
+  mobileNumber            String?
   isMobileNumberVerified  Boolean @default(false)
-  firstName   String?
-  lastName   String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  artwork     ArtWork[]
+  firstName               String?
+  lastName                String?
+  bankName                String?
+  bankAccountNumber       String?
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  artwork                 ArtWork[]
 }
 
 model Otp {
-  id    String    @id @default(uuid())
-  user  User  @relation(fields: [userId], references: [id])  
-  userId  String  @unique
-  otp     String
-  createdAt  DateTime  @default(now())
+  id                      String    @id @default(uuid())
+  user                    User  @relation(fields: [userId], references: [id])  
+  userId                  String  @unique
+  otp                     String
+  createdAt               DateTime  @default(now())
 }
 
-model Category{
-  id          String    @id @default(uuid())
-  name        String
-  detail      String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+model Repository {
+  id                      String    @id @default(uuid())
+  title                   String
+  description             String
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
 }
 
 model ArtWork {
-  id          String    @id @default(uuid())
-  title       String
-  detail      String
-  imageUri    String
-  OwnerProfile  Profile  @relation(fields: [ownerProfileId], references: [id])
-  ownerProfileId  String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id                String    @id @default(uuid())
+  title             String
+  description       String
+  quantity          Int
+  price             Decimal
+  firstImageUri     String?
+  secondImageUri    String?
+  thirdImageUri     String?
+  artistProfile     Profile  @relation(fields: [artistProfileId], references: [id])
+  artistProfileId   String
+  artistName        String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 }
 
 model ArtWork_Category{
@@ -72,7 +78,3 @@ model ArtWork_Category{
   category_id String
 }
 
-enum UserRoleEnum {
-  ADMIN
-  USER
-}
