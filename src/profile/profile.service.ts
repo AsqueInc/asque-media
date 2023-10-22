@@ -124,6 +124,13 @@ export class ProfileService {
         );
       }
 
+      if (userExists.id !== profileExists.userId) {
+        throw new HttpException(
+          'You can only update a profile that belongs to you',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
       // change mobile verification status to false if new mobile number is provided
       if (dto.mobileNumber) {
         await this.prisma.profile.update({
