@@ -10,7 +10,7 @@ import {
   Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -26,11 +26,13 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a new user' })
   registerUser(@Body() dto: RegisterUserDto) {
     return this.authService.registerUser(dto);
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Log a user in' })
   loginUser(@Body() dto: LoginDto) {
     return this.authService.loginUser(dto);
   }
@@ -38,6 +40,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Patch('change-password/:userId')
+  @ApiOperation({ summary: 'Change a user password' })
   changePassword(
     @Body() dto: ChangePasswordDto,
     @Param('userId') userId: string,
@@ -47,6 +50,7 @@ export class AuthController {
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Request email verification otp' })
   @Post('request-email-verification/:userId')
   requestEmailVerification(@Param('userId') userId: string) {
     return this.authService.requestEmailVerification(userId);
@@ -55,16 +59,19 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Patch('verify-email/:userId')
+  @ApiOperation({ summary: 'Verify email' })
   verifyEmail(@Body() dto: VerifyEmailDto, @Param('userId') userId: string) {
     return this.authService.verifyEmail(userId, dto);
   }
 
   @Post('send-reset-password-email')
+  @ApiOperation({ summary: 'Send reset password otp' })
   requestForgotPasswordEmail(@Body() dto: SendResetPasswordEmailDto) {
     return this.authService.requestForgotPasswordEmail(dto);
   }
 
   @Patch('reset-password')
+  @ApiOperation({ summary: 'Reset password' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
   }
@@ -72,6 +79,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Get('user')
+  @ApiOperation({ summary: 'Get user details' })
   getUser(@Param('userId') userId: string) {
     return this.authService.getUserDetails(userId);
   }
@@ -79,6 +87,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Post('refresh-access-token/:userId')
+  @ApiOperation({ summary: 'Refresh access token' })
   refreshAccessToken(@Param('userId') userId: string) {
     return this.authService.refreshAccessToken(userId);
   }
