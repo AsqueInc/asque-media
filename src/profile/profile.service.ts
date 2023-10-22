@@ -69,7 +69,6 @@ export class ProfileService {
           firstName: dto.lastName,
           lastName: dto.firstName,
           mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
-          profilePicUri: dto.profilePicUri,
           userId: dto.userId,
         },
       });

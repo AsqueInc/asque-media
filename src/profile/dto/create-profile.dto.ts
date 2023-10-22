@@ -20,10 +20,5 @@ export class CreateProfileDto {
   @IsString()
   @ApiProperty()
   @IsOptional()
-  profilePicUri: string;
-
-  @IsString()
-  @ApiProperty()
-  @IsOptional()
   userId: string;
 }
