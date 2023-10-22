@@ -21,10 +21,8 @@ African Americans, post first generation immigrants, and everone with a demonstr
 ## Todo
 
 - Make image uri nullable in schema files
-- Ensure only owners can access or create or update their profile
-- create functionality for uploading pictures and or media
-- Use transactions for routes that interact with otp table
-- test profile upload functionality
+- Use transactions for database operations
+- test image upload functionality
 - update route to get all art in a category so that it returns more data about the particular artwork to the client. consider updating the artwork_category schema table
 
 ## Installation
