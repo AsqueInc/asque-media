@@ -11,6 +11,10 @@ import { RequestMobileVerificationDto } from './dto/request-mobile-verification.
 import { ApiResponse } from 'src/types/response.type';
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
 import { MessageService } from 'src/utils/message.service';
+import {
+  FileUploadService,
+  ImageUploadType,
+} from 'src/utils/file-upload.service';
 
 @Injectable()
 export class ProfileService {
@@ -20,6 +24,7 @@ export class ProfileService {
     private readonly config: ConfigService,
     private util: UtilService,
     private messageSerive: MessageService,
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
   /**
@@ -277,6 +282,33 @@ export class ProfileService {
       return {
         statusCode: HttpStatus.OK,
         message: { message: 'Mobile number succeffully verified' },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async uploadProfilePicture(profileId: string, file: Express.Multer.File) {
+    try {
+      // upload image of artwork
+      const imagePublicId = await this.fileUploadService.uploadPicture(
+        file,
+        ImageUploadType.ProfilePicture,
+      );
+
+      // update profile with profile picture public id
+      await this.prisma.profile.update({
+        where: { id: profileId },
+        data: { profilePicUri: imagePublicId.imagePublicId },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: { message: 'Profile picture updated' },
       };
     } catch (error) {
       this.logger.error(error);
