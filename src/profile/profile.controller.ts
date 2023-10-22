@@ -62,13 +62,13 @@ export class ProfileController {
     return this.profileService.verifyMobileNumber(dto, userId);
   }
 
-  @Patch('profile-picture/:userId')
+  @Patch('profile-picture/:profileId')
   @ApiOperation({ summary: 'Upload a profile picture' })
   @UseInterceptors(FileInterceptor('file'))
   uploadProfilePicture(
     @UploadedFile() file: Express.Multer.File,
-    @Param('userId') userId: string,
+    @Param('profileId') profileId: string,
   ) {
-    return this.profileService.uploadProfilePicture(userId, file);
+    return this.profileService.uploadProfilePicture(profileId, file);
   }
 }
