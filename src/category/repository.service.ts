@@ -18,6 +18,22 @@ export class RepositoryService {
     private readonly emailService: EmailNotificationService,
   ) {}
 
+  async getAllAvailableRepositories() {
+    try {
+      const repositories = await this.prisma.repository.findMany();
+      return {
+        statusCode: HttpStatus.OK,
+        message: { data: repositories },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   /**
    * create a category
    * @param dto : crete category dto
@@ -65,7 +81,7 @@ export class RepositoryService {
   async updateRepository(
     dto: UpdateRepositoryDto,
     userId: string,
-    categoryId: string,
+    repositoryId: string,
   ): Promise<ApiResponse> {
     try {
       // check if user is an admin
@@ -74,18 +90,18 @@ export class RepositoryService {
       });
       if (user.isAdmin !== true) {
         throw new HttpException(
-          'Only admins can update categories',
+          'Only admins can update repositories',
           HttpStatus.UNAUTHORIZED,
         );
       }
 
       // update category
-      const updatedCategory = await this.prisma.repository.update({
-        where: { id: categoryId },
+      const updatedRepository = await this.prisma.repository.update({
+        where: { id: repositoryId },
         data: { title: dto.name, description: dto.detail },
       });
 
-      return { statusCode: HttpStatus.OK, message: { updatedCategory } };
+      return { statusCode: HttpStatus.OK, message: { updatedRepository } };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -102,14 +118,14 @@ export class RepositoryService {
    * @returns current page, page size, total records, paginated response
    */
   async getAllArtInRepository(
-    categoryId: string,
+    repositoryId: string,
     dto: PaginationDto,
   ): Promise<ApiResponse> {
     try {
       const skip = (dto.page - 1) * dto.pageSize;
       // check if category exists
       const categoryExists = await this.prisma.repository.findFirst({
-        where: { id: categoryId },
+        where: { id: repositoryId },
       });
       if (!categoryExists) {
         throw new HttpException(
@@ -120,7 +136,7 @@ export class RepositoryService {
 
       // find all artwork in the category
       const results = await this.prisma.artWork_Category.findMany({
-        where: { category_id: categoryId },
+        where: { category_id: repositoryId },
         skip: skip,
       });
 
@@ -147,14 +163,14 @@ export class RepositoryService {
 
   /**
    *
-   * @param categoryId : category id
+   * @param repositoryId : repository id
    * @returns : status code and category details
    */
-  async getRepositoryDetails(categoryId: string): Promise<ApiResponse> {
+  async getRepositoryDetails(repositoryId: string): Promise<ApiResponse> {
     try {
       // check if category exists
       const categoryExists = await this.prisma.repository.findFirst({
-        where: { id: categoryId },
+        where: { id: repositoryId },
       });
       if (!categoryExists) {
         throw new HttpException(
