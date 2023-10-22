@@ -5,9 +5,16 @@ import { PrismaService } from 'src/prisma.service';
 import { UtilService } from 'src/utils/util.service';
 import { JwtModule } from '@nestjs/jwt';
 import { MessageService } from 'src/utils/message.service';
+import { FileUploadService } from 'src/utils/file-upload.service';
 
 @Module({
-  providers: [ProfileService, PrismaService, UtilService, MessageService],
+  providers: [
+    ProfileService,
+    PrismaService,
+    UtilService,
+    MessageService,
+    FileUploadService,
+  ],
   controllers: [ProfileController],
   imports: [JwtModule.register({})],
 })
