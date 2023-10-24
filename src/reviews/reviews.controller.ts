@@ -54,7 +54,7 @@ export class ReviewsController {
   }
 
   @Patch(':reviewId/:profileId')
-  @ApiOperation({ summary: 'Create a review' })
+  @ApiOperation({ summary: 'Update a review' })
   updateReview(
     @Body() dto: UpdateReviewDto,
     @Param('reviewId') reviewId: string,
