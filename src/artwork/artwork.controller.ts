@@ -1,21 +1,31 @@
 import {
   Body,
   Controller,
+  FileTypeValidator,
   Get,
+  MaxFileSizeValidator,
   Param,
+  ParseFilePipe,
   Patch,
   Post,
   Query,
   UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ArtworkService } from './artwork.service';
-import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { CreateArtworkDto } from './dto/create-artwork.dto';
 import { UpdateArtworkDto } from './dto/update-artwork.dto';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
-import { UploadArtworkImage } from './dto/upload-artwork.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('artwork-endpoints')
 @UseGuards(JwtGuard)
@@ -55,18 +65,48 @@ export class ArtworkController {
     return this.artWorkService.updateArtWork(artworkId, profileId, dto);
   }
 
-  @Patch(':profileId/:artworkId')
+  @Post(':artworkId/:profileId/:repositoryId')
+  @ApiOperation({ summary: 'Add artwork to a repository' })
+  addArtworkToRepository(
+    @Param('artworkId') artworkId: string,
+    @Param('profileId') profileId: string,
+    @Param('repositoryId') repositoryId: string,
+  ) {
+    return this.artWorkService.addArtworkToRepository(
+      artworkId,
+      profileId,
+      repositoryId,
+    );
+  }
+
+  @Patch(':profileId/:artworkId/:artworkNumber')
   @ApiOperation({ summary: 'Upload artwork images' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
   uploadArtWorkImage(
     @Param('profileId') profileId: string,
     @Param('artworkId') artworkId: string,
-    @UploadedFile() file: Express.Multer.File,
-    @Body() dto: UploadArtworkImage,
+    @Param('artworkNumber') artworkNumber: number,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 3000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg' }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
   ) {
     return this.artWorkService.uploadArtWorkImage(
       profileId,
       artworkId,
-      dto,
+      artworkNumber,
       file,
     );
   }
