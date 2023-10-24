@@ -11,10 +11,7 @@ import { RequestMobileVerificationDto } from './dto/request-mobile-verification.
 import { ApiResponse } from 'src/types/response.type';
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
 import { MessageService } from 'src/utils/message.service';
-import {
-  FileUploadService,
-  ImageUploadType,
-} from 'src/utils/file-upload.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ProfileService {
@@ -24,7 +21,7 @@ export class ProfileService {
     private readonly config: ConfigService,
     private util: UtilService,
     private messageSerive: MessageService,
-    private readonly fileUploadService: FileUploadService,
+    private cloudinary: CloudinaryService,
   ) {}
 
   /**
@@ -178,7 +175,7 @@ export class ProfileService {
    * @param profileId : profile id
    * @returns profile
    */
-  async getProfile(profileId: string) {
+  async getProfile(profileId: string): Promise<ApiResponse> {
     try {
       // check if profile exists
       const profileExists = await this.checkProfileExistsById(profileId);
@@ -259,7 +256,10 @@ export class ProfileService {
    * @param userId : user id
    * @returns status code and message
    */
-  async verifyMobileNumber(dto: VerifyMobileDto, userId: string) {
+  async verifyMobileNumber(
+    dto: VerifyMobileDto,
+    userId: string,
+  ): Promise<ApiResponse> {
     try {
       // check if otp is valid
       const otpExists = await this.prisma.otp.findFirst({
@@ -298,18 +298,19 @@ export class ProfileService {
     }
   }
 
-  async uploadProfilePicture(profileId: string, file: Express.Multer.File) {
+  async uploadProfilePicture(
+    profileId: string,
+    file: Express.Multer.File,
+  ): Promise<ApiResponse> {
     try {
       // upload image of artwork
-      const imagePublicId = await this.fileUploadService.uploadPicture(
-        file,
-        ImageUploadType.ProfilePicture,
-      );
+      const uploadedProfilePicture =
+        await this.cloudinary.uploadProfilePicture(file);
 
       // update profile with profile picture public id
       await this.prisma.profile.update({
         where: { id: profileId },
-        data: { profilePicUri: imagePublicId.imagePublicId },
+        data: { profilePicUri: uploadedProfilePicture.url },
       });
 
       return {
