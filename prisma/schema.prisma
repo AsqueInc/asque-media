@@ -72,9 +72,9 @@ model ArtWork {
   updatedAt         DateTime  @updatedAt
 }
 
-model ArtWork_Category{
+model ArtWork_Repository{
   id          String    @id @default(uuid())
   artwork_id  String
-  category_id String
+  repository_id String
 }
 
