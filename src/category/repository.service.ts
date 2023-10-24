@@ -135,8 +135,8 @@ export class RepositoryService {
       }
 
       // find all artwork in the category
-      const results = await this.prisma.artWork_Category.findMany({
-        where: { category_id: repositoryId },
+      const results = await this.prisma.artWork_Repository.findMany({
+        where: { repository_id: repositoryId },
         skip: skip,
       });
 

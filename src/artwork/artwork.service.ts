@@ -158,8 +158,8 @@ export class ArtworkService {
         );
       }
 
-      await this.prisma.artWork_Category.create({
-        data: { artwork_id: artworkId, category_id: repositoryId },
+      await this.prisma.artWork_Repository.create({
+        data: { artwork_id: artworkId, repository_id: repositoryId },
       });
 
       return {
