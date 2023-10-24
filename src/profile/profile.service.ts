@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
@@ -10,15 +9,14 @@ import { Profile } from '@prisma/client';
 import { RequestMobileVerificationDto } from './dto/request-mobile-verification.dto';
 import { ApiResponse } from 'src/types/response.type';
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
-import { MessageService } from 'src/utils/message.service';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { MessageService } from 'src/utils/message.service';
 
 @Injectable()
 export class ProfileService {
   constructor(
     private prisma: PrismaService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private readonly config: ConfigService,
     private util: UtilService,
     private messageSerive: MessageService,
     private cloudinary: CloudinaryService,
