@@ -39,6 +39,7 @@ model Profile {
   updatedAt               DateTime  @updatedAt
   artwork                 ArtWork[]
   order                   Order[]
+  review                  Review[]
 }
 
 model Otp {
@@ -87,11 +88,15 @@ model Order {
   totalAmount       Decimal
   status            OrderStatus   @default(PENDING) 
   createdAt         DateTime  @default(now())
+  orderItem         Order_Item[]
 }
 
 model Order_Item{
   id          String    @id @default(uuid())
-
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id])
+  quantity    Int
+  price       Decimal
 
 }
 
@@ -99,8 +104,10 @@ model Review{
   id                String    @id @default(uuid())
   artwork           ArtWork   @relation(fields: [artworkId], references: [id])
   artworkId         String
+  profile           Profile   @relation(fields: [profileId], references: [id])
+  profileId         String
   comment           String
-  rating            Int
+  rating            Int?
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
