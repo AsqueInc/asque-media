@@ -5,19 +5,15 @@ import { ApiResponse } from 'src/types/response.type';
 import { Logger } from 'winston';
 import { CreateArtworkDto } from './dto/create-artwork.dto';
 import { UpdateArtworkDto } from './dto/update-artwork.dto';
-import { UploadArtworkImage } from './dto/upload-artwork.dto';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
-import {
-  FileUploadService,
-  ImageUploadType,
-} from 'src/utils/file-upload.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @Injectable()
 export class ArtworkService {
   constructor(
     private prisma: PrismaService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private readonly fileUplaodService: FileUploadService,
+    private cloudinary: CloudinaryService,
   ) {}
 
   async createArtwork(dto: CreateArtworkDto): Promise<ApiResponse> {
@@ -144,10 +140,44 @@ export class ArtworkService {
     }
   }
 
+  async addArtworkToRepository(
+    artworkId: string,
+    profileId: string,
+    repositoryId: string,
+  ) {
+    try {
+      // check is user owns the artwork
+      const artWork = await this.prisma.artWork.findFirst({
+        where: { id: artworkId },
+      });
+
+      if (artWork.artistProfileId !== profileId) {
+        throw new HttpException(
+          'You can only add an artwork you own to a repository',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      await this.prisma.artWork_Category.create({
+        data: { artwork_id: artworkId, category_id: repositoryId },
+      });
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        message: { data: 'Artwork added to repository' },
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async uploadArtWorkImage(
     profileId: string,
     artworkId: string,
-    dto: UploadArtworkImage,
+    artworkNumber: number,
     file: Express.Multer.File,
   ) {
     try {
@@ -162,28 +192,30 @@ export class ArtworkService {
         );
       }
       // upload image of artwork
-      const imagePublicId = await this.fileUplaodService.uploadPicture(
-        file,
-        ImageUploadType.Image,
-      );
+      const uploadedImage = await this.cloudinary.uploadImage(file);
 
       // save image public id to database
-      if (dto.image === 1) {
+      if (artworkNumber === 1) {
         await this.prisma.artWork.update({
           where: { id: artworkId },
-          data: { firstImageUri: imagePublicId.imagePublicId },
+          data: { firstImageUri: uploadedImage.url },
         });
-      } else if (dto.image === 1) {
+      } else if (artworkNumber === 2) {
         await this.prisma.artWork.update({
           where: { id: artworkId },
-          data: { secondImageUri: imagePublicId.imagePublicId },
+          data: { secondImageUri: uploadedImage.url },
         });
       } else {
         await this.prisma.artWork.update({
           where: { id: artworkId },
-          data: { thirdImageUri: imagePublicId.imagePublicId },
+          data: { thirdImageUri: uploadedImage.url },
         });
       }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: { data: 'Artwork images added' },
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
