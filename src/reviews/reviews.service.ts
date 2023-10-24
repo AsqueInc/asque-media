@@ -14,8 +14,23 @@ export class ReviewsService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
+  /**
+   * create a review
+   * @param dto : create review dto
+   * @returns status code and review object
+   */
   async createReview(dto: CreateReviewDto): Promise<ApiResponse> {
     try {
+      const artwork = await this.prisma.artWork.findFirst({
+        where: { id: dto.artworkId },
+      });
+
+      if (artwork.artistProfileId === dto.profileId) {
+        throw new HttpException(
+          'You cannot add a review to your own artwork',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
       const review = await this.prisma.review.create({
         data: {
           comment: dto.comment,
@@ -38,6 +53,12 @@ export class ReviewsService {
     }
   }
 
+  /**
+   * get all the reviews belonging to an artwork
+   * @param artworkId : artwork id
+   * @param dto : pagination dto
+   * @returns status code and list of reviews
+   */
   async getAllArtworkReviews(
     artworkId: string,
     dto: PaginationDto,
@@ -71,6 +92,11 @@ export class ReviewsService {
     }
   }
 
+  /**
+   * get a single review by review id
+   * @param reiewId : review id
+   * @returns status code and review object
+   */
   async getSingleReview(reiewId: string) {
     try {
       const review = await this.prisma.review.findFirst({
@@ -90,6 +116,13 @@ export class ReviewsService {
     }
   }
 
+  /**
+   * update a review
+   * @param reviewId : review id
+   * @param profileId : profile if
+   * @param dto : update revieew dto
+   * @returns status code and updated review object
+   */
   async updateReview(
     reviewId: string,
     profileId: string,
@@ -125,6 +158,12 @@ export class ReviewsService {
     }
   }
 
+  /**
+   * delete a review by id
+   * @param reviewId : review id
+   * @param profileId : profile id
+   * @returns status code and message
+   */
   async deleteReview(
     reviewId: string,
     profileId: string,
