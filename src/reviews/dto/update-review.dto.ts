@@ -7,7 +7,6 @@ export class UpdateReviewDto {
   @IsOptional()
   comment: string;
 
-  @IsString()
   @ApiProperty()
   @IsOptional()
   @Min(1)

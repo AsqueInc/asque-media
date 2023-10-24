@@ -7,7 +7,6 @@ export class CreateReviewDto {
   @IsNotEmpty()
   comment: string;
 
-  @IsString()
   @ApiProperty()
   @IsOptional()
   @Min(1)
