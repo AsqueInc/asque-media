@@ -7,6 +7,7 @@ import { ProfileModule } from './profile/profile.module';
 import { RepositoryModule } from './category/repository.module';
 import { ArtworkModule } from './artwork/artwork.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { ReviewsModule } from './reviews/reviews.module';
 import * as winston from 'winston';
 
 @Module({
@@ -34,6 +35,7 @@ import * as winston from 'winston';
     RepositoryModule,
     ArtworkModule,
     CloudinaryModule,
+    ReviewsModule,
   ],
   controllers: [],
   providers: [],
