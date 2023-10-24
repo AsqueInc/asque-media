@@ -6,6 +6,7 @@ import { WinstonModule } from 'nest-winston';
 import { ProfileModule } from './profile/profile.module';
 import { RepositoryModule } from './category/repository.module';
 import { ArtworkModule } from './artwork/artwork.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import * as winston from 'winston';
 
 @Module({
@@ -32,6 +33,7 @@ import * as winston from 'winston';
     ProfileModule,
     RepositoryModule,
     ArtworkModule,
+    CloudinaryModule,
   ],
   controllers: [],
   providers: [],

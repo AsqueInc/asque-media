@@ -5,17 +5,11 @@ import { PrismaService } from 'src/prisma.service';
 import { UtilService } from 'src/utils/util.service';
 import { JwtModule } from '@nestjs/jwt';
 import { MessageService } from 'src/utils/message.service';
-import { FileUploadService } from 'src/utils/file-upload.service';
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
 
 @Module({
-  providers: [
-    ProfileService,
-    PrismaService,
-    UtilService,
-    MessageService,
-    FileUploadService,
-  ],
+  providers: [ProfileService, PrismaService, UtilService, MessageService],
   controllers: [ProfileController],
-  imports: [JwtModule.register({})],
+  imports: [JwtModule.register({}), CloudinaryModule],
 })
 export class ProfileModule {}
