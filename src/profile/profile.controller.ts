@@ -86,7 +86,7 @@ export class ProfileController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 3000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
+          new FileTypeValidator({ fileType: 'image/' }),
         ],
       }),
     )
