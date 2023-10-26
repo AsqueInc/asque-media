@@ -22,6 +22,7 @@ African Americans, post first generation immigrants, and everone with a demonstr
 
 - Use transactions for database operations
 - update route to get all art in a category so that it returns more data about the particular artwork to the client. consider updating the artwork_category schema table
+- refactor code to use aws s3 to upload pictures instead of cloudinary
 
 ## Installation
 
