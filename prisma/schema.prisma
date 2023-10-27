@@ -71,6 +71,7 @@ model ArtWork {
   artistProfileId   String
   artistName        String
   review            Review[]
+  orderItem         Order_Item[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
@@ -82,22 +83,28 @@ model ArtWork_Repository{
 }
 
 model Order {
-  id                String    @id @default(uuid())
-  profile           Profile   @relation(fields: [profileId], references: [id])
-  profileId         String
-  totalAmount       Decimal
-  status            OrderStatus   @default(PENDING) 
-  createdAt         DateTime  @default(now())
-  orderItem         Order_Item[]
+  id                      String    @id @default(uuid())
+  profile                 Profile   @relation(fields: [profileId], references: [id])
+  profileId               String
+  firstShippingAddress    String?
+  secondShippingAddress   String?
+  city                    String?
+  zip                     String?
+  country                 String?
+  totalPrice              Decimal?      @default(0)
+  status                  OrderStatus   @default(PENDING) 
+  dateOrdered             DateTime  @default(now())
+  orderItem               Order_Item[]
 }
 
 model Order_Item{
   id          String    @id @default(uuid())
   orderId     String
   order       Order    @relation(fields: [orderId], references: [id])
+  artworkId   String
+  artwork       ArtWork    @relation(fields: [artworkId], references: [id])
   quantity    Int
   price       Decimal
-
 }
 
 model Review{
@@ -113,7 +120,8 @@ model Review{
 }
 
 enum OrderStatus {
-  PENDING 
+  PENDING
+  SHIPPED 
   CANCELED
   COMPLETED
 }
