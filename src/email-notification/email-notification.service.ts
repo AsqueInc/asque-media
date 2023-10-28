@@ -11,6 +11,7 @@ export class EmailNotificationService {
   constructor(
     private readonly configService: ConfigService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+    private config: ConfigService,
   ) {
     //setup mail service provider
     this.nodeMailerTransport = createTransport({
@@ -27,14 +28,37 @@ export class EmailNotificationService {
 
   /**
    * function to send otp email
-   * @param dto : send email dto
+   * @param to : email address of reciepient
+   * @param otp : generated otp
    */
   async sendOtpEmail(to: string, otp: string) {
     const mailOptions = {
-      from: 'alahirajeffrey@gmail.com',
+      from: this.config.get('USER_EMAIL'),
       to: to,
       subject: 'Verification Otp',
       text: `Hi there, Here is your verification otp ${otp}`,
+    };
+
+    await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
+      this.logger.error(error);
+      throw new HttpException(
+        'Email not sent',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
+  }
+
+  /**
+   * function to notify a customer that order item has been shipped
+   * @param to : email address of reciepient
+   * @param orderItemId : id of order item
+   */
+  async sendOrderShippedEmail(to: string, orderItemId: string) {
+    const mailOptions = {
+      from: this.config.get('USER_EMAIL'),
+      to: to,
+      subject: 'Order Shipment',
+      text: `Your order with id: ${orderItemId} has been shipped.`,
     };
 
     await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
