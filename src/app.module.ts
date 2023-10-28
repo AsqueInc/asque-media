@@ -9,6 +9,7 @@ import { ArtworkModule } from './artwork/artwork.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { OrderModule } from './order/order.module';
+import { PaymentModule } from './payment/payment.module';
 import * as winston from 'winston';
 
 @Module({
@@ -38,6 +39,7 @@ import * as winston from 'winston';
     CloudinaryModule,
     ReviewsModule,
     OrderModule,
+    PaymentModule,
   ],
   controllers: [],
   providers: [],
