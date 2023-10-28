@@ -1,16 +1,23 @@
-import { Controller, Param, Get, Patch, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  Get,
+  Patch,
+  Post,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-// import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CreateOrderDto } from './dto/create-order.dto';
-// import { NotifyOrderShipedDto } from './dto/order-shipped.dto';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { CheckOutDto } from './dto/check-out.dto';
 import { NotifyOrderShipedDto } from './dto/order-shipped.dto';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @ApiTags('order-endpoints')
-// @UseGuards(JwtGuard)
-// @ApiSecurity('JWT-auth')
+@UseGuards(JwtGuard)
+@ApiSecurity('JWT-auth')
 @Controller('orders')
 export class OrderController {
   constructor(private orderService: OrderService) {}
