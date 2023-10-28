@@ -14,9 +14,9 @@ model User {
   id                String    @id @default(uuid()) 
   email             String    @unique
   password          String?
-  isGoogleUser      Boolean  @default(false)    
+  isGoogleUser      Boolean   @default(false)    
   isEmailVerified   Boolean   @default(false)
-  isAdmin           Boolean @default(false)
+  isAdmin           Boolean   @default(false)
   refreshToken      String? 
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
@@ -93,7 +93,8 @@ model Order {
   country                 String?
   totalPrice              Decimal?      @default(0)
   status                  OrderStatus   @default(PENDING) 
-  dateOrdered             DateTime  @default(now())
+  payment                 Payment?
+  createdAt               DateTime  @default(now())
   orderItem               Order_Item[]
 }
 
@@ -105,6 +106,7 @@ model Order_Item{
   artwork       ArtWork    @relation(fields: [artworkId], references: [id])
   quantity    Int
   price       Decimal
+  addedAt     DateTime  @default(now())
 }
 
 model Review{
@@ -119,8 +121,20 @@ model Review{
   updatedAt         DateTime  @updatedAt
 }
 
+model Payment {
+  id                String    @id @default(uuid())
+  amount            Decimal
+  transactionId     String
+  payeeId           String
+  paymentId         String
+  transactionTime   DateTime  @default(now())
+  order             Order  @relation(fields: [orderId], references: [id])  
+  orderId           String  @unique
+}
+
 enum OrderStatus {
   PENDING
+  PAID
   SHIPPED 
   CANCELED
   COMPLETED
