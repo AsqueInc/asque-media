@@ -125,7 +125,7 @@ model Payment {
   amount            Decimal
   transactionId     String
   payeeId           String
-  paymentId         String
+  payeeEmail        String?
   transactionTime   DateTime  @default(now())
   order             Order  @relation(fields: [orderId], references: [id])  
   orderId           String  @unique
