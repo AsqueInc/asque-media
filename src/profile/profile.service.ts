@@ -65,6 +65,7 @@ export class ProfileService {
           lastName: dto.firstName,
           mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
           userId: dto.userId,
+          email: userExists.email,
         },
       });
 
