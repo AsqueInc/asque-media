@@ -268,6 +268,18 @@ export class OrderService {
 
       const mostRecentOrder = orders[0];
 
+      // if most recent order is null create and return an order
+      if (mostRecentOrder === undefined) {
+        const order = await this.prisma.order.create({
+          data: { profileId: dto.profileId },
+        });
+
+        return {
+          statusCode: HttpStatus.CREATED,
+          message: { order },
+        };
+      }
+
       // return order to user if order is pending
       if (mostRecentOrder.status === 'PENDING') {
         return {
