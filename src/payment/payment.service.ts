@@ -52,7 +52,7 @@ export class PaymentService {
       await this.prisma.payment.create({
         data: {
           transactionId: responseData.reference,
-
+          payeeEmail: profile.email,
           amount: dto.amount,
           payeeId: profile.id,
           orderId: dto.orderId,
