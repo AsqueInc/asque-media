@@ -429,7 +429,7 @@ export class AuthService {
       // return response if verify token has expired
       if (!verifyToken) {
         throw new HttpException(
-          'Refresh token expired',
+          'Refresh token expired. Login again',
           HttpStatus.BAD_REQUEST,
         );
       }
@@ -439,7 +439,7 @@ export class AuthService {
       // generate new access token
       const accessToken = await this.jwtService.signAsync(payload, {
         expiresIn: '15m',
-        secret: this.config.get('JWT_REFRESH_SECRET'),
+        secret: this.config.get('JWT_ACCESS_SECRET'),
       });
 
       return {
