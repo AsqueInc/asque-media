@@ -18,6 +18,11 @@ export class RegisterUserDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
+  username: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
   @MinLength(8, {
     message:
       'Password is too short. Minimal length is $constraint1 characters, but actual is $value',
