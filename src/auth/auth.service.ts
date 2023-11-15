@@ -393,8 +393,9 @@ export class AuthService {
         throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
       }
 
-      // strip password
+      // strip password and refreshToken
       delete userExists.password;
+      delete userExists.refreshToken;
 
       return {
         statusCode: HttpStatus.OK,
