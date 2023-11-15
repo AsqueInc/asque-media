@@ -78,7 +78,7 @@ export class AuthController {
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
-  @Get('user')
+  @Get(':userId')
   @ApiOperation({ summary: 'Get user details' })
   getUser(@Param('userId') userId: string) {
     return this.authService.getUserDetails(userId);
