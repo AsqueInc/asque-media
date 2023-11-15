@@ -13,6 +13,7 @@ import { PaymentModule } from './payment/payment.module';
 import * as winston from 'winston';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { AlbumModule } from './album/album.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { APP_GUARD } from '@nestjs/core';
         limit: 10,
       },
     ]),
+    AlbumModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
