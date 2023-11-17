@@ -79,9 +79,9 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Get(':userId')
-  @ApiOperation({ summary: 'Get user details' })
-  getUser(@Param('userId') userId: string) {
-    return this.authService.getUserDetails(userId);
+  @ApiOperation({ summary: 'Get user details by Id' })
+  getUserDetailsById(@Param('userId') userId: string) {
+    return this.authService.getUserDetailsById(userId);
   }
 
   @UseGuards(JwtGuard)
@@ -103,11 +103,19 @@ export class AuthController {
     return res.send({ accessToken, userId, userEmail });
   }
 
-  @Patch('add-admin/:userId')
+  @Patch('add-admin/:adminId/:userId')
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Add admin user' })
-  addAdmin(@Param('userId') userId: string) {
-    return this.authService.addAdmin(userId);
+  addAdmin(@Param('userId') userId: string, @Param('adminId') adminId: string) {
+    return this.authService.addAdmin(adminId, userId);
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @Get()
+  @ApiOperation({ summary: 'Get user details by email' })
+  getUserByEmail(@Body() dto: SendResetPasswordEmailDto) {
+    return this.authService.getUserDetailsByEmail(dto);
   }
 }
