@@ -386,7 +386,7 @@ export class AuthService {
    * @param userId : user id
    * @returns : status code and message containing user data
    */
-  async getUserDetails(userId: string) {
+  async getUserDetailsById(userId: string) {
     try {
       const userExists = await this.checkUserExistsById(userId);
       if (!userExists) {
@@ -460,8 +460,45 @@ export class AuthService {
     }
   }
 
-  async addAdmin(userId: string): Promise<ApiResponse> {
+  async getUserDetailsByEmail(dto: SendResetPasswordEmailDto) {
     try {
+      const user = await this.prisma.user.findFirst({
+        where: { email: dto.email },
+      });
+      if (!user) {
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
+      }
+
+      // strip password and refreshToken
+      delete user.password;
+      delete user.refreshToken;
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: {
+          data: user,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async addAdmin(adminId: string, userId: string): Promise<ApiResponse> {
+    try {
+      // const admin = await this.prisma.user.findFirst({
+      //   where: { id: adminId },
+      // });
+      // if (admin.isAdmin !== true) {
+      //   throw new HttpException(
+      //     'Only admins can add new admin users',
+      //     HttpStatus.UNAUTHORIZED,
+      //   );
+      // }
       await this.prisma.user.update({
         where: { id: userId },
         data: { isAdmin: true },
