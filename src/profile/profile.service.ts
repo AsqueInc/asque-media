@@ -324,4 +324,26 @@ export class ProfileService {
       );
     }
   }
+
+  /**
+   * get th details of a profile by user id
+   * @param userId : id of user
+   * @returns status code and user object
+   */
+  async getProfileByUserId(userId: string) {
+    // check if profile exists
+    const profile = await this.checkProfileExistsById(userId);
+    if (!profile) {
+      throw new HttpException('Profile does not exists', HttpStatus.NOT_FOUND);
+    }
+
+    return { statusCode: HttpStatus.OK, message: { profile } };
+  }
+  catch(error) {
+    this.logger.error(error);
+    throw new HttpException(
+      error.message,
+      error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+    );
+  }
 }
