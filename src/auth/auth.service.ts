@@ -464,34 +464,6 @@ export class AuthService {
     }
   }
 
-  async getUserDetailsByEmail(dto: SendResetPasswordEmailDto) {
-    try {
-      const user = await this.prisma.user.findFirst({
-        where: { email: dto.email },
-      });
-      if (!user) {
-        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
-      }
-
-      // strip password and refreshToken
-      delete user.password;
-      delete user.refreshToken;
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: {
-          data: user,
-        },
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   async addAdmin(adminId: string, userId: string): Promise<ApiResponse> {
     try {
       // const admin = await this.prisma.user.findFirst({

@@ -110,12 +110,4 @@ export class AuthController {
   addAdmin(@Param('userId') userId: string, @Param('adminId') adminId: string) {
     return this.authService.addAdmin(adminId, userId);
   }
-
-  @UseGuards(JwtGuard)
-  @ApiSecurity('JWT-auth')
-  @Get()
-  @ApiOperation({ summary: 'Get user details by email' })
-  getUserByEmail(@Body() dto: SendResetPasswordEmailDto) {
-    return this.authService.getUserDetailsByEmail(dto);
-  }
 }
