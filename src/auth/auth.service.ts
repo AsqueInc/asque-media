@@ -459,4 +459,24 @@ export class AuthService {
       );
     }
   }
+
+  async makeAdmin(userId: string): Promise<ApiResponse> {
+    try {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { isAdmin: true },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: { message: 'User updated to admin' },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
