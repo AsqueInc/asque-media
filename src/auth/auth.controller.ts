@@ -102,4 +102,12 @@ export class AuthController {
     const { accessToken, userId, userEmail } = req.user;
     return res.send({ accessToken, userId, userEmail });
   }
+
+  @Patch('add-admin/:userId')
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @ApiOperation({ summary: 'Add admin user' })
+  addAdmin(@Param('userId') userId: string) {
+    return this.authService.addAdmin(userId);
+  }
 }
