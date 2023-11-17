@@ -464,17 +464,23 @@ export class AuthService {
     }
   }
 
+  /**
+   * make a user an admin
+   * @param adminId : id of the admin
+   * @param userId : id of user to be made admin
+   * @returns : status code and message
+   */
   async addAdmin(adminId: string, userId: string): Promise<ApiResponse> {
     try {
-      // const admin = await this.prisma.user.findFirst({
-      //   where: { id: adminId },
-      // });
-      // if (admin.isAdmin !== true) {
-      //   throw new HttpException(
-      //     'Only admins can add new admin users',
-      //     HttpStatus.UNAUTHORIZED,
-      //   );
-      // }
+      const admin = await this.prisma.user.findFirst({
+        where: { id: adminId },
+      });
+      if (admin.isAdmin !== true) {
+        throw new HttpException(
+          'Only admins can add new admin users',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
       await this.prisma.user.update({
         where: { id: userId },
         data: { isAdmin: true },
