@@ -18,6 +18,10 @@ export class RepositoryService {
     private readonly emailService: EmailNotificationService,
   ) {}
 
+  /**
+   * get all available repositories
+   * @returns : status code and list of repositories
+   */
   async getAllAvailableRepositories() {
     try {
       const repositories = await this.prisma.repository.findMany();
@@ -35,8 +39,8 @@ export class RepositoryService {
   }
 
   /**
-   * create a category
-   * @param dto : crete category dto
+   * create a reposiroty
+   * @param dto : create repository dto
    * @param userId : user id
    * @returns : status code and created category
    */
@@ -57,11 +61,11 @@ export class RepositoryService {
       }
 
       // create category
-      const category = await this.prisma.repository.create({
+      const repository = await this.prisma.repository.create({
         data: { title: dto.name, description: dto.detail },
       });
 
-      return { statusCode: HttpStatus.CREATED, message: { category } };
+      return { statusCode: HttpStatus.CREATED, message: { repository } };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -72,10 +76,10 @@ export class RepositoryService {
   }
 
   /**
-   * update category information
-   * @param dto : update category dto
+   * update repository information
+   * @param dto : update repository dto
    * @param userId : user id
-   * @param categoryId : category id
+   * @param repositoryId : repository id
    * @returns status code and message
    */
   async updateRepository(
@@ -113,9 +117,9 @@ export class RepositoryService {
 
   /**
    *
-   * @param categoryId : id of category
+   * @param repositoryId : id of repository
    * @param dto : pagination dto
-   * @returns current page, page size, total records, paginated response
+   * @returns : current page, page size, total records, paginated response
    */
   async getAllArtInRepository(
     repositoryId: string,
@@ -124,10 +128,10 @@ export class RepositoryService {
     try {
       const skip = (dto.page - 1) * dto.pageSize;
       // check if category exists
-      const categoryExists = await this.prisma.repository.findFirst({
+      const repositoryExists = await this.prisma.repository.findFirst({
         where: { id: repositoryId },
       });
-      if (!categoryExists) {
+      if (!repositoryExists) {
         throw new HttpException(
           'Category does not exist',
           HttpStatus.NOT_FOUND,
@@ -168,20 +172,20 @@ export class RepositoryService {
    */
   async getRepositoryDetails(repositoryId: string): Promise<ApiResponse> {
     try {
-      // check if category exists
-      const categoryExists = await this.prisma.repository.findFirst({
+      // check if repository exists
+      const repositoryExists = await this.prisma.repository.findFirst({
         where: { id: repositoryId },
       });
-      if (!categoryExists) {
+      if (!repositoryExists) {
         throw new HttpException(
-          'Category does not exist',
+          'Repository does not exist',
           HttpStatus.NOT_FOUND,
         );
       }
 
       return {
         statusCode: HttpStatus.OK,
-        message: { categoryExists },
+        message: { repositoryExists },
       };
     } catch (error) {
       this.logger.error(error);
