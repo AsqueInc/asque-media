@@ -3,7 +3,7 @@ import {
   Controller,
   FileTypeValidator,
   Get,
-  MaxFileSizeValidator,
+  // MaxFileSizeValidator,
   Param,
   ParseFilePipe,
   Patch,
@@ -96,7 +96,7 @@ export class ArtworkController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 3000 }),
+          // new MaxFileSizeValidator({ maxSize: 3000 }),
           new FileTypeValidator({ fileType: 'image/jpeg' }),
         ],
       }),
