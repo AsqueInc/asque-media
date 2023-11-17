@@ -15,13 +15,13 @@ import { PaginationDto } from './dto/pagination.dto';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
-@UseGuards(JwtGuard)
-@ApiSecurity('JWT-auth')
 @ApiTags('repository-endpoints')
 @Controller('repository')
 export class RepositoryController {
   constructor(private readonly repositoryService: RepositoryService) {}
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Post('')
   @ApiOperation({ summary: 'Create a repository to categorize artwork' })
   CreateRepository(
@@ -31,6 +31,8 @@ export class RepositoryController {
     return this.repositoryService.createRepository(dto, userId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Patch(':userId/:repositoryId')
   @ApiOperation({ summary: 'Update a repository details' })
   updateRepository(
@@ -43,7 +45,7 @@ export class RepositoryController {
 
   @Get(':repositoryId')
   @ApiOperation({ summary: 'Get a repository details by id' })
-  getCategoryDetails(@Param('repositoryId') repositoryId: string) {
+  getRepositoryDetails(@Param('repositoryId') repositoryId: string) {
     return this.repositoryService.getRepositoryDetails(repositoryId);
   }
 
