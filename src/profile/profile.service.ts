@@ -332,7 +332,9 @@ export class ProfileService {
    */
   async getProfileByUserId(userId: string) {
     // check if profile exists
-    const profile = await this.checkProfileExistsById(userId);
+    const profile = await this.prisma.profile.findFirst({
+      where: { userId: userId },
+    });
     if (!profile) {
       throw new HttpException('Profile does not exists', HttpStatus.NOT_FOUND);
     }
