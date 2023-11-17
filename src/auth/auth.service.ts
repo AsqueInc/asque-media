@@ -460,7 +460,7 @@ export class AuthService {
     }
   }
 
-  async makeAdmin(userId: string): Promise<ApiResponse> {
+  async addAdmin(userId: string): Promise<ApiResponse> {
     try {
       await this.prisma.user.update({
         where: { id: userId },
