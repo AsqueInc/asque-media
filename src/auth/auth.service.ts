@@ -147,7 +147,11 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { accessToken: accessToken, refreshToken: refreshToken },
+        message: {
+          userId: userExists.id,
+          accessToken: accessToken,
+          refreshToken: refreshToken,
+        },
       };
     } catch (error) {
       this.logger.error(error);
