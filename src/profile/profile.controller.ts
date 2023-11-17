@@ -95,4 +95,10 @@ export class ProfileController {
   ) {
     return this.profileService.uploadProfilePicture(profileId, file);
   }
+
+  @Get('/user/:userId')
+  @ApiOperation({ summary: 'Get a single profile by user id' })
+  getProfileByUserId(@Param('userId') userId: string) {
+    return this.profileService.getProfileByUserId(userId);
+  }
 }
