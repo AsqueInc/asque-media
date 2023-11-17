@@ -3,7 +3,6 @@ import {
   Controller,
   FileTypeValidator,
   Get,
-  MaxFileSizeValidator,
   Param,
   ParseFilePipe,
   Patch,
@@ -84,10 +83,7 @@ export class ProfileController {
   uploadProfilePicture(
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 3000 }),
-          new FileTypeValidator({ fileType: 'image/' }),
-        ],
+        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
       }),
     )
     file: Express.Multer.File,

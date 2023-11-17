@@ -4,7 +4,6 @@ import {
   Delete,
   FileTypeValidator,
   Get,
-  MaxFileSizeValidator,
   Param,
   ParseFilePipe,
   Patch,
@@ -85,10 +84,7 @@ export class AlbumController {
     @Param('profileId') profileId: string,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 3000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
+        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
       }),
     )
     file: Express.Multer.File,
@@ -111,10 +107,7 @@ export class AlbumController {
     @Param('profileId') profileId: string,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 3000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
+        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
       }),
     )
     file: Express.Multer.File,
@@ -143,10 +136,7 @@ export class AlbumController {
     @Param('profileId') profileId: string,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 3000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
+        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
       }),
     )
     file: Express.Multer.File,
