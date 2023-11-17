@@ -3,7 +3,6 @@ import {
   Controller,
   FileTypeValidator,
   Get,
-  // MaxFileSizeValidator,
   Param,
   ParseFilePipe,
   Patch,
@@ -95,10 +94,7 @@ export class ArtworkController {
     @Param('artworkNumber') artworkNumber: number,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          // new MaxFileSizeValidator({ maxSize: 3000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg' }),
-        ],
+        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
       }),
     )
     file: Express.Multer.File,
