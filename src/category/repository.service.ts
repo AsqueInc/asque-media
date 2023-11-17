@@ -42,7 +42,7 @@ export class RepositoryService {
    * create a reposiroty
    * @param dto : create repository dto
    * @param userId : user id
-   * @returns : status code and created category
+   * @returns : status code and created repository
    */
   async createRepository(
     dto: CreateRepositoryDto,
@@ -55,12 +55,12 @@ export class RepositoryService {
       });
       if (user.isAdmin !== true) {
         throw new HttpException(
-          'Only admins can create categories',
+          'Only admins can create repositories',
           HttpStatus.UNAUTHORIZED,
         );
       }
 
-      // create category
+      // create repository
       const repository = await this.prisma.repository.create({
         data: { title: dto.name, description: dto.detail },
       });
@@ -99,7 +99,7 @@ export class RepositoryService {
         );
       }
 
-      // update category
+      // update repository
       const updatedRepository = await this.prisma.repository.update({
         where: { id: repositoryId },
         data: { title: dto.name, description: dto.detail },
@@ -127,18 +127,18 @@ export class RepositoryService {
   ): Promise<ApiResponse> {
     try {
       const skip = (dto.page - 1) * dto.pageSize;
-      // check if category exists
+      // check if repository exists
       const repositoryExists = await this.prisma.repository.findFirst({
         where: { id: repositoryId },
       });
       if (!repositoryExists) {
         throw new HttpException(
-          'Category does not exist',
+          'Repository does not exist',
           HttpStatus.NOT_FOUND,
         );
       }
 
-      // find all artwork in the category
+      // find all artwork in the repository
       const results = await this.prisma.artWork_Repository.findMany({
         where: { repository_id: repositoryId },
         skip: skip,
@@ -168,7 +168,7 @@ export class RepositoryService {
   /**
    *
    * @param repositoryId : repository id
-   * @returns : status code and category details
+   * @returns : status code and repository details
    */
   async getRepositoryDetails(repositoryId: string): Promise<ApiResponse> {
     try {
