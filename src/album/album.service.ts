@@ -6,6 +6,7 @@ import { PrismaService } from 'src/prisma.service';
 import { ApiResponse } from 'src/types/response.type';
 import { Logger } from 'winston';
 import { CreateAlbumDto } from './dto/create-album.dto';
+import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
 
 @Injectable()
 export class AlbumService {
@@ -224,21 +225,25 @@ export class AlbumService {
       }
 
       // ensure an album does not have more than 20 images
-      if (album.albumImageUris.length === 20) {
+      if (album.albumImageUris.length >= 20) {
         throw new HttpException(
           'You cannot upload more than 20 images to an album',
           HttpStatus.BAD_REQUEST,
         );
       }
+
+      // get album image uri list
+      const albumImageUriList = album.albumImageUris;
+
       // upload image to cloudinary
       const uploadedImageUri = await this.cloudinary.uploadImage(file);
 
-      //   album.albumImageUris.push(uploadedImageUri.url);
+      albumImageUriList.push(uploadedImageUri.url);
 
       // update album
       const updatedAlbum = await this.prisma.album.update({
         where: { id: albumId },
-        data: { albumImageUris: uploadedImageUri.url },
+        data: { albumImageUris: albumImageUriList },
       });
 
       return {
@@ -255,60 +260,15 @@ export class AlbumService {
   }
 
   /**
-   * replace an image in an album
-   * @param albumId : album id
-   * @param profileId : profile id
-   * @param imageNumber : image number to be replaced
-   * @param file : image to be replaced with
-   */
-  async replaceImage(
-    albumId: string,
-    profileId: string,
-    imageNumber: number,
-    file: Express.Multer.File,
-  ): Promise<ApiResponse> {
-    try {
-      const album = await this.prisma.album.findFirst({
-        where: { id: albumId },
-      });
-
-      if (!album) {
-        throw new HttpException('Album does not exist', HttpStatus.NOT_FOUND);
-      }
-
-      // ensure only owner of album can delete album
-      if (album.profileId !== profileId) {
-        throw new HttpException(
-          'You cannot replace images to an album you did not create',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: { imageNumber, file },
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  /**
    * delete an album image
    * @param albumId : album id
    * @param profileId : profile id
-   * @param imageNumber : image number to be replaced
-   * @param file : image to be replaced with
+   * @param dto : delete album image dto
    */
   async deleteAlbumImage(
     albumId: string,
     profileId: string,
-    imageNumber: number,
-    file: Express.Multer.File,
+    dto: DeleteAlbumImageDto,
   ): Promise<ApiResponse> {
     const album = await this.prisma.album.findFirst({
       where: { id: albumId },
@@ -326,9 +286,22 @@ export class AlbumService {
       );
     }
 
+    // remove image uri from list
+    const albumImageUriList = album.albumImageUris;
+    const indexToRemove = albumImageUriList.indexOf(dto.imageUri);
+
+    if (indexToRemove !== -1) {
+      albumImageUriList.splice(indexToRemove, 1);
+    }
+
+    await this.prisma.album.update({
+      where: { id: albumId },
+      data: { albumImageUris: albumImageUriList },
+    });
+
     return {
       statusCode: HttpStatus.OK,
-      message: { imageNumber, file },
+      message: { message: 'Image removed from list' },
     };
   }
 }
