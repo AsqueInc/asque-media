@@ -19,7 +19,7 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 @UseGuards(JwtGuard)
 @ApiSecurity('JWT-auth')
 @ApiTags('review-endpoints')
-@Controller('reviews')
+@Controller('review')
 export class ReviewsController {
   constructor(private readonly reviewService: ReviewsService) {}
 
