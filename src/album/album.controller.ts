@@ -25,6 +25,7 @@ import { AlbumService } from './album.service';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
 
 @ApiTags('album-endpoints')
 @UseGuards(JwtGuard)
@@ -92,61 +93,13 @@ export class AlbumController {
     return this.albumService.uploadImageToAlbum(albumId, profileId, file);
   }
 
-  @Patch('replace/:albumId/:profileId')
-  @ApiOperation({ summary: 'Replace an album image ' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
-    },
-  })
-  @UseInterceptors(FileInterceptor('file'))
-  replaceImage(
-    @Param('albumId') albumId: string,
-    @Param('profileId') profileId: string,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
-      }),
-    )
-    file: Express.Multer.File,
-    @Query() imageNumber: number,
-  ) {
-    return this.albumService.replaceImage(
-      albumId,
-      profileId,
-      imageNumber,
-      file,
-    );
-  }
-
   @Delete('image/:albumId/:profileId')
   @ApiOperation({ summary: 'Delete an album image ' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
-    },
-  })
-  @UseInterceptors(FileInterceptor('file'))
   deleteAlbumImage(
     @Param('albumId') albumId: string,
     @Param('profileId') profileId: string,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
-      }),
-    )
-    file: Express.Multer.File,
-    @Query() imageNumber: number,
+    @Body() dto: DeleteAlbumImageDto,
   ) {
-    return this.albumService.deleteAlbumImage(
-      albumId,
-      profileId,
-      imageNumber,
-      file,
-    );
+    return this.albumService.deleteAlbumImage(albumId, profileId, dto);
   }
 }
