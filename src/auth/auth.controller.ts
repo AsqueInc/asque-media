@@ -84,8 +84,8 @@ export class AuthController {
     return this.authService.getUserDetailsById(userId);
   }
 
-  @UseGuards(JwtGuard)
-  @ApiSecurity('JWT-auth')
+  // @UseGuards(JwtGuard)
+  // @ApiSecurity('JWT-auth')
   @Post('refresh-access-token/:userId')
   @ApiOperation({ summary: 'Refresh access token' })
   refreshAccessToken(@Param('userId') userId: string) {
