@@ -26,6 +26,7 @@ African Americans, post first generation immigrants, and everone with a demonstr
 - Add guard so that only decoded userId and profileId can use userId and profileId
 - Including shipping costs when checking out
 - ensure image uploads doe not exceed 3mb
+- Endpoint to create referal link, get user's referal link
 
 ## Installation
 
