@@ -16,6 +16,11 @@ export class ArtworkService {
     private cloudinary: CloudinaryService,
   ) {}
 
+  /**
+   * create an artwork
+   * @param dto : create artwork dto
+   * @returns : status code and artork object
+   */
   async createArtwork(dto: CreateArtworkDto): Promise<ApiResponse> {
     try {
       const artwork = await this.prisma.artWork.create({
@@ -42,6 +47,13 @@ export class ArtworkService {
     }
   }
 
+  /**
+   * update an artwork
+   * @param artworkId : id of artwork
+   * @param profileId : id of profile
+   * @param dto : update artwork dto
+   * @returns : status code and updated artwork
+   */
   async updateArtWork(
     artworkId: string,
     profileId: string,
@@ -82,6 +94,11 @@ export class ArtworkService {
     }
   }
 
+  /**
+   * get an artwork by artwork id
+   * @param artworkId : id of artwork
+   * @returns : status code and artwork object
+   */
   async getSingleArtWorkById(artworkId: string): Promise<ApiResponse> {
     try {
       const artWork = await this.prisma.artWork.findFirst({
@@ -108,6 +125,12 @@ export class ArtworkService {
     }
   }
 
+  /**
+   * get all artwork created by a user
+   * @param profileId : id of artist
+   * @param dto : pagination dto
+   * @returns : status code and list of artworks by a profile
+   */
   async getAllArtworkByUser(
     profileId: string,
     dto: PaginationDto,
@@ -140,6 +163,13 @@ export class ArtworkService {
     }
   }
 
+  /**
+   * add an artwork to a repository
+   * @param artworkId : id of artwork
+   * @param profileId : id of artwork artist
+   * @param repositoryId : id of repository
+   * @returns : status code and message
+   */
   async addArtworkToRepository(
     artworkId: string,
     profileId: string,
@@ -174,10 +204,16 @@ export class ArtworkService {
     }
   }
 
+  /**
+   * upload artwork image
+   * @param profileId : id of author
+   * @param artworkId : id of artwork
+   * @param file : image to be uploaded
+   * @returns : status code and message
+   */
   async uploadArtWorkImage(
     profileId: string,
     artworkId: string,
-    artworkNumber: number,
     file: Express.Multer.File,
   ) {
     try {
@@ -194,27 +230,18 @@ export class ArtworkService {
       // upload image of artwork
       const uploadedImage = await this.cloudinary.uploadImage(file);
 
-      // save image public id to database
-      if (artworkNumber === 1) {
-        await this.prisma.artWork.update({
-          where: { id: artworkId },
-          data: { firstImageUri: uploadedImage.url },
-        });
-      } else if (artworkNumber === 2) {
-        await this.prisma.artWork.update({
-          where: { id: artworkId },
-          data: { secondImageUri: uploadedImage.url },
-        });
-      } else {
-        await this.prisma.artWork.update({
-          where: { id: artworkId },
-          data: { thirdImageUri: uploadedImage.url },
-        });
-      }
+      // get image url and push to image uri list
+      const imageUris = artWork.imageUris;
 
+      imageUris.push(uploadedImage.url);
+
+      await this.prisma.artWork.update({
+        where: { id: artworkId },
+        data: { imageUris: imageUris },
+      });
       return {
         statusCode: HttpStatus.OK,
-        message: { data: 'Artwork images added' },
+        message: { data: 'Artwork image added' },
       };
     } catch (error) {
       this.logger.error(error);
