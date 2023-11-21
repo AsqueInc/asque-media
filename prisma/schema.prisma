@@ -65,9 +65,7 @@ model ArtWork {
   description       String
   quantity          Int
   price             Decimal
-  firstImageUri     String?
-  secondImageUri    String?
-  thirdImageUri     String?
+  imageUris         String[]
   artistProfile     Profile  @relation(fields: [artistProfileId], references: [id])
   artistProfileId   String
   artistName        String
@@ -116,7 +114,7 @@ model Order_Item{
   orderId     String
   order       Order    @relation(fields: [orderId], references: [id])
   artworkId   String
-  artwork       ArtWork    @relation(fields: [artworkId], references: [id])
+  artwork     ArtWork    @relation(fields: [artworkId], references: [id])
   quantity    Int
   price       Decimal
   addedAt     DateTime  @default(now())
