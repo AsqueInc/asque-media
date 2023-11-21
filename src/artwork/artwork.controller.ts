@@ -91,7 +91,6 @@ export class ArtworkController {
   uploadArtWorkImage(
     @Param('profileId') profileId: string,
     @Param('artworkId') artworkId: string,
-    @Param('artworkNumber') artworkNumber: number,
     @UploadedFile(
       new ParseFilePipe({
         validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
@@ -99,11 +98,6 @@ export class ArtworkController {
     )
     file: Express.Multer.File,
   ) {
-    return this.artWorkService.uploadArtWorkImage(
-      profileId,
-      artworkId,
-      artworkNumber,
-      file,
-    );
+    return this.artWorkService.uploadArtWorkImage(profileId, artworkId, file);
   }
 }
