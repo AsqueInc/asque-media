@@ -268,7 +268,7 @@ export class OrderService {
 
       const mostRecentOrder = orders[0];
 
-      // if most recent order is null create and return an order
+      // if most recent order is undefined create and return an order
       if (mostRecentOrder === undefined) {
         const order = await this.prisma.order.create({
           data: { profileId: dto.profileId },

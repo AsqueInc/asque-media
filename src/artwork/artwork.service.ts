@@ -221,12 +221,21 @@ export class ArtworkService {
       const artWork = await this.prisma.artWork.findFirst({
         where: { id: artworkId },
       });
+
       if (artWork.artistProfileId !== profileId) {
         throw new HttpException(
           'You cannot upload images to a profile you do not own',
           HttpStatus.UNAUTHORIZED,
         );
       }
+
+      if (artWork.imageUris.length >= 5) {
+        throw new HttpException(
+          'You cannot upload more than 5 images to an album',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       // upload image of artwork
       const uploadedImage = await this.cloudinary.uploadImage(file);
 
