@@ -173,7 +173,6 @@ export class AuthService {
     userId: string,
   ): Promise<ApiResponse> {
     try {
-      this.logger.info(userId);
       const userExists = await this.checkUserExistsById(userId);
       if (!userExists) {
         throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
@@ -427,6 +426,13 @@ export class AuthService {
       const refreshTokenExists = await this.prisma.user.findFirst({
         where: { id: userId },
       });
+
+      if (!refreshTokenExists) {
+        throw new HttpException(
+          'Refresh Token does not exist. Login again',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
 
       // check refresh token
       const verifyToken = this.jwtService.verify(
