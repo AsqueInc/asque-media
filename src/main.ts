@@ -16,6 +16,9 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1');
 
+  // setup cors
+  app.enableCors();
+
   // setup swagger
   const config = new DocumentBuilder()
     .setTitle('Asque Media')
