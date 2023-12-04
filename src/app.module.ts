@@ -14,6 +14,7 @@ import * as winston from 'winston';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AlbumModule } from './album/album.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { AlbumModule } from './album/album.module';
       },
     ]),
     AlbumModule,
+    BlogModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
