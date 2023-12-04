@@ -13,7 +13,7 @@ export class CreateBlogDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  userId: string;
+  profileId: string;
 }
 
 export class UpdateBlogDto {
