@@ -7,11 +7,22 @@ import {
   Delete,
   Patch,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  FileTypeValidator,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard)
 @ApiSecurity('JWT-auth')
@@ -32,25 +43,51 @@ export class BlogController {
     return this.blogService.createBlog(dto);
   }
 
-  @Get('user/:userId')
+  @Get('user/:profileId')
   @ApiOperation({ summary: 'Get all blogs by a user' })
-  getAllUserBlogs(@Param('userId') userId: string) {
-    return this.blogService.getAllUserBlogs(userId);
+  getAllUserBlogs(@Param('profileId') profileId: string) {
+    return this.blogService.getAllUserBlogs(profileId);
   }
 
-  @Delete(':userId/:blogId')
+  @Delete(':profileId/:blogId')
   @ApiOperation({ summary: 'Delete a blog' })
-  deleteBlog(@Param('userId') userId: string, @Param('blogId') blogId: string) {
-    return this.blogService.deleteBlog(userId, blogId);
+  deleteBlog(
+    @Param('profileId') profileId: string,
+    @Param('blogId') blogId: string,
+  ) {
+    return this.blogService.deleteBlog(profileId, blogId);
   }
 
-  @Patch(':userId/:blogId')
+  @Patch(':profileId/:blogId')
   @ApiOperation({ summary: 'Update a blog' })
   updateBlog(
-    @Param('userId') userId: string,
+    @Param('profileId') profileId: string,
     @Param('blogId') blogId: string,
     @Body() dto: UpdateBlogDto,
   ) {
-    return this.blogService.updateBlog(userId, blogId, dto);
+    return this.blogService.updateBlog(profileId, blogId, dto);
+  }
+
+  @Patch('upload/:blogId/:profileId')
+  @ApiOperation({ summary: 'Upload an image to a blog' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  uploadImageToAlbum(
+    @Param('blogId') blogId: string,
+    @Param('profileId') profileId: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.blogService.addImageToBlog(blogId, profileId, file);
   }
 }
