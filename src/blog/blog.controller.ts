@@ -6,11 +6,15 @@ import {
   Post,
   Delete,
   Patch,
+  UseGuards,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
+import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
+@UseGuards(JwtGuard)
+@ApiSecurity('JWT-auth')
 @ApiTags('blog-endpoints')
 @Controller('blog')
 export class BlogController {
