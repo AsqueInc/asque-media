@@ -14,5 +14,6 @@ export class AudioVideoUploadDto {
 
   @ApiProperty()
   @IsNotEmpty()
+  @IsString()
   profileId: string;
 }
