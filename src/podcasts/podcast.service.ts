@@ -3,17 +3,17 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PrismaService } from 'src/prisma.service';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
-import { AudioVideoUploadDto } from './dto/audo-video.dto';
+import { PodcastDto } from './dto/podcast.dto';
 
 @Injectable()
-export class AudioVideoService {
+export class PodcastService {
   constructor(
     private prisma: PrismaService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private cloudinary: CloudinaryService,
   ) {}
 
-  async createPodcast(dto: AudioVideoUploadDto) {
+  async createAudioPodcast(dto: PodcastDto) {
     try {
       const podcast = await this.prisma.podcast.create({
         data: {
@@ -36,7 +36,7 @@ export class AudioVideoService {
     }
   }
 
-  async createVideo(dto: AudioVideoUploadDto) {
+  async createVideoPodcast(dto: PodcastDto) {
     try {
       const video = await this.prisma.video.create({
         data: {
@@ -83,11 +83,11 @@ export class AudioVideoService {
 
   async uploadVideo(videoId: string, file: Express.Multer.File) {
     try {
-      const uploadAudio = await this.cloudinary.uploadProfilePicture(file);
+      const uploadVideo = await this.cloudinary.uploadVideo(file);
 
-      await this.prisma.podcast.update({
+      await this.prisma.video.update({
         where: { id: videoId },
-        data: { podcastUri: uploadAudio.url },
+        data: { videoUri: uploadVideo.url },
       });
 
       return {

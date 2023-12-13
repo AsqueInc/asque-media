@@ -11,7 +11,6 @@ import {
   UploadedFile,
   ParseFilePipe,
 } from '@nestjs/common';
-import { AudioVideoService } from './audio-video.service';
 import {
   ApiBody,
   ApiConsumes,
@@ -19,51 +18,52 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
-import { AudioVideoUploadDto } from './dto/audo-video.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PodcastService } from './podcast.service';
+import { PodcastDto } from './dto/podcast.dto';
 
 @ApiTags('Podcast-endpoints')
-@Controller('audio-video')
 @UseGuards(JwtGuard)
 @ApiSecurity('JWT-auth')
-export class AudioVideoController {
-  constructor(private readonly audioVideoService: AudioVideoService) {}
+@Controller('podcast')
+export class PodcastController {
+  constructor(private readonly podcastService: PodcastService) {}
 
   @Post('audio')
   @ApiOperation({ summary: 'Create an audio podcast' })
-  createPodcast(@Body() dto: AudioVideoUploadDto) {
-    return this.audioVideoService.createPodcast(dto);
+  createPodcast(@Body() dto: PodcastDto) {
+    return this.podcastService.createAudioPodcast(dto);
   }
 
   @Post('video')
   @ApiOperation({ summary: 'Create a video podcast' })
-  createVideoPodcast(@Body() dto: AudioVideoUploadDto) {
-    return this.audioVideoService.createVideo(dto);
+  createVideoPodcast(@Body() dto: PodcastDto) {
+    return this.podcastService.createVideoPodcast(dto);
   }
 
   @Get('audio/:audioId')
   @ApiOperation({ summary: 'Get details of an audio podcast' })
   getPodcastDetails(@Param('audioId') audioId: string) {
-    return this.audioVideoService.getPodcastDetails(audioId);
+    return this.podcastService.getPodcastDetails(audioId);
   }
 
   @Get('video/:videoId')
   @ApiOperation({ summary: 'Get details of an audio podcast' })
   getVideoDetails(@Param('videoId') videoId: string) {
-    return this.audioVideoService.getVideoDetails(videoId);
+    return this.podcastService.getVideoDetails(videoId);
   }
 
   @Get('audio/profile/:profleId')
   @ApiOperation({ summary: 'Get all podcasts by profile' })
   getAllPodcastByProfile(@Param('profleId') profleId: string) {
-    return this.audioVideoService.getAllPodcastByProfile(profleId);
+    return this.podcastService.getAllPodcastByProfile(profleId);
   }
 
   @Get('video/profile/:profleId')
   @ApiOperation({ summary: 'Get all videos by profile' })
   getAllVideosByProfile(@Param('profleId') profleId: string) {
-    return this.audioVideoService.getAllVideosByProfile(profleId);
+    return this.podcastService.getAllVideosByProfile(profleId);
   }
 
   @Patch('audio/upload/:podcastId')
@@ -85,7 +85,7 @@ export class AudioVideoController {
     )
     file: Express.Multer.File,
   ) {
-    return this.audioVideoService.uploadPodcastAudio(podcastId, file);
+    return this.podcastService.uploadPodcastAudio(podcastId, file);
   }
 
   @Patch('video/upload/:videoId')
@@ -107,6 +107,6 @@ export class AudioVideoController {
     )
     file: Express.Multer.File,
   ) {
-    return this.audioVideoService.uploadVideo(videoId, file);
+    return this.podcastService.uploadVideo(videoId, file);
   }
 }

@@ -15,7 +15,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AlbumModule } from './album/album.module';
 import { BlogModule } from './blog/blog.module';
-import { AudioVideoModule } from './audio-video/audio-video.module';
+import { PodcastModule } from './podcasts/podcast.module';
 
 @Module({
   imports: [
@@ -53,7 +53,7 @@ import { AudioVideoModule } from './audio-video/audio-video.module';
     ]),
     AlbumModule,
     BlogModule,
-    AudioVideoModule,
+    PodcastModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
