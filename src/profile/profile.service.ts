@@ -31,6 +31,58 @@ export class ProfileService {
     return await this.prisma.profile.findFirst({ where: { id: id } });
   };
 
+  async createArtistProfile(dto: CreateProfileDto) {
+    try {
+      // check if user exists
+      const userExists = await this.prisma.user.findFirst({
+        where: { id: dto.userId },
+      });
+      if (!userExists) {
+        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
+      }
+
+      // chech if profile already exists
+      const profileExists = await this.prisma.profile.findFirst({
+        where: { userId: dto.userId },
+      });
+      if (profileExists) {
+        throw new HttpException(
+          'Profile already exists',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      // create user
+      const profile = await this.prisma.profile.create({
+        data: {
+          firstName: dto.lastName,
+          lastName: dto.firstName,
+          mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
+          userId: dto.userId,
+          email: userExists.email,
+          profileType: 'ARTIST',
+        },
+      });
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        message: {
+          profileId: profile.id,
+          userId: profile.userId,
+          firstName: profile.firstName,
+          lastName: profile.lastName,
+          mobileNumber: profile.mobileNumber,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   /**
    *
    * @param dto :create profile dto
