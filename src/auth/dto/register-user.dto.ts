@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
@@ -19,6 +20,16 @@ export class RegisterUserDto {
   @IsNotEmpty()
   @ApiProperty()
   name: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({ default: 'USER' })
+  type: 'USER' | 'ARTIST';
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  referralCode: string;
 
   @IsString()
   @IsNotEmpty()
