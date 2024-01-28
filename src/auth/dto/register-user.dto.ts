@@ -23,7 +23,7 @@ export class RegisterUserDto {
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ default: 'USER' })
+  @ApiProperty({ default: 'ARTIST' })
   type: 'USER' | 'ARTIST';
 
   @IsString()
