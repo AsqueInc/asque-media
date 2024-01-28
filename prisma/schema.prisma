@@ -14,14 +14,14 @@ model User {
   id                String    @id @default(uuid()) 
   email             String    @unique
   password          String?
-  name          String?    @unique
+  name          String?    
   isGoogleUser      Boolean   @default(false)    
   isEmailVerified   Boolean   @default(false)
   isAdmin           Boolean   @default(false)
   refreshToken      String? 
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
-  role              Role       @default(USER)
+  role              Role       @default(ARTIST)
   profile           Profile?
   otp               Otp?
   referral           Referral?
@@ -34,6 +34,7 @@ model Referral {
     user                  User      @relation(fields: [userEmail], references: [email])  
     userEmail             String    @unique
     code                  String    @unique
+    balance               Decimal   @default(0.0)
     referred          User[]            @relation("ReferredBy")
     createdAt     DateTime  @default(now())
     updatedAt     DateTime  @updatedAt
