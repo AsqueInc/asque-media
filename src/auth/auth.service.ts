@@ -45,7 +45,11 @@ export class AuthService {
     return await this.prisma.user.findFirst({ where: { id: id } });
   };
 
-  async createUser(dto: RegisterUserDto, referrerEmail?: string) {
+  async createUser(
+    dto: RegisterUserDto,
+    referrerEmail?: string,
+    referrerBalance?: number,
+  ) {
     // generate referral code for user
     const referralCode = this.util.generateReferralCode();
 
@@ -58,6 +62,7 @@ export class AuthService {
     // hash new password
     const passwordHash = await bcrypt.hash(dto.password, 12);
 
+    // code to create user if referral code is used
     if (referrerEmail) {
       const newUser = await this.prisma.user.create({
         data: {
@@ -94,12 +99,19 @@ export class AuthService {
         },
       });
 
+      // update referrer account balance
+      await this.prisma.referral.update({
+        where: { userEmail: referrerEmail },
+        data: { balance: referrerBalance + 500 },
+      });
+
       return {
         statusCode: HttpStatus.CREATED,
         data: newUser,
       };
     }
 
+    // code to create user if referral code is not used
     const newUser = await this.prisma.user.create({
       data: {
         email: dto.email,
@@ -159,7 +171,11 @@ export class AuthService {
         );
       }
 
-      return await this.createUser(dto, referral.userEmail);
+      return await this.createUser(
+        dto,
+        referral.userEmail,
+        Number(referral.balance),
+      );
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -268,7 +284,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: 'Password changed successfully',
+        message: 'Password change successful',
       };
     } catch (error) {
       this.logger.error(error);
