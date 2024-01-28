@@ -41,4 +41,19 @@ export class UtilService {
       HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
+
+  /**
+   * generates a referral code for a user
+   * @returns referral code
+   */
+  generateReferralCode(): string {
+    const characters = 'QWERTYUIOPLKJHGFDSAZXCVBNM';
+    let referralCode = '';
+
+    for (let i = 0; i < 7; i++) {
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      referralCode += characters.charAt(randomIndex);
+    }
+    return referralCode;
+  }
 }
