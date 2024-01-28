@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ReferralService } from './referral.service';
 import { ReferralController } from './referral.controller';
+import { PrismaService } from 'src/prisma.service';
 
 @Module({
-  providers: [ReferralService],
-  controllers: [ReferralController]
+  providers: [ReferralService, PrismaService],
+  controllers: [ReferralController],
 })
 export class ReferralModule {}
