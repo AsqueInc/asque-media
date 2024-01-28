@@ -39,29 +39,37 @@ export class AuthController {
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
-  @Patch('change-password/:userId')
+  @Patch('change-password')
   @ApiOperation({ summary: 'Change a user password' })
   changePassword(
     @Body() dto: ChangePasswordDto,
-    @Param('userId') userId: string,
+    @Req() req,
+    // @Param('userId') userId: string,
   ) {
-    return this.authService.changePassword(dto, userId);
+    return this.authService.changePassword(dto, req.user.sub);
   }
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Request email verification otp' })
-  @Post('request-email-verification/:userId')
-  requestEmailVerification(@Param('userId') userId: string) {
-    return this.authService.requestEmailVerification(userId);
+  @Post('request-email-verification')
+  requestEmailVerification(
+    @Req() req,
+    // @Param('userId') userId: string
+  ) {
+    return this.authService.requestEmailVerification(req.user.sub);
   }
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
-  @Patch('verify-email/:userId')
+  @Patch('verify-email')
   @ApiOperation({ summary: 'Verify email' })
-  verifyEmail(@Body() dto: VerifyEmailDto, @Param('userId') userId: string) {
-    return this.authService.verifyEmail(userId, dto);
+  verifyEmail(
+    @Body() dto: VerifyEmailDto,
+    // @Param('userId') userId: string,
+    @Req() req,
+  ) {
+    return this.authService.verifyEmail(req.user.sub, dto);
   }
 
   @Post('send-reset-password-email')
@@ -78,18 +86,24 @@ export class AuthController {
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
-  @Get(':userId')
+  @Get('')
   @ApiOperation({ summary: 'Get user details by Id' })
-  getUserDetailsById(@Param('userId') userId: string) {
-    return this.authService.getUserDetailsById(userId);
+  getUserDetailsById(
+    @Req() req,
+    // @Param('userId') userId: string
+  ) {
+    return this.authService.getUserDetailsById(req.user.sub);
   }
 
   // @UseGuards(JwtGuard)
   // @ApiSecurity('JWT-auth')
-  @Post('refresh-access-token/:userId')
+  @Post('refresh-access-token')
   @ApiOperation({ summary: 'Refresh access token' })
-  refreshAccessToken(@Param('userId') userId: string) {
-    return this.authService.refreshAccessToken(userId);
+  refreshAccessToken(
+    @Req() req,
+    // @Param('userId') userId: string
+  ) {
+    return this.authService.refreshAccessToken(req.user.sub);
   }
 
   @Get('google')
@@ -103,11 +117,15 @@ export class AuthController {
     return res.send({ accessToken, userId, userEmail });
   }
 
-  @Patch('add-admin/:adminId/:userId')
+  @Patch('add-admin/:userId')
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Add admin user' })
-  addAdmin(@Param('userId') userId: string, @Param('adminId') adminId: string) {
-    return this.authService.addAdmin(adminId, userId);
+  addAdmin(
+    @Req() req,
+    @Param('userId') userId: string,
+    // @Param('adminId') adminId: string
+  ) {
+    return this.authService.addAdmin(req.user.sub, userId);
   }
 }
