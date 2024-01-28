@@ -16,6 +16,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AlbumModule } from './album/album.module';
 import { BlogModule } from './blog/blog.module';
 import { PodcastModule } from './podcasts/podcast.module';
+import { ReferralModule } from './referral/referral.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { PodcastModule } from './podcasts/podcast.module';
     AlbumModule,
     BlogModule,
     PodcastModule,
+    ReferralModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
