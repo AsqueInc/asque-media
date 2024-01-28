@@ -23,7 +23,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { PodcastService } from './podcast.service';
 import { PodcastDto } from './dto/podcast.dto';
 
-@ApiTags('Podcast-endpoints')
+@ApiTags('podcast-endpoints')
 @UseGuards(JwtGuard)
 @ApiSecurity('JWT-auth')
 @Controller('podcast')
