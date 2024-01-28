@@ -14,15 +14,29 @@ model User {
   id                String    @id @default(uuid()) 
   email             String    @unique
   password          String?
-  username          String?    @unique
+  name          String?    @unique
   isGoogleUser      Boolean   @default(false)    
   isEmailVerified   Boolean   @default(false)
   isAdmin           Boolean   @default(false)
   refreshToken      String? 
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+  role              Role       @default(USER)
   profile           Profile?
   otp               Otp?
+  referral           Referral?
+  referrer Referral? @relation("ReferredBy", fields: [referrerEmail], references: [userEmail], onDelete: Cascade, onUpdate: Cascade)
+  referrerEmail String?
+}
+
+model Referral {
+    id                    String    @id @default(uuid()) 
+    user                  User      @relation(fields: [userEmail], references: [email])  
+    userEmail             String    @unique
+    code                  String    @unique
+    referred          User[]            @relation("ReferredBy")
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
 }
 
 model Blog {
@@ -33,6 +47,7 @@ model Blog {
   updatedAt DateTime  @updatedAt
   profile     Profile      @relation(fields: [profileId], references: [id])
   profileId   String
+  referrer   String?
   imageUris   String[]    
 }
 
@@ -53,12 +68,10 @@ model Profile {
   review                  Review[]
   album                   Album?
   blogs                   Blog[]
-  profileType             PROFILE_TYPE   @default(USER)
   podcast                 Podcast[]
-  video                   Video[]
 }
 
-enum PROFILE_TYPE{
+enum Role{
   ADMIN
   ARTIST
   USER
@@ -72,18 +85,13 @@ model Podcast{
   profile       Profile    @relation(fields: [profileId], references: [id])
   profileId     String
   description   String?
-  podcastUri    String?
+  uri    String?
+  type  PodcastType   @default(AUDIO)
 }
 
-model Video{
-  id            String    @id @default(uuid()) 
-  title         String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  profile       Profile    @relation(fields: [profileId], references: [id])
-  profileId     String
-  description   String?
-  videoUri    String?
+enum PodcastType {
+  AUDIO
+  VIDEO
 }
 
 model Otp {
@@ -111,6 +119,8 @@ model ArtWork {
   imageUris         String[]
   artistProfile     Profile  @relation(fields: [artistProfileId], references: [id])
   artistProfileId   String
+
+  // remove artist name
   artistName        String
   review            Review[]
   orderItem         Order_Item[]
