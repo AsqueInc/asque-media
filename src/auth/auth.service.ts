@@ -52,6 +52,29 @@ export class AuthService {
    */
   async registerUser(dto: RegisterUserDto): Promise<ApiResponse> {
     try {
+      const referral = await this.prisma.referral.findFirst({
+        where: { code: dto.referralCode },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
+          },
+        },
+      });
+
+      if (!referral) {
+        throw new HttpException(
+          'Invalid referral code',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // generate referral code for user
+      const referralCode = this.util.generateReferralCode();
+
       // check if user already exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (userExists) {
@@ -66,17 +89,37 @@ export class AuthService {
           email: dto.email,
           password: passwordHash,
           name: dto.name,
+          role: dto.type,
+          referral: {
+            create: {
+              code: referralCode,
+            },
+          },
+          referrer: {
+            connect: {
+              userEmail: referral.userEmail,
+            },
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          referral: {
+            select: {
+              id: true,
+              code: true,
+            },
+          },
         },
       });
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: {
-          id: newUser.id,
-          email: newUser.email,
-          createdAt: newUser.createdAt,
-          updatedAt: newUser.updatedAt,
-        },
+        data: newUser,
       };
     } catch (error) {
       this.logger.error(error);
@@ -122,7 +165,7 @@ export class AuthService {
 
       // sign access token
       const accessToken = await this.jwtService.signAsync(payload, {
-        expiresIn: '15m',
+        expiresIn: this.config.get('JWT_EXPIRES_IN'),
         secret: this.config.get('JWT_ACCESS_SECRET'),
       });
 
@@ -139,8 +182,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: {
-          userId: userExists.id,
+        data: {
           accessToken: accessToken,
           refreshToken: refreshToken,
         },
@@ -187,7 +229,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Password changed successfully' },
+        message: 'Password changed successfully',
       };
     } catch (error) {
       this.logger.error(error);
@@ -221,7 +263,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Email verification otp sent' },
+        message: 'Email verification otp sent',
       };
     } catch (error) {
       this.logger.error(error);
@@ -270,7 +312,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Email successfully verified' },
+        message: 'Email successfully verified',
       };
     } catch (error) {
       this.logger.error(error);
@@ -308,7 +350,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Reset otp sent' },
+        message: 'Reset otp sent',
       };
     } catch (error) {
       this.logger.error(error);
@@ -339,7 +381,7 @@ export class AuthService {
       if (!userOtp) {
         return {
           statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'Otp not found' },
+          message: 'Otp not found',
         };
       }
 
@@ -347,7 +389,7 @@ export class AuthService {
       if (userOtp.otp !== dto.otp) {
         return {
           statusCode: HttpStatus.NOT_FOUND,
-          message: { error: 'Otp not found' },
+          message: 'Otp not found',
         };
       }
 
@@ -365,7 +407,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Password reset successful' },
+        message: 'Password reset successful',
       };
     } catch (error) {
       this.logger.error(error);
@@ -486,7 +528,7 @@ export class AuthService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'User updated to admin' },
+        message: 'User upgraded to admin status',
       };
     } catch (error) {
       this.logger.error(error);
