@@ -45,45 +45,20 @@ export class AuthService {
     return await this.prisma.user.findFirst({ where: { id: id } });
   };
 
-  /**
-   * register a new user
-   * @param dto : register user dto
-   * @returns : response code and user details
-   */
-  async registerUser(dto: RegisterUserDto): Promise<ApiResponse> {
-    try {
-      const referral = await this.prisma.referral.findFirst({
-        where: { code: dto.referralCode },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
-            },
-          },
-        },
-      });
+  async createUser(dto: RegisterUserDto, referrerEmail?: string) {
+    // generate referral code for user
+    const referralCode = this.util.generateReferralCode();
 
-      if (!referral) {
-        throw new HttpException(
-          'Invalid referral code',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+    // check if user already exists
+    const userExists = await this.checkUserExistsByEmail(dto.email);
+    if (userExists) {
+      throw new HttpException('User already exists', HttpStatus.UNAUTHORIZED);
+    }
 
-      // generate referral code for user
-      const referralCode = this.util.generateReferralCode();
+    // hash new password
+    const passwordHash = await bcrypt.hash(dto.password, 12);
 
-      // check if user already exists
-      const userExists = await this.checkUserExistsByEmail(dto.email);
-      if (userExists) {
-        throw new HttpException('User already exists', HttpStatus.UNAUTHORIZED);
-      }
-
-      // hash new password
-      const passwordHash = await bcrypt.hash(dto.password, 12);
-
+    if (referrerEmail) {
       const newUser = await this.prisma.user.create({
         data: {
           email: dto.email,
@@ -93,11 +68,12 @@ export class AuthService {
           referral: {
             create: {
               code: referralCode,
+              balance: this.config.get('REFERRAL_AMOUNT'),
             },
           },
           referrer: {
             connect: {
-              userEmail: referral.userEmail,
+              userEmail: referrerEmail,
             },
           },
         },
@@ -112,6 +88,7 @@ export class AuthService {
             select: {
               id: true,
               code: true,
+              balance: true,
             },
           },
         },
@@ -121,6 +98,68 @@ export class AuthService {
         statusCode: HttpStatus.CREATED,
         data: newUser,
       };
+    }
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password: passwordHash,
+        name: dto.name,
+        role: dto.type,
+        referral: {
+          create: {
+            code: referralCode,
+            balance: this.config.get('REFERRAL_AMOUNT'),
+          },
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+        referral: {
+          select: {
+            id: true,
+            code: true,
+            balance: true,
+          },
+        },
+      },
+    });
+
+    return {
+      statusCode: HttpStatus.CREATED,
+      data: newUser,
+    };
+  }
+
+  /**
+   * register a new user
+   * @param dto : register user dto
+   * @returns : response code and user details
+   */
+  async registerUser(dto: RegisterUserDto): Promise<ApiResponse> {
+    try {
+      if (dto.referralCode === undefined) {
+        return await this.createUser(dto);
+      }
+
+      // verify referral code
+      const referral = await this.prisma.referral.findFirst({
+        where: { code: dto.referralCode },
+      });
+
+      if (!referral) {
+        throw new HttpException(
+          'Invalid referral code',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      return await this.createUser(dto, referral.userEmail);
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
