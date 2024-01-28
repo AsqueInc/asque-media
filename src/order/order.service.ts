@@ -276,7 +276,7 @@ export class OrderService {
 
         return {
           statusCode: HttpStatus.CREATED,
-          message: { order },
+          data: { order },
         };
       }
 
@@ -284,7 +284,7 @@ export class OrderService {
       if (mostRecentOrder.status === 'PENDING') {
         return {
           statusCode: HttpStatus.OK,
-          message: { mostRecentOrder },
+          data: { mostRecentOrder },
         };
       }
 
@@ -295,7 +295,7 @@ export class OrderService {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: { order },
+        data: { order },
       };
     } catch (error) {
       throw new HttpException(

@@ -65,7 +65,7 @@ export class RepositoryService {
         data: { title: dto.name, description: dto.detail },
       });
 
-      return { statusCode: HttpStatus.CREATED, message: { repository } };
+      return { statusCode: HttpStatus.CREATED, data: repository };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -105,7 +105,7 @@ export class RepositoryService {
         data: { title: dto.name, description: dto.detail },
       });
 
-      return { statusCode: HttpStatus.OK, message: { updatedRepository } };
+      return { statusCode: HttpStatus.OK, data: updatedRepository };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -149,7 +149,7 @@ export class RepositoryService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: {
+        data: {
           currentPage: dto.page,
           pageSize: dto.pageSize,
           totalRecord: totalRecords,
@@ -185,7 +185,7 @@ export class RepositoryService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { repositoryExists },
+        data: repositoryExists,
       };
     } catch (error) {
       this.logger.error(error);

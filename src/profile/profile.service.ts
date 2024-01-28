@@ -60,7 +60,7 @@ export class ProfileService {
           mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
           userId: dto.userId,
           email: userExists.email,
-          profileType: 'ARTIST',
+          // : 'ARTIST',
         },
       });
 
@@ -123,7 +123,7 @@ export class ProfileService {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: {
+        data: {
           profileId: profile.id,
           userId: profile.userId,
           firstName: profile.firstName,
@@ -194,7 +194,7 @@ export class ProfileService {
 
         return {
           statusCode: HttpStatus.OK,
-          message: { error: 'Profile updated' },
+          message: 'Profile updated',
         };
       }
 
@@ -210,7 +210,7 @@ export class ProfileService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Profile updated' },
+        message: 'Profile updated',
       };
     } catch (error) {
       this.logger.error(error);
@@ -237,7 +237,7 @@ export class ProfileService {
         );
       }
 
-      return { statusCode: HttpStatus.OK, message: { profileExists } };
+      return { statusCode: HttpStatus.OK, data: profileExists };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -290,7 +290,7 @@ export class ProfileService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Mobile verification otp sent' },
+        message: 'Mobile verification otp sent',
       };
     } catch (error) {
       this.logger.error(error);
@@ -338,7 +338,7 @@ export class ProfileService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Mobile number succeffully verified' },
+        message: 'Mobile number succeffully verified',
       };
     } catch (error) {
       this.logger.error(error);
@@ -366,7 +366,7 @@ export class ProfileService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Profile picture updated' },
+        message: 'Profile picture updated',
       };
     } catch (error) {
       this.logger.error(error);

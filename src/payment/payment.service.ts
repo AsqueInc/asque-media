@@ -61,7 +61,7 @@ export class PaymentService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: {
+        data: {
           redirectUrl: responseData.authorization_url,
           reference: responseData.reference,
         },

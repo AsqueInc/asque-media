@@ -42,7 +42,7 @@ export class ReviewsService {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: { review },
+        data: review,
       };
     } catch (error) {
       this.logger.error(error);
@@ -76,7 +76,7 @@ export class ReviewsService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: {
+        data: {
           currentPage: dto.page,
           pageSize: dto.pageSize,
           totalRecord: totalRecords,
@@ -105,7 +105,7 @@ export class ReviewsService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { review },
+        data: review,
       };
     } catch (error) {
       this.logger.error(error);
@@ -184,7 +184,7 @@ export class ReviewsService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { data: 'Review deleted' },
+        message: 'Review deleted',
       };
     } catch (error) {
       this.logger.error(error);

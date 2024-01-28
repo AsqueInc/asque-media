@@ -34,7 +34,7 @@ export class AlbumService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { album },
+        data: { album },
       };
     } catch (error) {
       this.logger.error(error);
@@ -66,7 +66,7 @@ export class AlbumService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { album },
+        data: album,
       };
     } catch (error) {
       this.logger.error(error);
@@ -101,7 +101,7 @@ export class AlbumService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: {
+        data: {
           currentPage: dto.page,
           pageSize: dto.pageSize,
           totalRecord: totalRecords,
@@ -145,7 +145,7 @@ export class AlbumService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Album deleted' },
+        message: 'Album deleted',
       };
     } catch (error) {
       this.logger.error(error);
@@ -184,7 +184,7 @@ export class AlbumService {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: { album },
+        data: album,
       };
     } catch (error) {
       this.logger.error(error);
@@ -248,7 +248,7 @@ export class AlbumService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { updatedAlbum },
+        data: updatedAlbum,
       };
     } catch (error) {
       this.logger.error(error);
@@ -301,7 +301,7 @@ export class AlbumService {
 
     return {
       statusCode: HttpStatus.OK,
-      message: { message: 'Image removed from list' },
+      message: 'Image removed from list',
     };
   }
 }

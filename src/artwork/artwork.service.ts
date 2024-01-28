@@ -36,7 +36,7 @@ export class ArtworkService {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: { artwork },
+        data: artwork,
       };
     } catch (error) {
       this.logger.error(error);
@@ -83,7 +83,7 @@ export class ArtworkService {
       });
       return {
         statusCode: HttpStatus.OK,
-        message: { updatedArtWork },
+        data: updatedArtWork,
       };
     } catch (error) {
       this.logger.error(error);
@@ -114,7 +114,7 @@ export class ArtworkService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { artWork },
+        data: artWork,
       };
     } catch (error) {
       this.logger.error(error);
@@ -147,7 +147,7 @@ export class ArtworkService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: {
+        data: {
           currentPage: dto.page,
           pageSize: dto.pageSize,
           totalRecord: totalRecords,

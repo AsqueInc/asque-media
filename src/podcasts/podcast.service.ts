@@ -38,11 +38,12 @@ export class PodcastService {
 
   async createVideoPodcast(dto: PodcastDto) {
     try {
-      const video = await this.prisma.video.create({
+      const video = await this.prisma.podcast.create({
         data: {
           title: dto.title,
           description: dto.description,
           profileId: dto.profileId,
+          type: 'VIDEO',
         },
       });
 
@@ -65,7 +66,7 @@ export class PodcastService {
 
       await this.prisma.podcast.update({
         where: { id: podcastId },
-        data: { podcastUri: uploadAudio.url },
+        data: { uri: uploadAudio.url },
       });
 
       return {
@@ -85,9 +86,9 @@ export class PodcastService {
     try {
       const uploadVideo = await this.cloudinary.uploadVideo(file);
 
-      await this.prisma.video.update({
+      await this.prisma.podcast.update({
         where: { id: videoId },
-        data: { videoUri: uploadVideo.url },
+        data: { uri: uploadVideo.url },
       });
 
       return {
@@ -124,7 +125,7 @@ export class PodcastService {
 
   async getVideoDetails(videoId: string) {
     try {
-      const video = await this.prisma.video.findFirst({
+      const video = await this.prisma.podcast.findFirst({
         where: { id: videoId },
       });
 
@@ -162,7 +163,7 @@ export class PodcastService {
 
   async getAllVideosByProfile(profileId: string) {
     try {
-      const videos = await this.prisma.video.findMany({
+      const videos = await this.prisma.podcast.findMany({
         where: { profileId: profileId },
       });
 
