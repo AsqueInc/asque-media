@@ -32,8 +32,11 @@ export class AuthService {
    * @param email : string
    * @returns : user object or null
    */
-  checkUserExistsByEmail = async (email: string): Promise<User | null> => {
-    return await this.prisma.user.findFirst({ where: { email: email } });
+  checkUserExistsByEmail = async (email: string) => {
+    return await this.prisma.user.findFirst({
+      where: { email: email },
+      include: { profile: { select: { id: true } } },
+    });
   };
 
   /**
@@ -68,8 +71,12 @@ export class AuthService {
         data: {
           email: dto.email,
           password: passwordHash,
-          name: dto.name,
           role: dto.type,
+          profile: {
+            create: {
+              name: dto.name,
+            },
+          },
           referral: {
             create: {
               code: referralCode,
@@ -85,10 +92,18 @@ export class AuthService {
         select: {
           id: true,
           email: true,
-          name: true,
           role: true,
           createdAt: true,
           updatedAt: true,
+          profile: {
+            select: {
+              id: true,
+              name: true,
+              earning: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
           referral: {
             select: {
               id: true,
@@ -116,8 +131,12 @@ export class AuthService {
       data: {
         email: dto.email,
         password: passwordHash,
-        name: dto.name,
         role: dto.type,
+        profile: {
+          create: {
+            name: dto.name,
+          },
+        },
         referral: {
           create: {
             code: referralCode,
@@ -128,15 +147,25 @@ export class AuthService {
       select: {
         id: true,
         email: true,
-        name: true,
         role: true,
         createdAt: true,
         updatedAt: true,
+        profile: {
+          select: {
+            id: true,
+            name: true,
+            earning: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
         referral: {
           select: {
             id: true,
             code: true,
             balance: true,
+            createdAt: true,
+            updatedAt: true,
           },
         },
       },
@@ -216,7 +245,11 @@ export class AuthService {
         throw new HttpException('Incorrect password', HttpStatus.UNAUTHORIZED);
       }
 
-      const payload = { sub: userExists.id, email: userExists.email };
+      const payload = {
+        userId: userExists.id,
+        email: userExists.email,
+        profileId: userExists.profile.id,
+      };
 
       // sign access token
       const accessToken = await this.jwtService.signAsync(payload, {
@@ -423,6 +456,13 @@ export class AuthService {
    */
   async resetPassword(dto: ResetPasswordDto): Promise<ApiResponse> {
     try {
+      if (dto.newPassword !== dto.confirmNewPassword) {
+        throw new HttpException(
+          'New password and confirm new password must be the same',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       // get user details
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (!userExists) {
@@ -434,18 +474,12 @@ export class AuthService {
         where: { userId: userExists.id },
       });
       if (!userOtp) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: 'Otp not found',
-        };
+        throw new HttpException('Otp not found', HttpStatus.NOT_FOUND);
       }
 
       // check if user otp and otp provided are the same
       if (userOtp.otp !== dto.otp) {
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: 'Otp not found',
-        };
+        throw new HttpException('Invalid Otp', HttpStatus.BAD_REQUEST);
       }
 
       // hash new password and update password field in db
