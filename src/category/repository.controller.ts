@@ -6,6 +6,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { RepositoryService } from './repository.service';
@@ -15,51 +16,57 @@ import { PaginationDto } from './dto/pagination.dto';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
-@ApiTags('repository-endpoints')
-@Controller('repository')
+@ApiTags('category-endpoints')
+@Controller('category')
 export class RepositoryController {
   constructor(private readonly repositoryService: RepositoryService) {}
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Post('')
-  @ApiOperation({ summary: 'Create a repository to categorize artwork' })
+  @ApiOperation({ summary: 'Create a category' })
   CreateRepository(
     @Body() dto: CreateRepositoryDto,
-    @Param('userId') userId: string,
+    // @Param('userId') userId: string,
+    @Req() req,
   ) {
-    return this.repositoryService.createRepository(dto, userId);
+    return this.repositoryService.createRepository(dto, req.user.userId);
   }
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
-  @Patch(':userId/:repositoryId')
-  @ApiOperation({ summary: 'Update a repository details' })
+  @Patch(':categoryId')
+  @ApiOperation({ summary: 'Update a category details' })
   updateRepository(
     @Body() dto: UpdateRepositoryDto,
-    @Param('userId') userId: string,
-    @Param('repositoryId') repositoryId: string,
+    // @Param('userId') userId: string,
+    @Param('categoryId') categoryId: string,
+    @Req() req,
   ) {
-    return this.repositoryService.updateRepository(dto, userId, repositoryId);
+    return this.repositoryService.updateRepository(
+      dto,
+      req.user.userId,
+      categoryId,
+    );
   }
 
-  @Get(':repositoryId')
-  @ApiOperation({ summary: 'Get a repository details by id' })
-  getRepositoryDetails(@Param('repositoryId') repositoryId: string) {
-    return this.repositoryService.getRepositoryDetails(repositoryId);
+  @Get(':categoryId')
+  @ApiOperation({ summary: 'Get a category details by id' })
+  getRepositoryDetails(@Param('categoryId') categoryId: string) {
+    return this.repositoryService.getRepositoryDetails(categoryId);
   }
 
-  @Get('all/:repositoryId')
-  @ApiOperation({ summary: 'Get all artwork in a repository' })
+  @Get('all/:categoryId')
+  @ApiOperation({ summary: 'Get all artwork in a category' })
   getAllArtInRepository(
     @Query() dto: PaginationDto,
-    @Param('repositoryId') repositoryId: string,
+    @Param('categoryId') categoryId: string,
   ) {
-    return this.repositoryService.getAllArtInRepository(repositoryId, dto);
+    return this.repositoryService.getAllArtInRepository(categoryId, dto);
   }
 
   @Get('')
-  @ApiOperation({ summary: 'Get all available repositories' })
+  @ApiOperation({ summary: 'Get all available categories' })
   getAllAvailableRepositories() {
     return this.repositoryService.getAllAvailableRepositories();
   }
