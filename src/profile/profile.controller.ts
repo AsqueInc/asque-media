@@ -3,16 +3,17 @@ import {
   Controller,
   FileTypeValidator,
   Get,
-  Param,
+  // Param,
   ParseFilePipe,
   Patch,
   Post,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { ProfileService } from './profile.service';
-import { CreateProfileDto } from './dto/create-profile.dto';
+// import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import {
   ApiBody,
@@ -33,26 +34,28 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
-  @Post('create-profile')
-  @ApiOperation({ summary: 'Create a profile for a user' })
-  createProfile(@Body() dto: CreateProfileDto) {
-    return this.profileService.createProfile(dto);
-  }
-
-  @Patch('update-profile/:userId/:profileId')
+  @Patch('update-profile')
   @ApiOperation({ summary: 'Update a user profile' })
   updateProfile(
     @Body() dto: UpdateProfileDto,
-    @Param('userId') userId: string,
-    @Param('profileId') profileId: string,
+    @Req() req,
+    // @Param('userId') userId: string,
+    // @Param('profileId') profileId: string,
   ) {
-    return this.profileService.updateProfile(dto, userId, profileId);
+    return this.profileService.updateProfile(
+      dto,
+      req.user.userId,
+      req.user.profileId,
+    );
   }
 
-  @Get(':profileId')
+  @Get('')
   @ApiOperation({ summary: 'Get a single profile by profile id' })
-  getProfile(@Param('profileId') profileId: string) {
-    return this.profileService.getProfile(profileId);
+  getProfile(
+    @Req() req,
+    // @Param('profileId') profileId: string
+  ) {
+    return this.profileService.getProfile(req.user.profileId);
   }
 
   @Post('request-mobile-verification')
@@ -61,16 +64,17 @@ export class ProfileController {
     return this.profileService.requestMobileNumberVerification(dto);
   }
 
-  @Patch('verify-mobile/:userId')
+  @Patch('verify-mobile')
   @ApiOperation({ summary: 'Verify a mobile number' })
   verifyMobileNumber(
     @Body() dto: VerifyMobileDto,
-    @Param('userId') userId: string,
+    // @Param('userId') userId: string,
+    @Req() req,
   ) {
-    return this.profileService.verifyMobileNumber(dto, userId);
+    return this.profileService.verifyMobileNumber(dto, req.user.userId);
   }
 
-  @Patch('profile-picture/:profileId')
+  @Patch('profile-picture')
   @ApiOperation({ summary: 'Upload a profile picture' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -87,14 +91,18 @@ export class ProfileController {
       }),
     )
     file: Express.Multer.File,
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
+    @Req() req,
   ) {
-    return this.profileService.uploadProfilePicture(profileId, file);
+    return this.profileService.uploadProfilePicture(req.user.profileId, file);
   }
 
   @Get('/user/:userId')
   @ApiOperation({ summary: 'Get a single profile by user id' })
-  getProfileByUserId(@Param('userId') userId: string) {
-    return this.profileService.getProfileByUserId(userId);
+  getProfileByUserId(
+    @Req() req,
+    // @Param('userId') userId: string
+  ) {
+    return this.profileService.getProfileByUserId(req.user.userId);
   }
 }
