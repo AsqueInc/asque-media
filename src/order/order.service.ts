@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
-import { CreateOrderDto } from './dto/create-order.dto';
+// import { CreateOrderDto } from './dto/create-order.dto';
 import { ApiResponse } from 'src/types/response.type';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { Decimal } from '@prisma/client/runtime/library';
@@ -35,7 +35,7 @@ export class OrderService {
         throw new HttpException('Order does not exist', HttpStatus.NOT_FOUND);
       }
 
-      return { statusCode: HttpStatus.OK, message: { order } };
+      return { statusCode: HttpStatus.OK, data: { order } };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -64,7 +64,7 @@ export class OrderService {
         );
       }
 
-      return { statusCode: HttpStatus.OK, message: { orders } };
+      return { statusCode: HttpStatus.OK, data: { orders } };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -181,7 +181,7 @@ export class OrderService {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: { orderItem },
+        data: { orderItem },
       };
     } catch (error) {
       throw new HttpException(
@@ -243,7 +243,7 @@ export class OrderService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Order item removed from order' },
+        message: 'Order item removed from order',
       };
     } catch (error) {
       throw new HttpException(
@@ -258,11 +258,11 @@ export class OrderService {
    * @param dto : create order dto containing customer profileId
    * @returns :status code and order object
    */
-  async createOrder(dto: CreateOrderDto): Promise<ApiResponse> {
+  async createOrder(profileId: string): Promise<ApiResponse> {
     try {
       // get the most recent order
       const orders = await this.prisma.order.findMany({
-        where: { profileId: dto.profileId },
+        where: { profileId: profileId },
         orderBy: { createdAt: 'desc' },
       });
 
@@ -271,7 +271,7 @@ export class OrderService {
       // if most recent order is undefined create and return an order
       if (mostRecentOrder === undefined) {
         const order = await this.prisma.order.create({
-          data: { profileId: dto.profileId },
+          data: { profileId: profileId },
         });
 
         return {
@@ -290,7 +290,7 @@ export class OrderService {
 
       // create order
       const order = await this.prisma.order.create({
-        data: { profileId: dto.profileId },
+        data: { profileId: profileId },
       });
 
       return {
@@ -315,8 +315,7 @@ export class OrderService {
       const checkOutDetails = await this.prisma.order.update({
         where: { id: orderId },
         data: {
-          firstShippingAddress: dto.firstShippingAddress,
-          secondShippingAddress: dto.secondfirstShippingAddress,
+          deliveryAddress: dto.deliveryAddress,
           city: dto.city,
           zip: dto.zip,
           country: dto.country,
@@ -347,7 +346,7 @@ export class OrderService {
         where: { id: dto.userId },
       });
 
-      if (user.isAdmin !== true) {
+      if (user.role !== 'ADMIN') {
         throw new HttpException(
           'Only admins can notify users of shipped orders',
           HttpStatus.UNAUTHORIZED,

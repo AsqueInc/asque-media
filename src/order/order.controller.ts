@@ -6,10 +6,11 @@ import {
   Post,
   Body,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { CreateOrderDto } from './dto/create-order.dto';
+// import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { CheckOutDto } from './dto/check-out.dto';
 import { NotifyOrderShipedDto } from './dto/order-shipped.dto';
@@ -28,28 +29,35 @@ export class OrderController {
     return this.orderService.getOrderDetails(orderId);
   }
 
-  @Get('profile/:profileId')
+  @Get('profile')
   @ApiOperation({
     summary: 'Get a list of orders and order items made by a user',
   })
-  getUserOrders(@Param('profileId') profileId: string) {
-    return this.orderService.getUserOrders(profileId);
+  getUserOrders(
+    // @Param('profileId') profileId: string,
+    @Req() req,
+  ) {
+    return this.orderService.getUserOrders(req.user.profileId);
   }
 
   // needs refactoring
-  @Patch('cancel/:orderId/:profileId')
+  @Patch('cancel/:orderId/')
   @ApiOperation({ summary: 'Cancel an order' })
   cancelOrder(
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
     @Param('orderId') orderId: string,
+    @Req() req,
   ) {
-    return this.orderService.cancelOrder(orderId, profileId);
+    return this.orderService.cancelOrder(orderId, req.user.profileId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create an order' })
-  createOrder(@Body() dto: CreateOrderDto) {
-    return this.orderService.createOrder(dto);
+  createOrder(
+    // @Body() dto: CreateOrderDto,
+    @Req() req,
+  ) {
+    return this.orderService.createOrder(req.user.profileId);
   }
 
   @Post('order-item')
@@ -58,13 +66,17 @@ export class OrderController {
     return this.orderService.addOrderItemToOrder(dto);
   }
 
-  @Patch('remove-order-item/:profileId/:orderItemId')
+  @Patch('remove-order-item/:orderItemId')
   @ApiOperation({ summary: 'removed selected artwork from an order' })
   removeOrderItemFromOrder(
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
     @Param('orderItemId') orderItemId: string,
+    @Req() req,
   ) {
-    return this.orderService.removeOrderItemFromOrder(profileId, orderItemId);
+    return this.orderService.removeOrderItemFromOrder(
+      req.user.profileId,
+      orderItemId,
+    );
   }
 
   @Patch('checkout/:orderId')
