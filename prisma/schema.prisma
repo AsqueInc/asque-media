@@ -13,8 +13,7 @@ datasource db {
 model User {
   id                String    @id @default(uuid()) 
   email             String    @unique
-  password          String?
-  name          String?    
+  password          String?    
   isGoogleUser      Boolean   @default(false)    
   isEmailVerified   Boolean   @default(false)
   isAdmin           Boolean   @default(false)
@@ -29,6 +28,31 @@ model User {
   referrerEmail String?
 }
 
+enum Role{
+  ADMIN
+  ARTIST
+  USER
+}
+
+model Profile {
+  id                      String    @id @default(uuid()) 
+  user                    User      @relation(fields: [userEmail], references: [email])  
+  userEmail                  String    @unique
+  profilePicUri           String?
+  mobileNumber            String?
+  isMobileNumberVerified  Boolean   @default(false)
+  name                    String?
+  earning                 Decimal   @default(0.0)
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  artwork                 ArtWork[]
+  order                   Order[]
+  review                  Review[]
+  albums                  Album[]
+  stories                 Story[]
+  podcast                 Podcast[]
+}
+
 model Referral {
     id                    String    @id @default(uuid()) 
     user                  User      @relation(fields: [userEmail], references: [email])  
@@ -40,7 +64,7 @@ model Referral {
     updatedAt     DateTime  @updatedAt
 }
 
-model Blog {
+model Story {
   id        String      @id @default(uuid())
   title     String
   content   String
@@ -48,34 +72,7 @@ model Blog {
   updatedAt DateTime  @updatedAt
   profile     Profile      @relation(fields: [profileId], references: [id])
   profileId   String
-  referrer   String?
   imageUris   String[]    
-}
-
-model Profile {
-  id                      String    @id @default(uuid()) 
-  user                    User      @relation(fields: [userId], references: [id])  
-  userId                  String    @unique
-  email                   String    @unique
-  profilePicUri           String?
-  mobileNumber            String?
-  isMobileNumberVerified  Boolean   @default(false)
-  firstName               String?
-  lastName                String?
-  createdAt               DateTime  @default(now())
-  updatedAt               DateTime  @updatedAt
-  artwork                 ArtWork[]
-  order                   Order[]
-  review                  Review[]
-  album                   Album?
-  blogs                   Blog[]
-  podcast                 Podcast[]
-}
-
-enum Role{
-  ADMIN
-  ARTIST
-  USER
 }
 
 model Podcast{
@@ -103,7 +100,7 @@ model Otp {
   createdAt               DateTime  @default(now())
 }
 
-model Repository {
+model Category {
   id                      String    @id @default(uuid())
   title                   String
   description             String
@@ -114,45 +111,56 @@ model Repository {
 model ArtWork {
   id                String    @id @default(uuid())
   title             String
-  description       String
+  description       String?
   quantity          Int
   price             Decimal
   imageUris         String[]
   artistProfile     Profile  @relation(fields: [artistProfileId], references: [id])
   artistProfileId   String
-
-  // remove artist name
   artistName        String
   review            Review[]
   orderItem         Order_Item[]
-  album             Album?
+  // album             Album?
+  category          String[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
 
 model Album {
   id                String      @id @default(uuid())
-  artworkId         String      @unique
-  artwork           ArtWork     @relation(fields: [artworkId], references: [id])
+  title             String
+  category          String[]
+  // artworkId         String      @unique
+  // artwork           ArtWork     @relation(fields: [artworkId], references: [id])
   profileId         String      @unique
   profile           Profile     @relation(fields: [profileId], references: [id])
   albumImageUris    String[]
+  description       String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 }
 
-model ArtWork_Repository{
+model ArtWork_Category{
   id          String    @id @default(uuid())
   artwork_id  String
-  repository_id String
+  category_id String
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+}
+
+model Album_Category{
+  id          String    @id @default(uuid())
+  album_id  String  
+  category_id String
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 }
 
 model Order {
   id                      String    @id @default(uuid())
   profile                 Profile   @relation(fields: [profileId], references: [id])
   profileId               String
-  firstShippingAddress    String?
-  secondShippingAddress   String?
+  deliveryAddress    String?
   city                    String?
   zip                     String?
   country                 String?
