@@ -1,14 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateAlbumDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  profileId: string;
+  title: string;
 
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
-  artworkId: string;
+  description: string;
+
+  @IsOptional()
+  @ApiProperty()
+  category: [];
 }
