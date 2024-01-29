@@ -46,7 +46,7 @@ export class AuthController {
     @Req() req,
     // @Param('userId') userId: string,
   ) {
-    return this.authService.changePassword(dto, req.user.sub);
+    return this.authService.changePassword(dto, req.user.userId);
   }
 
   @UseGuards(JwtGuard)
@@ -57,7 +57,7 @@ export class AuthController {
     @Req() req,
     // @Param('userId') userId: string
   ) {
-    return this.authService.requestEmailVerification(req.user.sub);
+    return this.authService.requestEmailVerification(req.user.userId);
   }
 
   @UseGuards(JwtGuard)
@@ -69,10 +69,10 @@ export class AuthController {
     // @Param('userId') userId: string,
     @Req() req,
   ) {
-    return this.authService.verifyEmail(req.user.sub, dto);
+    return this.authService.verifyEmail(req.user.userId, dto);
   }
 
-  @Post('send-reset-password-email')
+  @Post('request-password-reset')
   @ApiOperation({ summary: 'Send reset password otp' })
   requestForgotPasswordEmail(@Body() dto: SendResetPasswordEmailDto) {
     return this.authService.requestForgotPasswordEmail(dto);
@@ -92,7 +92,7 @@ export class AuthController {
     @Req() req,
     // @Param('userId') userId: string
   ) {
-    return this.authService.getUserDetailsById(req.user.sub);
+    return this.authService.getUserDetailsById(req.user.userId);
   }
 
   // @UseGuards(JwtGuard)
@@ -103,7 +103,7 @@ export class AuthController {
     @Req() req,
     // @Param('userId') userId: string
   ) {
-    return this.authService.refreshAccessToken(req.user.sub);
+    return this.authService.refreshAccessToken(req.user.userId);
   }
 
   @Get('google')
@@ -126,6 +126,6 @@ export class AuthController {
     @Param('userId') userId: string,
     // @Param('adminId') adminId: string
   ) {
-    return this.authService.addAdmin(req.user.sub, userId);
+    return this.authService.addAdmin(req.user.userId, userId);
   }
 }
