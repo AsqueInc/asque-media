@@ -13,15 +13,15 @@ export class BlogService {
     private cloudinary: CloudinaryService,
   ) {}
 
-  async createBlog(dto: CreateBlogDto) {
+  async createBlog(dto: CreateBlogDto, profileId: string) {
     try {
-      const blog = await this.prisma.blog.create({
+      const blog = await this.prisma.story.create({
         data: {
           title: dto.title,
           content: dto.content,
           profile: {
             connect: {
-              id: dto.profileId,
+              id: profileId,
             },
           },
         },
@@ -42,7 +42,7 @@ export class BlogService {
 
   async getAllUserBlogs(profileId: string) {
     try {
-      const blogs = await this.prisma.blog.findMany({
+      const blogs = await this.prisma.story.findMany({
         where: { profileId: profileId },
       });
 
@@ -61,7 +61,10 @@ export class BlogService {
 
   async getSingleBlog(blogId: string) {
     try {
-      const blog = await this.prisma.blog.findFirst({ where: { id: blogId } });
+      const blog = await this.prisma.story.findFirst({
+        where: { id: blogId },
+        include: { profile: { select: { name: true } } },
+      });
       if (!blog) {
         throw new HttpException('Blog does not exists', HttpStatus.NOT_FOUND);
       }
@@ -81,7 +84,7 @@ export class BlogService {
 
   async deleteBlog(profileId: string, blogId: string) {
     try {
-      const blog = await this.prisma.blog.findFirst({ where: { id: blogId } });
+      const blog = await this.prisma.story.findFirst({ where: { id: blogId } });
       if (!blog) {
         throw new HttpException('Blog does not exists', HttpStatus.NOT_FOUND);
       }
@@ -100,7 +103,7 @@ export class BlogService {
         );
       }
 
-      await this.prisma.blog.delete({ where: { id: blogId } });
+      await this.prisma.story.delete({ where: { id: blogId } });
 
       return {
         statusCode: HttpStatus.OK,
@@ -117,7 +120,7 @@ export class BlogService {
 
   async updateBlog(profileId: string, blogId: string, dto: UpdateBlogDto) {
     try {
-      const blog = await this.prisma.blog.findFirst({ where: { id: blogId } });
+      const blog = await this.prisma.story.findFirst({ where: { id: blogId } });
       if (!blog) {
         throw new HttpException('Blog does not exists', HttpStatus.NOT_FOUND);
       }
@@ -136,7 +139,7 @@ export class BlogService {
         );
       }
 
-      const updatedBlog = await this.prisma.blog.update({
+      const updatedBlog = await this.prisma.story.update({
         where: { id: blogId },
         data: {
           title: dto.title,
@@ -163,7 +166,7 @@ export class BlogService {
     file: Express.Multer.File,
   ) {
     try {
-      const blog = await this.prisma.blog.findFirst({ where: { id: blogId } });
+      const blog = await this.prisma.story.findFirst({ where: { id: blogId } });
       if (!blog) {
         throw new HttpException('Blog does not exists', HttpStatus.NOT_FOUND);
       }
@@ -179,7 +182,7 @@ export class BlogService {
       const uploadedImageUri = await this.cloudinary.uploadImage(file);
       blogImageUriList.push(uploadedImageUri.url);
 
-      const updatedBlog = await this.prisma.blog.update({
+      const updatedBlog = await this.prisma.story.update({
         where: { id: blogId },
         data: { imageUris: blogImageUriList },
       });
