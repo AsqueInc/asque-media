@@ -10,10 +10,6 @@ export class CreateBlogDto {
   @ApiProperty()
   @IsNotEmpty()
   content: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  profileId: string;
 }
 
 export class UpdateBlogDto {
