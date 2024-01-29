@@ -140,22 +140,6 @@ model Album {
   updatedAt         DateTime    @updatedAt
 }
 
-model ArtWork_Category{
-  id          String    @id @default(uuid())
-  artwork_id  String
-  category_id String
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-}
-
-model Album_Category{
-  id          String    @id @default(uuid())
-  album_id  String  
-  category_id String
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-}
-
 model Order {
   id                      String    @id @default(uuid())
   profile                 Profile   @relation(fields: [profileId], references: [id])
