@@ -36,4 +36,9 @@ export class ResetPasswordDto {
       'password must contain the following: a capital letter, a small letter, and a number',
   })
   newPassword: string;
+
+  @IsString()
+  @ApiProperty()
+  @IsNotEmpty()
+  confirmNewPassword: string;
 }
