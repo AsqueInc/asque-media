@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
-import { CreateProfileDto } from './dto/create-profile.dto';
+// import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UtilService } from 'src/utils/util.service';
 import { Profile } from '@prisma/client';
@@ -31,114 +31,114 @@ export class ProfileService {
     return await this.prisma.profile.findFirst({ where: { id: id } });
   };
 
-  async createArtistProfile(dto: CreateProfileDto) {
-    try {
-      // check if user exists
-      const userExists = await this.prisma.user.findFirst({
-        where: { id: dto.userId },
-      });
-      if (!userExists) {
-        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
-      }
+  // async createArtistProfile(dto: CreateProfileDto) {
+  //   try {
+  //     // check if user exists
+  //     const userExists = await this.prisma.user.findFirst({
+  //       where: { id: dto.userId },
+  //     });
+  //     if (!userExists) {
+  //       throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
+  //     }
 
-      // chech if profile already exists
-      const profileExists = await this.prisma.profile.findFirst({
-        where: { userId: dto.userId },
-      });
-      if (profileExists) {
-        throw new HttpException(
-          'Profile already exists',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+  //     // chech if profile already exists
+  //     const profileExists = await this.prisma.profile.findFirst({
+  //       where: { userId: dto.userId },
+  //     });
+  //     if (profileExists) {
+  //       throw new HttpException(
+  //         'Profile already exists',
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     }
 
-      // create user
-      const profile = await this.prisma.profile.create({
-        data: {
-          firstName: dto.lastName,
-          lastName: dto.firstName,
-          mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
-          userId: dto.userId,
-          email: userExists.email,
-          // : 'ARTIST',
-        },
-      });
+  //     // create user
+  //     const profile = await this.prisma.profile.create({
+  //       data: {
+  //         firstName: dto.lastName,
+  //         lastName: dto.firstName,
+  //         mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
+  //         userId: dto.userId,
+  //         email: userExists.email,
+  //         // : 'ARTIST',
+  //       },
+  //     });
 
-      return {
-        statusCode: HttpStatus.CREATED,
-        message: {
-          profileId: profile.id,
-          userId: profile.userId,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          mobileNumber: profile.mobileNumber,
-        },
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //     return {
+  //       statusCode: HttpStatus.CREATED,
+  //       message: {
+  //         profileId: profile.id,
+  //         userId: profile.userId,
+  //         firstName: profile.firstName,
+  //         lastName: profile.lastName,
+  //         mobileNumber: profile.mobileNumber,
+  //       },
+  //     };
+  //   } catch (error) {
+  //     this.logger.error(error);
+  //     throw new HttpException(
+  //       error.message,
+  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
-  /**
-   *
-   * @param dto :create profile dto
-   * @param userId : user id
-   * @returns : status code and profile data
-   */
-  async createProfile(dto: CreateProfileDto): Promise<ApiResponse> {
-    try {
-      // check if user exists
-      const userExists = await this.prisma.user.findFirst({
-        where: { id: dto.userId },
-      });
-      if (!userExists) {
-        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
-      }
+  // /**
+  //  *
+  //  * @param dto :create profile dto
+  //  * @param userId : user id
+  //  * @returns : status code and profile data
+  //  */
+  // async createProfile(dto: CreateProfileDto): Promise<ApiResponse> {
+  //   try {
+  //     // check if user exists
+  //     const userExists = await this.prisma.user.findFirst({
+  //       where: { id: dto.userId },
+  //     });
+  //     if (!userExists) {
+  //       throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
+  //     }
 
-      // chech if profile already exists
-      const profileExists = await this.prisma.profile.findFirst({
-        where: { userId: dto.userId },
-      });
-      if (profileExists) {
-        throw new HttpException(
-          'Profile already exists',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
-      }
+  //     // chech if profile already exists
+  //     const profileExists = await this.prisma.profile.findFirst({
+  //       where: { userId: dto.userId },
+  //     });
+  //     if (profileExists) {
+  //       throw new HttpException(
+  //         'Profile already exists',
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //       );
+  //     }
 
-      // create user
-      const profile = await this.prisma.profile.create({
-        data: {
-          firstName: dto.lastName,
-          lastName: dto.firstName,
-          mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
-          userId: dto.userId,
-          email: userExists.email,
-        },
-      });
+  //     // create user
+  //     const profile = await this.prisma.profile.create({
+  //       data: {
+  //         firstName: dto.lastName,
+  //         lastName: dto.firstName,
+  //         mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
+  //         userId: dto.userId,
+  //         email: userExists.email,
+  //       },
+  //     });
 
-      return {
-        statusCode: HttpStatus.CREATED,
-        data: {
-          profileId: profile.id,
-          userId: profile.userId,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          mobileNumber: profile.mobileNumber,
-        },
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //     return {
+  //       statusCode: HttpStatus.CREATED,
+  //       data: {
+  //         profileId: profile.id,
+  //         userId: profile.userId,
+  //         firstName: profile.firstName,
+  //         lastName: profile.lastName,
+  //         mobileNumber: profile.mobileNumber,
+  //       },
+  //     };
+  //   } catch (error) {
+  //     this.logger.error(error);
+  //     throw new HttpException(
+  //       error.message,
+  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   /**
    * update profile
@@ -155,7 +155,7 @@ export class ProfileService {
     try {
       // check if user exists
       const userExists = await this.prisma.profile.findFirst({
-        where: { userId: userId },
+        where: { user: { id: userId } },
       });
       if (!userExists) {
         throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
@@ -164,6 +164,7 @@ export class ProfileService {
       // check if profile exists
       const profileExists = await this.prisma.profile.findFirst({
         where: { id: profileId },
+        include: { user: { select: { id: true } } },
       });
       if (!profileExists) {
         throw new HttpException(
@@ -172,7 +173,7 @@ export class ProfileService {
         );
       }
 
-      if (userExists.id !== profileExists.userId) {
+      if (userExists.id !== profileExists.user.id) {
         throw new HttpException(
           'You can only update a profile that belongs to you',
           HttpStatus.NOT_FOUND,
@@ -185,8 +186,7 @@ export class ProfileService {
           where: { id: profileId },
           data: {
             isMobileNumberVerified: false,
-            firstName: dto.firstName,
-            lastName: dto.lastName,
+            name: dto.name,
             profilePicUri: dto.profilePicUri,
             mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
           },
@@ -202,8 +202,7 @@ export class ProfileService {
       await this.prisma.profile.update({
         where: { id: profileId },
         data: {
-          firstName: dto.firstName,
-          lastName: dto.lastName,
+          name: dto.name,
           profilePicUri: dto.profilePicUri,
         },
       });
@@ -259,6 +258,7 @@ export class ProfileService {
       // check if user's mobile number is saved.
       const numberExists = await this.prisma.profile.findFirst({
         where: { mobileNumber: dto.mobileNumber },
+        include: { user: { select: { id: true } } },
       });
       if (!numberExists) {
         throw new HttpException(
@@ -278,6 +278,8 @@ export class ProfileService {
       // generate otp and send message to user
       const otp = this.util.generateOtp();
 
+      // sign otp with jwt
+
       await this.messageSerive.sendTestMessage(
         numberExists.mobileNumber,
         `your mobile verification otp is : ${otp}. do not share with anyone`,
@@ -285,7 +287,7 @@ export class ProfileService {
 
       // save otp
       await this.prisma.otp.create({
-        data: { userId: numberExists.userId, otp: otp },
+        data: { userId: numberExists.user.id, otp: otp },
       });
 
       return {
@@ -315,6 +317,7 @@ export class ProfileService {
       // check if otp is valid
       const otpExists = await this.prisma.otp.findFirst({
         where: { userId: userId, otp: dto.otp },
+        include: { user: { select: { email: true } } },
       });
 
       if (!otpExists) {
@@ -323,7 +326,7 @@ export class ProfileService {
 
       // verify mobile number
       await this.prisma.profile.update({
-        where: { userId: userId },
+        where: { userEmail: otpExists.user.email },
         data: { isMobileNumberVerified: true },
       });
 
@@ -385,7 +388,7 @@ export class ProfileService {
   async getProfileByUserId(userId: string) {
     // check if profile exists
     const profile = await this.prisma.profile.findFirst({
-      where: { userId: userId },
+      where: { user: { id: userId } },
     });
     if (!profile) {
       throw new HttpException('Profile does not exists', HttpStatus.NOT_FOUND);
