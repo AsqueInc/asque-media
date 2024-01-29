@@ -11,6 +11,7 @@ import {
   UploadedFile,
   ParseFilePipe,
   FileTypeValidator,
+  Req,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import {
@@ -26,50 +27,52 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtGuard)
 @ApiSecurity('JWT-auth')
-@ApiTags('blog-endpoints')
-@Controller('blog')
+@ApiTags('story-endpoints')
+@Controller('story')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
-  @Get(':blogId')
-  @ApiOperation({ summary: 'Get a single blog by id' })
-  getProfile(@Param('blogId') blogId: string) {
-    return this.blogService.getSingleBlog(blogId);
+  @Get(':storyId')
+  @ApiOperation({ summary: 'Get a single story by id' })
+  getProfile(@Param('storyId') storyId: string) {
+    return this.blogService.getSingleBlog(storyId);
   }
 
   @Post('')
-  @ApiOperation({ summary: 'Create a blog' })
-  createProfile(@Body() dto: CreateBlogDto) {
-    return this.blogService.createBlog(dto);
+  @ApiOperation({ summary: 'Create a story' })
+  createProfile(@Body() dto: CreateBlogDto, @Req() req) {
+    return this.blogService.createBlog(dto, req.user.profileId);
   }
 
   @Get('user/:profileId')
-  @ApiOperation({ summary: 'Get all blogs by a user' })
+  @ApiOperation({ summary: 'Get all stories by a user' })
   getAllUserBlogs(@Param('profileId') profileId: string) {
     return this.blogService.getAllUserBlogs(profileId);
   }
 
-  @Delete(':profileId/:blogId')
-  @ApiOperation({ summary: 'Delete a blog' })
+  @Delete(':storyId')
+  @ApiOperation({ summary: 'Delete a story' })
   deleteBlog(
-    @Param('profileId') profileId: string,
-    @Param('blogId') blogId: string,
+    // @Param('profileId') profileId: string,
+    @Param('storyId') storyId: string,
+    @Req() req,
   ) {
-    return this.blogService.deleteBlog(profileId, blogId);
+    return this.blogService.deleteBlog(req.user.profileId, storyId);
   }
 
-  @Patch(':profileId/:blogId')
-  @ApiOperation({ summary: 'Update a blog' })
+  @Patch(':storyId')
+  @ApiOperation({ summary: 'Update a story' })
   updateBlog(
-    @Param('profileId') profileId: string,
-    @Param('blogId') blogId: string,
+    @Req() req,
+    // @Param('profileId') profileId: string,
+    @Param('storyId') storyId: string,
     @Body() dto: UpdateBlogDto,
   ) {
-    return this.blogService.updateBlog(profileId, blogId, dto);
+    return this.blogService.updateBlog(req.user.profileId, storyId, dto);
   }
 
-  @Patch('upload/:blogId/:profileId')
-  @ApiOperation({ summary: 'Upload an image to a blog' })
+  @Patch('upload/:storyId')
+  @ApiOperation({ summary: 'Upload an image to a story' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -79,8 +82,9 @@ export class BlogController {
   })
   @UseInterceptors(FileInterceptor('file'))
   uploadImageToAlbum(
-    @Param('blogId') blogId: string,
-    @Param('profileId') profileId: string,
+    @Param('storyId') storyId: string,
+    // @Param('profileId') profileId: string,
+    @Req() req,
     @UploadedFile(
       new ParseFilePipe({
         validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
@@ -88,6 +92,6 @@ export class BlogController {
     )
     file: Express.Multer.File,
   ) {
-    return this.blogService.addImageToBlog(blogId, profileId, file);
+    return this.blogService.addImageToBlog(storyId, req.user.profileId, file);
   }
 }
