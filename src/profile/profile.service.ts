@@ -31,115 +31,6 @@ export class ProfileService {
     return await this.prisma.profile.findFirst({ where: { id: id } });
   };
 
-  // async createArtistProfile(dto: CreateProfileDto) {
-  //   try {
-  //     // check if user exists
-  //     const userExists = await this.prisma.user.findFirst({
-  //       where: { id: dto.userId },
-  //     });
-  //     if (!userExists) {
-  //       throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
-  //     }
-
-  //     // chech if profile already exists
-  //     const profileExists = await this.prisma.profile.findFirst({
-  //       where: { userId: dto.userId },
-  //     });
-  //     if (profileExists) {
-  //       throw new HttpException(
-  //         'Profile already exists',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-
-  //     // create user
-  //     const profile = await this.prisma.profile.create({
-  //       data: {
-  //         firstName: dto.lastName,
-  //         lastName: dto.firstName,
-  //         mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
-  //         userId: dto.userId,
-  //         email: userExists.email,
-  //         // : 'ARTIST',
-  //       },
-  //     });
-
-  //     return {
-  //       statusCode: HttpStatus.CREATED,
-  //       message: {
-  //         profileId: profile.id,
-  //         userId: profile.userId,
-  //         firstName: profile.firstName,
-  //         lastName: profile.lastName,
-  //         mobileNumber: profile.mobileNumber,
-  //       },
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw new HttpException(
-  //       error.message,
-  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
-
-  // /**
-  //  *
-  //  * @param dto :create profile dto
-  //  * @param userId : user id
-  //  * @returns : status code and profile data
-  //  */
-  // async createProfile(dto: CreateProfileDto): Promise<ApiResponse> {
-  //   try {
-  //     // check if user exists
-  //     const userExists = await this.prisma.user.findFirst({
-  //       where: { id: dto.userId },
-  //     });
-  //     if (!userExists) {
-  //       throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
-  //     }
-
-  //     // chech if profile already exists
-  //     const profileExists = await this.prisma.profile.findFirst({
-  //       where: { userId: dto.userId },
-  //     });
-  //     if (profileExists) {
-  //       throw new HttpException(
-  //         'Profile already exists',
-  //         HttpStatus.INTERNAL_SERVER_ERROR,
-  //       );
-  //     }
-
-  //     // create user
-  //     const profile = await this.prisma.profile.create({
-  //       data: {
-  //         firstName: dto.lastName,
-  //         lastName: dto.firstName,
-  //         mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
-  //         userId: dto.userId,
-  //         email: userExists.email,
-  //       },
-  //     });
-
-  //     return {
-  //       statusCode: HttpStatus.CREATED,
-  //       data: {
-  //         profileId: profile.id,
-  //         userId: profile.userId,
-  //         firstName: profile.firstName,
-  //         lastName: profile.lastName,
-  //         mobileNumber: profile.mobileNumber,
-  //       },
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw new HttpException(
-  //       error.message,
-  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
-
   /**
    * update profile
    * @param dto : update profile dto
@@ -180,30 +71,24 @@ export class ProfileService {
         );
       }
 
-      // change mobile verification status to false if new mobile number is provided
-      if (dto.mobileNumber) {
-        await this.prisma.profile.update({
-          where: { id: profileId },
-          data: {
-            isMobileNumberVerified: false,
-            name: dto.name,
-            profilePicUri: dto.profilePicUri,
-            mobileNumber: this.util.parseMobileNumber(dto.mobileNumber),
-          },
-        });
-
-        return {
-          statusCode: HttpStatus.OK,
-          message: 'Profile updated',
-        };
-      }
-
       //update profile
       await this.prisma.profile.update({
         where: { id: profileId },
         data: {
           name: dto.name,
+          mobileNumber: dto.mobileNumber
+            ? this.util.parseMobileNumber(dto.mobileNumber)
+            : profileExists.mobileNumber,
+          isMobileNumberVerified: dto.mobileNumber
+            ? false
+            : profileExists.isMobileNumberVerified,
           profilePicUri: dto.profilePicUri,
+          briefBio: dto.briefBio,
+          websiteLink: dto.websiteLink,
+          socialMediaHandle: dto.socialMediaHandle,
+          bank: dto.bank,
+          accountName: dto.accountName,
+          accountNumber: dto.accountNumber,
         },
       });
 
