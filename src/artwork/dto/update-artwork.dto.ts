@@ -12,16 +12,12 @@ export class UpdateArtworkDto {
   @IsOptional()
   description: string;
 
+  @IsString()
   @ApiProperty()
   @IsOptional()
-  quantity: number;
+  category: string;
 
   @ApiProperty()
   @IsOptional()
   price: number;
-
-  @IsString()
-  @ApiProperty()
-  @IsOptional()
-  artistFullName: string;
 }
