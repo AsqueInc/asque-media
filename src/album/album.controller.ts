@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -46,13 +47,14 @@ export class AlbumController {
     return this.albumService.getAlbumDetailsByArtworkId(artworkId);
   }
 
-  @Get('profile/:profileId')
-  @ApiOperation({ summary: 'Get all albums created by a profile by profileId' })
+  @Get('own')
+  @ApiOperation({ summary: 'Get all albums created by a profile' })
   getAllAlbumsByProfileId(
-    @Param('ProfileId') profileId: string,
+    @Req() req,
+    // @Param('ProfileId') profileId: string,
     @Query() dto: PaginationDto,
   ) {
-    return this.albumService.getAllAlbumsByProfileId(profileId, dto);
+    return this.albumService.getAllAlbumsByProfileId(req.user.profileId, dto);
   }
 
   @Delete(':albumId/:profileId')

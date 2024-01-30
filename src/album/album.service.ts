@@ -25,7 +25,7 @@ export class AlbumService {
     try {
       const album = await this.prisma.album.findFirst({
         where: { id: albumId },
-        include: { artwork: true },
+        include: { profile: { select: { name: true } } },
       });
 
       if (!album) {
