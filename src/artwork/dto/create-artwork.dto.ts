@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { SaleType } from '@prisma/client';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateArtworkDto {
   @IsString()
@@ -10,10 +11,15 @@ export class CreateArtworkDto {
   @IsString()
   @ApiProperty()
   @IsNotEmpty()
+  category: string;
+
+  @IsString()
+  @ApiProperty()
+  @IsOptional()
   description: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   quantity: number;
 
   @ApiProperty()
@@ -22,11 +28,11 @@ export class CreateArtworkDto {
 
   @IsString()
   @ApiProperty()
-  @IsNotEmpty()
-  artistProfileId: string;
+  @IsOptional()
+  saleType: SaleType;
 
   @IsString()
   @ApiProperty()
-  @IsNotEmpty()
-  fullName: string;
+  @IsOptional()
+  imageUris: string[];
 }
