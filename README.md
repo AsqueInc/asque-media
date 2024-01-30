@@ -18,6 +18,10 @@ African Americans, post first generation immigrants, and everone with a demonstr
 - [Prisma](https://www.prisma.io/) easy to integrate into your framework of choice, Prisma simplifies database access, saves repetitive CRUD boilerplate and increases type safety. Its the perfect companion for building production-grade, robust and scalable web applications.
 - [Postgres](https://www.postgresql.org/) is a powerful, open source object-relational database system with over 35 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance.
 
+## Todo
+
+- Create an endpoint to update images
+
 ## Installation
 
 ```bash
