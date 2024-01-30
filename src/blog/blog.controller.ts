@@ -12,6 +12,7 @@ import {
   ParseFilePipe,
   FileTypeValidator,
   Req,
+  Query,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import {
@@ -24,6 +25,7 @@ import {
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { PaginationDto } from 'src/category/dto/pagination.dto';
 
 @UseGuards(JwtGuard)
 @ApiSecurity('JWT-auth')
@@ -44,10 +46,14 @@ export class BlogController {
     return this.blogService.createBlog(dto, req.user.profileId);
   }
 
-  @Get('user/:profileId')
-  @ApiOperation({ summary: 'Get all stories by a user' })
-  getAllUserBlogs(@Param('profileId') profileId: string) {
-    return this.blogService.getAllUserBlogs(profileId);
+  @Get('own')
+  @ApiOperation({ summary: 'Get all stories by a profile' })
+  getAllUserBlogs(
+    @Req() req,
+    @Query() dto: PaginationDto,
+    // @Param('profileId') profileId: string
+  ) {
+    return this.blogService.getAllUserBlogs(req.user.profileId, dto);
   }
 
   @Delete(':storyId')
