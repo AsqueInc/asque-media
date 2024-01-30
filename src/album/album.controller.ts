@@ -41,12 +41,6 @@ export class AlbumController {
     return this.albumService.getAlbumDetailsById(albumId);
   }
 
-  @Get('artwork/:artworkId')
-  @ApiOperation({ summary: 'Get details of an album by artwork id' })
-  getAlbumDetailsByArtworkId(@Param('artworkId') artworkId: string) {
-    return this.albumService.getAlbumDetailsByArtworkId(artworkId);
-  }
-
   @Get('own')
   @ApiOperation({ summary: 'Get all albums created by a profile' })
   getAllAlbumsByProfileId(
@@ -68,8 +62,8 @@ export class AlbumController {
 
   @Post()
   @ApiOperation({ summary: 'Create an album for an artwork' })
-  createAlbum(@Body() dto: CreateAlbumDto) {
-    return this.albumService.createAlbum(dto);
+  createAlbum(@Body() dto: CreateAlbumDto, @Req() req) {
+    return this.albumService.createAlbum(dto, req.user.profileId);
   }
 
   @Patch('upload/:albumId/:profileId')
