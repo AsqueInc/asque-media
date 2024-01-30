@@ -118,26 +118,28 @@ model ArtWork {
   id                String    @id @default(uuid())
   title             String
   description       String?
-  quantity          Int
+  quantity          Int?
   price             Decimal
+  saleType          SaleType  
   imageUris         String[]
   artistProfile     Profile  @relation(fields: [artistProfileId], references: [id])
   artistProfileId   String
-  artistName        String
   review            Review[]
   orderItem         Order_Item[]
-  // album             Album?
-  category          String[]
+  category          String
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+enum SaleType {
+  ORIGINAL
+  PRINT
 }
 
 model Album {
   id                String      @id @default(uuid())
   title             String
-  category          String[]
-  // artworkId         String      @unique
-  // artwork           ArtWork     @relation(fields: [artworkId], references: [id])
+  category          String
   profileId         String      @unique
   profile           Profile     @relation(fields: [profileId], references: [id])
   albumImageUris    String[]
@@ -193,6 +195,23 @@ model Payment {
   transactionTime   DateTime  @default(now())
   order             Order  @relation(fields: [orderId], references: [id])  
   orderId           String  @unique
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Transfer {
+  id                String    @id @default(uuid())
+  amount            Decimal
+  transactionId     String
+  payeeEmail        String?
+  accountName       String
+  bankName          String
+  bankCode          String
+  type              String
+  reference         String
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
 }
 
 enum OrderStatus {
