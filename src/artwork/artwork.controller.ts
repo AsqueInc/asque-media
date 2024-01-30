@@ -52,35 +52,40 @@ export class ArtworkController {
 
   @Post('')
   @ApiOperation({ summary: 'Create an artwork' })
-  createArtwork(@Body() dto: CreateArtworkDto) {
-    return this.artWorkService.createArtwork(dto);
+  createArtwork(@Body() dto: CreateArtworkDto, @Req() req) {
+    return this.artWorkService.createArtwork(dto, req.user.profileId);
   }
 
-  @Patch(':artworkId/:profileId')
+  @Patch(':artworkId')
   @ApiOperation({ summary: 'Update artwork details' })
   updateArtWork(
     @Param('artworkId') artworkId: string,
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
     @Body() dto: UpdateArtworkDto,
+    @Req() req,
   ) {
-    return this.artWorkService.updateArtWork(artworkId, profileId, dto);
-  }
-
-  @Post(':artworkId/:profileId/:repositoryId')
-  @ApiOperation({ summary: 'Add artwork to a repository' })
-  addArtworkToRepository(
-    @Param('artworkId') artworkId: string,
-    @Param('profileId') profileId: string,
-    @Param('repositoryId') repositoryId: string,
-  ) {
-    return this.artWorkService.addArtworkToRepository(
+    return this.artWorkService.updateArtWork(
       artworkId,
-      profileId,
-      repositoryId,
+      req.user.profileId,
+      dto,
     );
   }
 
-  @Patch(':profileId/:artworkId/:artworkNumber')
+  // @Post(':artworkId/:profileId/:repositoryId')
+  // @ApiOperation({ summary: 'Add artwork to a repository' })
+  // addArtworkToRepository(
+  //   @Param('artworkId') artworkId: string,
+  //   @Param('profileId') profileId: string,
+  //   @Param('repositoryId') repositoryId: string,
+  // ) {
+  //   return this.artWorkService.addArtworkToRepository(
+  //     artworkId,
+  //     profileId,
+  //     repositoryId,
+  //   );
+  // }
+
+  @Patch('image/upload/:artworkId')
   @ApiOperation({ summary: 'Upload artwork images' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -91,8 +96,9 @@ export class ArtworkController {
   })
   @UseInterceptors(FileInterceptor('file'))
   uploadArtWorkImage(
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
     @Param('artworkId') artworkId: string,
+    @Req() req,
     @UploadedFile(
       new ParseFilePipe({
         validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
@@ -100,6 +106,10 @@ export class ArtworkController {
     )
     file: Express.Multer.File,
   ) {
-    return this.artWorkService.uploadArtWorkImage(profileId, artworkId, file);
+    return this.artWorkService.uploadArtWorkImage(
+      req.user.profileId,
+      artworkId,
+      file,
+    );
   }
 }
