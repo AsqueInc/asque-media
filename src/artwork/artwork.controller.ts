@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -39,13 +40,14 @@ export class ArtworkController {
     return this.artWorkService.getSingleArtWorkById(artworkId);
   }
 
-  @Get('profile/:profileId')
+  @Get('own')
   @ApiOperation({ summary: 'Get all artwork produced by a user' })
   getAllArtworkByUser(
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
     @Query() dto: PaginationDto,
+    @Req() req,
   ) {
-    return this.artWorkService.getAllArtworkByUser(profileId, dto);
+    return this.artWorkService.getAllArtworkByUser(req.user.profileId, dto);
   }
 
   @Post('')
