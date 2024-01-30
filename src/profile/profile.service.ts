@@ -11,6 +11,8 @@ import { ApiResponse } from 'src/types/response.type';
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { MessageService } from 'src/utils/message.service';
+import { PaymentService } from 'src/payment/payment.service';
+import { WithdrawReferralEarningDto } from './dto/withdraw-referral-earning.dto';
 
 @Injectable()
 export class ProfileService {
@@ -20,6 +22,7 @@ export class ProfileService {
     private util: UtilService,
     private messageSerive: MessageService,
     private cloudinary: CloudinaryService,
+    private paymentService: PaymentService,
   ) {}
 
   /**
@@ -287,5 +290,45 @@ export class ProfileService {
       error.message,
       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
     );
+  }
+
+  async withdrawReferralEarning(
+    profileId: string,
+    dto: WithdrawReferralEarningDto,
+  ) {
+    try {
+      const profile = await this.prisma.profile.findFirst({
+        where: { id: profileId },
+        include: {
+          user: {
+            select: { referral: true },
+          },
+        },
+      });
+
+      if (dto.amount > Number(profile.user.referral.balance)) {
+        throw new HttpException(
+          `Balnance too low. You can only withdraw ${profile.user.referral.balance}`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const transferResponse = await this.paymentService.transferMoney(
+        dto.recipientAccountNumber,
+        dto.bankCode,
+        dto.amount,
+        'Referral earning withdrawal',
+        profile.name,
+        profile.userEmail,
+      );
+
+      return { statusCode: HttpStatus.OK, data: transferResponse };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }
