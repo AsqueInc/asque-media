@@ -26,6 +26,7 @@ import { RequestMobileVerificationDto } from './dto/request-mobile-verification.
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { WithdrawReferralEarningDto } from './dto/withdraw-referral-earning.dto';
 
 @ApiTags('profile-endpoints')
 @UseGuards(JwtGuard)
@@ -104,5 +105,11 @@ export class ProfileController {
     // @Param('userId') userId: string
   ) {
     return this.profileService.getProfileByUserId(req.user.userId);
+  }
+
+  @Post('withdraw-referral-earning')
+  @ApiOperation({ summary: 'Withdraw referral earning' })
+  withdrawReferralEarning(@Body() dto: WithdrawReferralEarningDto, @Req() req) {
+    return this.profileService.withdrawReferralEarning(req.user.profileId, dto);
   }
 }
