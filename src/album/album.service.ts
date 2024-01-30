@@ -50,32 +50,32 @@ export class AlbumService {
    * @param artWorkId : artworkId of album
    * @returns : status code and album details
    */
-  async getAlbumDetailsByArtworkId(artWorkId: string): Promise<ApiResponse> {
-    try {
-      const album = await this.prisma.album.findFirst({
-        where: { artworkId: artWorkId },
-        include: { artwork: true },
-      });
+  // async getAlbumDetailsByArtworkId(artWorkId: string): Promise<ApiResponse> {
+  //   try {
+  //     const album = await this.prisma.album.findFirst({
+  //       where: { artworkId: artWorkId },
+  //       include: { artwork: true },
+  //     });
 
-      if (!album) {
-        throw new HttpException(
-          'An album has not been created for this artwork',
-          HttpStatus.NOT_FOUND,
-        );
-      }
+  //     if (!album) {
+  //       throw new HttpException(
+  //         'An album has not been created for this artwork',
+  //         HttpStatus.NOT_FOUND,
+  //       );
+  //     }
 
-      return {
-        statusCode: HttpStatus.OK,
-        data: album,
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //     return {
+  //       statusCode: HttpStatus.OK,
+  //       data: album,
+  //     };
+  //   } catch (error) {
+  //     this.logger.error(error);
+  //     throw new HttpException(
+  //       error.message,
+  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   /**
    * get all albums posted by a profile via profile id
@@ -92,7 +92,7 @@ export class AlbumService {
 
       const albums = await this.prisma.album.findMany({
         where: { profileId: profileId },
-        include: { profile: true, artwork: true },
+        include: { profile: { select: { name: true, briefBio: true } } },
         skip: skip,
       });
 
@@ -125,6 +125,11 @@ export class AlbumService {
    */
   async deleteAlbum(albumId: string, profileId: string): Promise<ApiResponse> {
     try {
+      const profile = await this.prisma.profile.findFirst({
+        where: { id: profileId },
+        include: { user: { select: { role: true } } },
+      });
+
       const album = await this.prisma.album.findFirst({
         where: { id: albumId },
       });
@@ -134,19 +139,19 @@ export class AlbumService {
       }
 
       // ensure only owner of album can delete album
-      if (album.profileId !== profileId) {
-        throw new HttpException(
-          'You cannot delete an album you did not create',
-          HttpStatus.UNAUTHORIZED,
-        );
+      if (album.profileId === profileId || profile.user.role === 'ADMIN') {
+        await this.prisma.album.delete({ where: { id: albumId } });
+
+        return {
+          statusCode: HttpStatus.OK,
+          message: 'Album deleted',
+        };
       }
 
-      await this.prisma.album.delete({ where: { id: albumId } });
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Album deleted',
-      };
+      throw new HttpException(
+        'You cannot delete an album you did not create',
+        HttpStatus.UNAUTHORIZED,
+      );
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -161,25 +166,23 @@ export class AlbumService {
    * @param dto : create album dto
    * @returns : status code and album details
    */
-  async createAlbum(dto: CreateAlbumDto): Promise<ApiResponse> {
+  async createAlbum(
+    dto: CreateAlbumDto,
+    profileId: string,
+  ): Promise<ApiResponse> {
     try {
-      const artwork = await this.prisma.artWork.findFirst({
-        where: { id: dto.artworkId },
-      });
-
-      if (!artwork) {
-        throw new HttpException('Artwork does not exist', HttpStatus.NOT_FOUND);
-      }
-
-      if (artwork.artistProfileId !== dto.profileId) {
-        throw new HttpException(
-          'Only the owner of an artwork can create an album',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
       const album = await this.prisma.album.create({
-        data: { artworkId: dto.artworkId, profileId: dto.profileId },
+        data: {
+          title: dto.title,
+          category: dto.category,
+          description: dto.description,
+          albumImageUris: dto.albumImageUris,
+          profile: {
+            connect: {
+              id: profileId,
+            },
+          },
+        },
       });
 
       return {
