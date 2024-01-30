@@ -21,16 +21,25 @@ export class ArtworkService {
    * @param dto : create artwork dto
    * @returns : status code and artork object
    */
-  async createArtwork(dto: CreateArtworkDto): Promise<ApiResponse> {
+  async createArtwork(
+    dto: CreateArtworkDto,
+    profileId: string,
+  ): Promise<ApiResponse> {
     try {
       const artwork = await this.prisma.artWork.create({
         data: {
           title: dto.title,
+          artistProfile: {
+            connect: {
+              id: profileId,
+            },
+          },
           description: dto.description,
-          quantity: dto.quantity,
           price: dto.price,
-          artistProfileId: dto.artistProfileId,
-          artistName: dto.fullName,
+          saleType: dto.saleType,
+          quantity: dto.saleType == 'ORIGINAL' ? 0 : dto.quantity,
+          imageUris: dto.imageUris,
+          category: dto.category,
         },
       });
 
@@ -76,9 +85,8 @@ export class ArtworkService {
         data: {
           title: dto.title,
           description: dto.description,
-          quantity: dto.quantity,
-          artistName: dto.artistFullName,
           price: dto.price,
+          category: dto.category,
         },
       });
       return {
@@ -170,39 +178,39 @@ export class ArtworkService {
    * @param repositoryId : id of repository
    * @returns : status code and message
    */
-  async addArtworkToRepository(
-    artworkId: string,
-    profileId: string,
-    repositoryId: string,
-  ) {
-    try {
-      // check is user owns the artwork
-      const artWork = await this.prisma.artWork.findFirst({
-        where: { id: artworkId },
-      });
+  // async addArtworkToRepository(
+  //   artworkId: string,
+  //   profileId: string,
+  //   repositoryId: string,
+  // ) {
+  //   try {
+  //     // check is user owns the artwork
+  //     const artWork = await this.prisma.artWork.findFirst({
+  //       where: { id: artworkId },
+  //     });
 
-      if (artWork.artistProfileId !== profileId) {
-        throw new HttpException(
-          'You can only add an artwork you own to a repository',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
+  //     if (artWork.artistProfileId !== profileId) {
+  //       throw new HttpException(
+  //         'You can only add an artwork you own to a repository',
+  //         HttpStatus.UNAUTHORIZED,
+  //       );
+  //     }
 
-      await this.prisma.artWork_Repository.create({
-        data: { artwork_id: artworkId, repository_id: repositoryId },
-      });
+  //     await this.prisma.artWork_Repository.create({
+  //       data: { artwork_id: artworkId, repository_id: repositoryId },
+  //     });
 
-      return {
-        statusCode: HttpStatus.CREATED,
-        message: { data: 'Artwork added to repository' },
-      };
-    } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //     return {
+  //       statusCode: HttpStatus.CREATED,
+  //       message: { data: 'Artwork added to repository' },
+  //     };
+  //   } catch (error) {
+  //     throw new HttpException(
+  //       error.message,
+  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   /**
    * upload artwork image
