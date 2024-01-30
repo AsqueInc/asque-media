@@ -24,7 +24,7 @@ export class RepositoryService {
    */
   async getAllAvailableRepositories() {
     try {
-      const repositories = await this.prisma.repository.findMany();
+      const repositories = await this.prisma.category.findMany();
       return {
         statusCode: HttpStatus.OK,
         message: { data: repositories },
@@ -53,15 +53,15 @@ export class RepositoryService {
       const user = await this.prisma.user.findFirst({
         where: { id: userId },
       });
-      if (user.isAdmin !== true) {
+      if (user.role !== 'ADMIN') {
         throw new HttpException(
-          'Only admins can create repositories',
+          'Only admins can create categories',
           HttpStatus.UNAUTHORIZED,
         );
       }
 
       // create repository
-      const repository = await this.prisma.repository.create({
+      const repository = await this.prisma.category.create({
         data: { title: dto.name, description: dto.detail },
       });
 
@@ -92,7 +92,7 @@ export class RepositoryService {
       const user = await this.prisma.user.findFirst({
         where: { id: userId },
       });
-      if (user.isAdmin !== true) {
+      if (user.role !== 'ADMIN') {
         throw new HttpException(
           'Only admins can update repositories',
           HttpStatus.UNAUTHORIZED,
@@ -100,7 +100,7 @@ export class RepositoryService {
       }
 
       // update repository
-      const updatedRepository = await this.prisma.repository.update({
+      const updatedRepository = await this.prisma.category.update({
         where: { id: repositoryId },
         data: { title: dto.name, description: dto.detail },
       });
@@ -128,19 +128,19 @@ export class RepositoryService {
     try {
       const skip = (dto.page - 1) * dto.pageSize;
       // check if repository exists
-      const repositoryExists = await this.prisma.repository.findFirst({
+      const repositoryExists = await this.prisma.category.findFirst({
         where: { id: repositoryId },
       });
       if (!repositoryExists) {
         throw new HttpException(
-          'Repository does not exist',
+          'Category does not exist',
           HttpStatus.NOT_FOUND,
         );
       }
 
       // find all artwork in the repository
-      const results = await this.prisma.artWork_Repository.findMany({
-        where: { repository_id: repositoryId },
+      const results = await this.prisma.artWork.findMany({
+        where: { category: repositoryExists.title },
         skip: skip,
       });
 
@@ -173,12 +173,12 @@ export class RepositoryService {
   async getRepositoryDetails(repositoryId: string): Promise<ApiResponse> {
     try {
       // check if repository exists
-      const repositoryExists = await this.prisma.repository.findFirst({
+      const repositoryExists = await this.prisma.category.findFirst({
         where: { id: repositoryId },
       });
       if (!repositoryExists) {
         throw new HttpException(
-          'Repository does not exist',
+          'Category does not exist',
           HttpStatus.NOT_FOUND,
         );
       }
