@@ -4,6 +4,7 @@ import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { PaginationDto } from 'src/category/dto/pagination.dto';
 
 @Injectable()
 export class BlogService {
@@ -40,15 +41,25 @@ export class BlogService {
     }
   }
 
-  async getAllUserBlogs(profileId: string) {
+  async getAllUserBlogs(profileId: string, dto: PaginationDto) {
     try {
+      const skip = (dto.page - 1) * dto.pageSize;
+
       const blogs = await this.prisma.story.findMany({
         where: { profileId: profileId },
+        skip: skip,
       });
+
+      const totalRecords = blogs.length;
 
       return {
         statusCode: HttpStatus.OK,
-        message: { blogs },
+        data: {
+          blogs,
+          pageSize: dto.pageSize,
+          currentPage: dto.page,
+          totalRecord: totalRecords,
+        },
       };
     } catch (error) {
       this.logger.error(error);
