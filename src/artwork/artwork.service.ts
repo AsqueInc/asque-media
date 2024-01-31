@@ -26,6 +26,18 @@ export class ArtworkService {
     profileId: string,
   ): Promise<ApiResponse> {
     try {
+      const profile = await this.prisma.profile.findFirst({
+        where: { id: profileId },
+        include: { user: { select: { role: true } } },
+      });
+
+      if (profile.user.role !== 'ARTIST') {
+        throw new HttpException(
+          'Only artists can create artwork',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
       const artwork = await this.prisma.artWork.create({
         data: {
           title: dto.title,
@@ -114,10 +126,7 @@ export class ArtworkService {
       });
 
       if (!artWork) {
-        throw new HttpException(
-          'Artwork does not have any published artwork',
-          HttpStatus.NOT_FOUND,
-        );
+        throw new HttpException('Artwork not found', HttpStatus.NOT_FOUND);
       }
 
       return {
