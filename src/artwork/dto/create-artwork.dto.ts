@@ -31,7 +31,6 @@ export class CreateArtworkDto {
   @IsOptional()
   saleType: SaleType;
 
-  @IsString()
   @ApiProperty()
   @IsOptional()
   imageUris: string[];
