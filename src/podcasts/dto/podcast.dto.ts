@@ -11,9 +11,4 @@ export class PodcastDto {
   @ApiProperty()
   @IsNotEmpty()
   description: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  profileId: string;
 }
