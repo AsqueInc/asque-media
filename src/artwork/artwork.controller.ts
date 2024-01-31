@@ -1,22 +1,22 @@
 import {
   Body,
   Controller,
-  FileTypeValidator,
+  // FileTypeValidator,
   Get,
   Param,
-  ParseFilePipe,
+  // ParseFilePipe,
   Patch,
   Post,
   Query,
   Req,
-  UploadedFile,
+  // UploadedFile,
   UseGuards,
-  UseInterceptors,
+  // UseInterceptors,
 } from '@nestjs/common';
 import { ArtworkService } from './artwork.service';
 import {
-  ApiBody,
-  ApiConsumes,
+  // ApiBody,
+  // ApiConsumes,
   ApiOperation,
   ApiSecurity,
   ApiTags,
@@ -25,7 +25,7 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { CreateArtworkDto } from './dto/create-artwork.dto';
 import { UpdateArtworkDto } from './dto/update-artwork.dto';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+// import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('artwork-endpoints')
 @UseGuards(JwtGuard)
@@ -85,31 +85,31 @@ export class ArtworkController {
   //   );
   // }
 
-  @Patch('image/upload/:artworkId')
-  @ApiOperation({ summary: 'Upload artwork images' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
-    },
-  })
-  @UseInterceptors(FileInterceptor('file'))
-  uploadArtWorkImage(
-    // @Param('profileId') profileId: string,
-    @Param('artworkId') artworkId: string,
-    @Req() req,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    return this.artWorkService.uploadArtWorkImage(
-      req.user.profileId,
-      artworkId,
-      file,
-    );
-  }
+  // @Patch('image/upload/:artworkId')
+  // @ApiOperation({ summary: 'Upload artwork images' })
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: { file: { type: 'string', format: 'binary' } },
+  //   },
+  // })
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadArtWorkImage(
+  //   // @Param('profileId') profileId: string,
+  //   @Param('artworkId') artworkId: string,
+  //   @Req() req,
+  //   @UploadedFile(
+  //     new ParseFilePipe({
+  //       validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
+  //     }),
+  //   )
+  //   file: Express.Multer.File,
+  // ) {
+  //   return this.artWorkService.uploadArtWorkImage(
+  //     req.user.profileId,
+  //     artworkId,
+  //     file,
+  //   );
+  // }
 }

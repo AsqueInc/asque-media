@@ -228,53 +228,53 @@ export class ArtworkService {
    * @param file : image to be uploaded
    * @returns : status code and message
    */
-  async uploadArtWorkImage(
-    profileId: string,
-    artworkId: string,
-    file: Express.Multer.File,
-  ) {
-    try {
-      // check is user owns the artwork
-      const artWork = await this.prisma.artWork.findFirst({
-        where: { id: artworkId },
-      });
+  // async uploadArtWorkImage(
+  //   profileId: string,
+  //   artworkId: string,
+  //   file: Express.Multer.File,
+  // ) {
+  //   try {
+  //     // check is user owns the artwork
+  //     const artWork = await this.prisma.artWork.findFirst({
+  //       where: { id: artworkId },
+  //     });
 
-      if (artWork.artistProfileId !== profileId) {
-        throw new HttpException(
-          'You cannot upload images to a profile you do not own',
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
+  //     if (artWork.artistProfileId !== profileId) {
+  //       throw new HttpException(
+  //         'You cannot upload images to a profile you do not own',
+  //         HttpStatus.UNAUTHORIZED,
+  //       );
+  //     }
 
-      if (artWork.imageUris.length >= 5) {
-        throw new HttpException(
-          'You cannot upload more than 5 images to an album',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+  //     if (artWork.imageUris.length >= 5) {
+  //       throw new HttpException(
+  //         'You cannot upload more than 5 images to an album',
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //     }
 
-      // upload image of artwork
-      const uploadedImage = await this.cloudinary.uploadImage(file);
+  //     // upload image of artwork
+  //     const uploadedImage = await this.cloudinary.uploadImage(file);
 
-      // get image url and push to image uri list
-      const imageUris = artWork.imageUris;
+  //     // get image url and push to image uri list
+  //     const imageUris = artWork.imageUris;
 
-      imageUris.push(uploadedImage.url);
+  //     imageUris.push(uploadedImage.url);
 
-      await this.prisma.artWork.update({
-        where: { id: artworkId },
-        data: { imageUris: imageUris },
-      });
-      return {
-        statusCode: HttpStatus.OK,
-        message: { data: 'Artwork image added' },
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //     await this.prisma.artWork.update({
+  //       where: { id: artworkId },
+  //       data: { imageUris: imageUris },
+  //     });
+  //     return {
+  //       statusCode: HttpStatus.OK,
+  //       message: { data: 'Artwork image added' },
+  //     };
+  //   } catch (error) {
+  //     this.logger.error(error);
+  //     throw new HttpException(
+  //       error.message,
+  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 }

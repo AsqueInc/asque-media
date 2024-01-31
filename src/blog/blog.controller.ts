@@ -7,24 +7,24 @@ import {
   Delete,
   Patch,
   UseGuards,
-  UseInterceptors,
-  UploadedFile,
-  ParseFilePipe,
-  FileTypeValidator,
+  // UseInterceptors,
+  // UploadedFile,
+  // ParseFilePipe,
+  // FileTypeValidator,
   Req,
   Query,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import {
-  ApiBody,
-  ApiConsumes,
+  // ApiBody,
+  // ApiConsumes,
   ApiOperation,
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+// import { FileInterceptor } from '@nestjs/platform-express';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
 
 @UseGuards(JwtGuard)
@@ -77,27 +77,27 @@ export class BlogController {
     return this.blogService.updateBlog(req.user.profileId, storyId, dto);
   }
 
-  @Patch('upload/:storyId')
-  @ApiOperation({ summary: 'Upload an image to a story' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
-    },
-  })
-  @UseInterceptors(FileInterceptor('file'))
-  uploadImageToAlbum(
-    @Param('storyId') storyId: string,
-    // @Param('profileId') profileId: string,
-    @Req() req,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    return this.blogService.addImageToBlog(storyId, req.user.profileId, file);
-  }
+  // @Patch('upload/:storyId')
+  // @ApiOperation({ summary: 'Upload an image to a story' })
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: { file: { type: 'string', format: 'binary' } },
+  //   },
+  // })
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadImageToAlbum(
+  //   @Param('storyId') storyId: string,
+  //   // @Param('profileId') profileId: string,
+  //   @Req() req,
+  //   @UploadedFile(
+  //     new ParseFilePipe({
+  //       validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
+  //     }),
+  //   )
+  //   file: Express.Multer.File,
+  // ) {
+  //   return this.blogService.addImageToBlog(storyId, req.user.profileId, file);
+  // }
 }

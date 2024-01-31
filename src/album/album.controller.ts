@@ -2,21 +2,21 @@ import {
   Body,
   Controller,
   Delete,
-  FileTypeValidator,
+  // FileTypeValidator,
   Get,
   Param,
-  ParseFilePipe,
-  Patch,
+  // ParseFilePipe,
+  // Patch,
   Post,
   Query,
   Req,
-  UploadedFile,
+  // UploadedFile,
   UseGuards,
-  UseInterceptors,
+  // UseInterceptors,
 } from '@nestjs/common';
 import {
-  ApiBody,
-  ApiConsumes,
+  // ApiBody,
+  // ApiConsumes,
   ApiOperation,
   ApiSecurity,
   ApiTags,
@@ -25,7 +25,7 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { AlbumService } from './album.service';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+// import { FileInterceptor } from '@nestjs/platform-express';
 import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
 
 @ApiTags('album-endpoints')
@@ -66,33 +66,33 @@ export class AlbumController {
     return this.albumService.createAlbum(dto, req.user.profileId);
   }
 
-  @Patch('upload/:albumId')
-  @ApiOperation({ summary: 'Upload an image to an album' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: { file: { type: 'string', format: 'binary' } },
-    },
-  })
-  @UseInterceptors(FileInterceptor('file'))
-  uploadImageToAlbum(
-    @Param('albumId') albumId: string,
-    // @Param('profileId') profileId: string,
-    @Req() req,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    return this.albumService.uploadImageToAlbum(
-      albumId,
-      req.user.profileId,
-      file,
-    );
-  }
+  // @Patch('upload/:albumId')
+  // @ApiOperation({ summary: 'Upload an image to an album' })
+  // @ApiConsumes('multipart/form-data')
+  // @ApiBody({
+  //   schema: {
+  //     type: 'object',
+  //     properties: { file: { type: 'string', format: 'binary' } },
+  //   },
+  // })
+  // @UseInterceptors(FileInterceptor('file'))
+  // uploadImageToAlbum(
+  //   @Param('albumId') albumId: string,
+  //   // @Param('profileId') profileId: string,
+  //   @Req() req,
+  //   @UploadedFile(
+  //     new ParseFilePipe({
+  //       validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
+  //     }),
+  //   )
+  //   file: Express.Multer.File,
+  // ) {
+  //   return this.albumService.uploadImageToAlbum(
+  //     albumId,
+  //     req.user.profileId,
+  //     file,
+  //   );
+  // }
 
   @Delete('image/:albumId')
   @ApiOperation({ summary: 'Delete an album image ' })
