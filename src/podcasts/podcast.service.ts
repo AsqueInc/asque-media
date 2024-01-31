@@ -13,13 +13,13 @@ export class PodcastService {
     private cloudinary: CloudinaryService,
   ) {}
 
-  async createAudioPodcast(dto: PodcastDto) {
+  async createAudioPodcast(dto: PodcastDto, profileId: string) {
     try {
       const podcast = await this.prisma.podcast.create({
         data: {
           title: dto.title,
           description: dto.description,
-          profileId: dto.profileId,
+          profileId: profileId,
         },
       });
 
@@ -36,13 +36,13 @@ export class PodcastService {
     }
   }
 
-  async createVideoPodcast(dto: PodcastDto) {
+  async createVideoPodcast(dto: PodcastDto, profileId: string) {
     try {
       const video = await this.prisma.podcast.create({
         data: {
           title: dto.title,
           description: dto.description,
-          profileId: dto.profileId,
+          profileId: profileId,
           type: 'VIDEO',
         },
       });
