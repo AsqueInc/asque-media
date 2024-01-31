@@ -572,11 +572,15 @@ export class AuthService {
         );
       }
 
-      const payload = { sub: verifyToken.id, email: verifyToken.email };
+      const payload = {
+        userId: verifyToken.userId,
+        email: verifyToken.email,
+        profileId: verifyToken.profileId,
+      };
 
       // generate new access token
       const accessToken = await this.jwtService.signAsync(payload, {
-        expiresIn: '15m',
+        expiresIn: this.config.get('JWT_EXPIRES_IN'),
         secret: this.config.get('JWT_ACCESS_SECRET'),
       });
 
