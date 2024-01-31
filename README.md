@@ -20,7 +20,6 @@ African Americans, post first generation immigrants, and everone with a demonstr
 
 ## Todo
 
-- Create an endpoint to update images
 - Sign otp before storing in database
 
 ## Installation
