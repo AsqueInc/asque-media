@@ -19,13 +19,16 @@ export class ReviewsService {
    * @param dto : create review dto
    * @returns status code and review object
    */
-  async createReview(dto: CreateReviewDto): Promise<ApiResponse> {
+  async createReview(
+    dto: CreateReviewDto,
+    profileId: string,
+  ): Promise<ApiResponse> {
     try {
       const artwork = await this.prisma.artWork.findFirst({
         where: { id: dto.artworkId },
       });
 
-      if (artwork.artistProfileId === dto.profileId) {
+      if (artwork.artistProfileId === profileId) {
         throw new HttpException(
           'You cannot add a review to your own artwork',
           HttpStatus.UNAUTHORIZED,
@@ -35,7 +38,7 @@ export class ReviewsService {
         data: {
           comment: dto.comment,
           artworkId: dto.artworkId,
-          profileId: dto.profileId,
+          profileId: profileId,
           rating: dto.rating,
         },
       });
