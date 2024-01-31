@@ -43,39 +43,16 @@ export class ProfileService {
    */
   async updateProfile(
     dto: UpdateProfileDto,
-    userId: string,
     profileId: string,
   ): Promise<ApiResponse> {
     try {
-      // check if user exists
-      const userExists = await this.prisma.profile.findFirst({
-        where: { user: { id: userId } },
-      });
-      if (!userExists) {
-        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
-      }
-
-      // check if profile exists
+      // check profile details
       const profileExists = await this.prisma.profile.findFirst({
         where: { id: profileId },
-        include: { user: { select: { id: true } } },
       });
-      if (!profileExists) {
-        throw new HttpException(
-          'Profile does not exists',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      if (userExists.id !== profileExists.user.id) {
-        throw new HttpException(
-          'You can only update a profile that belongs to you',
-          HttpStatus.NOT_FOUND,
-        );
-      }
 
       //update profile
-      await this.prisma.profile.update({
+      const profile = await this.prisma.profile.update({
         where: { id: profileId },
         data: {
           name: dto.name,
@@ -98,6 +75,7 @@ export class ProfileService {
       return {
         statusCode: HttpStatus.OK,
         message: 'Profile updated',
+        data: profile,
       };
     } catch (error) {
       this.logger.error(error);
