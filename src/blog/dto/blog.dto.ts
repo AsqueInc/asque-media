@@ -10,6 +10,10 @@ export class CreateBlogDto {
   @ApiProperty()
   @IsNotEmpty()
   content: string;
+
+  @ApiProperty()
+  @IsOptional()
+  imageUris: string[];
 }
 
 export class UpdateBlogDto {
@@ -22,4 +26,8 @@ export class UpdateBlogDto {
   @IsOptional()
   @IsString()
   content: string;
+
+  @ApiProperty()
+  @IsOptional()
+  imageUris: string[];
 }
