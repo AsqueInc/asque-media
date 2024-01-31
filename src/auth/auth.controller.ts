@@ -97,13 +97,13 @@ export class AuthController {
 
   // @UseGuards(JwtGuard)
   // @ApiSecurity('JWT-auth')
-  @Post('refresh-access-token')
+  @Post('refresh-access-token/:userId')
   @ApiOperation({ summary: 'Refresh access token' })
   refreshAccessToken(
-    @Req() req,
-    // @Param('userId') userId: string
+    // @Req() req,
+    @Param('userId') userId: string,
   ) {
-    return this.authService.refreshAccessToken(req.user.userId);
+    return this.authService.refreshAccessToken(userId);
   }
 
   @Get('google')
