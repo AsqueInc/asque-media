@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
@@ -38,28 +39,30 @@ export class ReviewsController {
     return this.reviewService.getSingleReview(reviewId);
   }
 
-  @Delete(':reviewId/:profileId')
+  @Delete(':reviewId')
   @ApiOperation({ summary: 'Delete a review' })
   deleteReview(
     @Param('reviewId') reviewId: string,
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
+    @Req() req,
   ) {
-    return this.reviewService.deleteReview(reviewId, profileId);
+    return this.reviewService.deleteReview(reviewId, req.user.profileId);
   }
 
   @Post('')
   @ApiOperation({ summary: 'Create a review' })
-  createReview(@Body() dto: CreateReviewDto) {
-    return this.reviewService.createReview(dto);
+  createReview(@Body() dto: CreateReviewDto, @Req() req) {
+    return this.reviewService.createReview(dto, req.user.profileId);
   }
 
-  @Patch(':reviewId/:profileId')
+  @Patch(':reviewId')
   @ApiOperation({ summary: 'Update a review' })
   updateReview(
     @Body() dto: UpdateReviewDto,
     @Param('reviewId') reviewId: string,
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
+    @Req() req,
   ) {
-    return this.reviewService.updateReview(reviewId, profileId, dto);
+    return this.reviewService.updateReview(reviewId, req.user.profileId, dto);
   }
 }
