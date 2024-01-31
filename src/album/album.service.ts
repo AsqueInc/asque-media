@@ -45,6 +45,36 @@ export class AlbumService {
     }
   }
 
+  async getAllAlbums(dto: PaginationDto): Promise<ApiResponse> {
+    try {
+      const skip = (dto.page - 1) * dto.pageSize;
+
+      const albums = await this.prisma.album.findMany({
+        skip: skip,
+        orderBy: { createdAt: 'desc' },
+      });
+
+      // get length of result array
+      const totalRecords = albums.length;
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          currentPage: dto.page,
+          pageSize: dto.pageSize,
+          totalRecord: totalRecords,
+          data: albums,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   /**
    * get details of an album via artwork id
    * @param artWorkId : artworkId of album

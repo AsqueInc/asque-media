@@ -51,6 +51,15 @@ export class AlbumController {
     return this.albumService.getAllAlbumsByProfileId(req.user.profileId, dto);
   }
 
+  @Get('all')
+  @ApiOperation({ summary: 'Get all albums ' })
+  getAllAlbums(
+    // @Param('ProfileId') profileId: string,
+    @Query() dto: PaginationDto,
+  ) {
+    return this.albumService.getAllAlbums(dto);
+  }
+
   @Delete(':albumId/:profileId')
   @ApiOperation({ summary: 'Delete an album' })
   deleteAlbum(
