@@ -45,7 +45,7 @@ export class ProfileController {
   ) {
     return this.profileService.updateProfile(
       dto,
-      req.user.userId,
+      // req.user.userId,
       req.user.profileId,
     );
   }
