@@ -34,12 +34,6 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class ArtworkController {
   constructor(private readonly artWorkService: ArtworkService) {}
 
-  @Get(':artworkId')
-  @ApiOperation({ summary: 'Get a single artwork by id' })
-  getSingleArtWorkById(@Param('artworkId') artworkId: string) {
-    return this.artWorkService.getSingleArtWorkById(artworkId);
-  }
-
   @Get('own')
   @ApiOperation({ summary: 'Get all artwork produced by a user' })
   getAllArtworkByUser(
@@ -48,6 +42,12 @@ export class ArtworkController {
     @Req() req,
   ) {
     return this.artWorkService.getAllArtworkByUser(req.user.profileId, dto);
+  }
+
+  @Get(':artworkId')
+  @ApiOperation({ summary: 'Get a single artwork by id' })
+  getSingleArtWorkById(@Param('artworkId') artworkId: string) {
+    return this.artWorkService.getSingleArtWorkById(artworkId);
   }
 
   @Post('')
