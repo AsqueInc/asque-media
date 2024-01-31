@@ -20,4 +20,8 @@ export class UpdateArtworkDto {
   @ApiProperty()
   @IsOptional()
   price: number;
+
+  @ApiProperty()
+  @IsOptional()
+  imageUris: string[];
 }
