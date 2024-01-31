@@ -34,7 +34,7 @@ export class PaymentService {
       const response = await axios.post(
         'https://api.paystack.co/transaction/initialize',
         {
-          email: profile.email,
+          email: profile.userEmail,
           amount: dto.amount * 100,
           currency: 'NGN', // Nigerian Naira
         },
@@ -52,7 +52,7 @@ export class PaymentService {
       await this.prisma.payment.create({
         data: {
           transactionId: responseData.reference,
-          payeeEmail: profile.email,
+          payeeEmail: profile.userEmail,
           amount: dto.amount,
           payeeId: profile.id,
           orderId: dto.orderId,
@@ -118,6 +118,126 @@ export class PaymentService {
             statusCode: HttpStatus.OK,
             message: { message: 'Payment failed' },
           };
+      }
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * transfer funds
+   * @param recipientAccountNumber
+   * @param recipientBankCode
+   * @param amount
+   * @param reason
+   */
+  async transferMoney(
+    recipientAccountNumber: string,
+    recipientBankCode: string,
+    amount: number,
+    reason: string,
+    recipientName: string,
+    recipientEmail: string,
+  ) {
+    try {
+      // create transaction with paystack
+      const response = await axios.post(
+        'https://api.paystack.co/transfer',
+        {
+          source: 'balance',
+          reason: reason,
+          amount: amount,
+          recipient: {
+            type: 'nuban',
+            name: recipientName,
+            account_number: recipientAccountNumber,
+            bank_code: recipientBankCode,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.paystackApiKey}`,
+          },
+        },
+      );
+
+      // get response status
+      const status = response.data.event;
+
+      // get response details
+      const responseData = response.data.data;
+
+      switch (status) {
+        case 'transfer.success':
+          const transferDetails = await this.prisma.transfer.create({
+            data: {
+              amount: amount,
+              transactionId: responseData.id,
+              payeeEmail: recipientEmail,
+              accountName: responseData.recipient.details.account_name,
+              bankName: responseData.recipient.details.bank_name,
+              bankCode: recipientBankCode,
+              type: responseData.recipient.type,
+              reference: responseData.reference,
+            },
+          });
+
+          return {
+            statusCode: HttpStatus.OK,
+            message: 'Payment successful',
+            data: transferDetails,
+          };
+        case 'transfer.reversed':
+          return {
+            statusCode: HttpStatus.OK,
+            message: { message: 'Transfer reversed' },
+          };
+        case 'transfer.failed':
+          return {
+            statusCode: HttpStatus.OK,
+            message: { message: 'Payment failed' },
+          };
+      }
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getBanks() {
+    try {
+      // create transaction with paystack
+      const response = await axios.get(
+        `https://api.paystack.co/bank`,
+        // ?perPage=${dto.pageSize}
+
+        {
+          headers: {
+            Authorization: `Bearer ${this.paystackApiKey}`,
+          },
+        },
+      );
+
+      if ((response.data.data.status = true)) {
+        const returnedBankData = response.data.data;
+
+        const cleanedBankData = [];
+
+        returnedBankData.forEach((bank) => {
+          cleanedBankData.push({ bankName: bank.name, bankCode: bank.code });
+        });
+
+        return {
+          statusCode: HttpStatus.OK,
+          data: cleanedBankData,
+        };
       }
     } catch (error) {
       this.logger.error(error);
