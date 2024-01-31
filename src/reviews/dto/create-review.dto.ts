@@ -17,9 +17,4 @@ export class CreateReviewDto {
   @IsNotEmpty()
   @IsString()
   artworkId: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  profileId: string;
 }
