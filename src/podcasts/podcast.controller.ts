@@ -10,6 +10,7 @@ import {
   FileTypeValidator,
   UploadedFile,
   ParseFilePipe,
+  Req,
 } from '@nestjs/common';
 import {
   ApiBody,
@@ -32,14 +33,14 @@ export class PodcastController {
 
   @Post('audio')
   @ApiOperation({ summary: 'Create an audio podcast' })
-  createPodcast(@Body() dto: PodcastDto) {
-    return this.podcastService.createAudioPodcast(dto);
+  createPodcast(@Body() dto: PodcastDto, @Req() req) {
+    return this.podcastService.createAudioPodcast(dto, req.user.profileId);
   }
 
   @Post('video')
   @ApiOperation({ summary: 'Create a video podcast' })
-  createVideoPodcast(@Body() dto: PodcastDto) {
-    return this.podcastService.createVideoPodcast(dto);
+  createVideoPodcast(@Body() dto: PodcastDto, @Req() req) {
+    return this.podcastService.createVideoPodcast(dto, req.user.profileId);
   }
 
   @Get('audio/:audioId')
@@ -54,16 +55,16 @@ export class PodcastController {
     return this.podcastService.getVideoDetails(videoId);
   }
 
-  @Get('audio/profile/:profleId')
+  @Get('audio/profile')
   @ApiOperation({ summary: 'Get all podcasts by profile' })
-  getAllPodcastByProfile(@Param('profleId') profleId: string) {
-    return this.podcastService.getAllPodcastByProfile(profleId);
+  getAllPodcastByProfile(@Req() req) {
+    return this.podcastService.getAllPodcastByProfile(req.user.profleId);
   }
 
-  @Get('video/profile/:profleId')
+  @Get('video/profile')
   @ApiOperation({ summary: 'Get all videos by profile' })
-  getAllVideosByProfile(@Param('profleId') profleId: string) {
-    return this.podcastService.getAllVideosByProfile(profleId);
+  getAllVideosByProfile(@Req() req) {
+    return this.podcastService.getAllVideosByProfile(req.user.profleId);
   }
 
   @Patch('audio/upload/:podcastId')
