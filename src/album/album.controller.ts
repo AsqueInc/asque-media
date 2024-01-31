@@ -66,7 +66,7 @@ export class AlbumController {
     return this.albumService.createAlbum(dto, req.user.profileId);
   }
 
-  @Patch('upload/:albumId/:profileId')
+  @Patch('upload/:albumId')
   @ApiOperation({ summary: 'Upload an image to an album' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -78,7 +78,8 @@ export class AlbumController {
   @UseInterceptors(FileInterceptor('file'))
   uploadImageToAlbum(
     @Param('albumId') albumId: string,
-    @Param('profileId') profileId: string,
+    // @Param('profileId') profileId: string,
+    @Req() req,
     @UploadedFile(
       new ParseFilePipe({
         validators: [new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' })],
@@ -86,16 +87,21 @@ export class AlbumController {
     )
     file: Express.Multer.File,
   ) {
-    return this.albumService.uploadImageToAlbum(albumId, profileId, file);
+    return this.albumService.uploadImageToAlbum(
+      albumId,
+      req.user.profileId,
+      file,
+    );
   }
 
-  @Delete('image/:albumId/:profileId')
+  @Delete('image/:albumId')
   @ApiOperation({ summary: 'Delete an album image ' })
   deleteAlbumImage(
     @Param('albumId') albumId: string,
-    @Param('profileId') profileId: string,
+    @Req() req,
+    // @Param('profileId') profileId: string,
     @Body() dto: DeleteAlbumImageDto,
   ) {
-    return this.albumService.deleteAlbumImage(albumId, profileId, dto);
+    return this.albumService.deleteAlbumImage(albumId, req.user.profileId, dto);
   }
 }
