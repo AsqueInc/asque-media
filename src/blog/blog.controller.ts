@@ -56,6 +56,12 @@ export class BlogController {
     return this.blogService.getAllUserBlogs(req.user.profileId, dto);
   }
 
+  @Get('all')
+  @ApiOperation({ summary: 'Get all stores' })
+  getAllBlogs(@Query() dto: PaginationDto) {
+    return this.blogService.getAllBlogs(dto);
+  }
+
   @Delete(':storyId')
   @ApiOperation({ summary: 'Delete a story' })
   deleteBlog(

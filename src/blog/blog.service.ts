@@ -14,6 +14,37 @@ export class BlogService {
     private cloudinary: CloudinaryService,
   ) {}
 
+  async getAllBlogs(dto: PaginationDto) {
+    try {
+      const skip = (dto.page - 1) * dto.pageSize;
+
+      const blogs = await this.prisma.story.findMany({
+        skip: skip,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      const totalRecords = blogs.length;
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          blogs,
+          pageSize: dto.pageSize,
+          currentPage: dto.page,
+          totalRecord: totalRecords,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async createBlog(dto: CreateBlogDto, profileId: string) {
     try {
       const blog = await this.prisma.story.create({
