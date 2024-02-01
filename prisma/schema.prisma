@@ -211,7 +211,6 @@ model Transfer {
   reference         String
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
-
 }
 
 enum OrderStatus {
@@ -220,4 +219,19 @@ enum OrderStatus {
   SHIPPED 
   CANCELED
   COMPLETED
+}
+
+model File{
+  id                String    @id @default(uuid())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  fileType          Type
+  title             String
+  path              String
+}
+
+enum Type {
+  IMAGE
+  AUDIO
+  VIDEO
 }
