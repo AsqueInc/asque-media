@@ -346,8 +346,16 @@ export class AuthService {
       // send verification email
       await this.email.sendOtpEmail(userExists.email, otp);
 
-      // save otp to database
-      await this.prisma.otp.create({ data: { otp: otp, userId: userId } });
+      const payload = { otp: otp };
+
+      // sign otp
+      const token = await this.jwtService.signAsync(payload, {
+        expiresIn: '5m',
+        secret: this.config.get('OTP_SECRET'),
+      });
+
+      // save signed otp to database
+      await this.prisma.otp.create({ data: { otp: token, userId: userId } });
 
       return {
         statusCode: HttpStatus.OK,
@@ -377,16 +385,20 @@ export class AuthService {
       }
 
       // get otp details
-      const userOtp = await this.prisma.otp.findFirst({
+      const userToken = await this.prisma.otp.findFirst({
         where: { userId: user.id },
       });
-      if (!userOtp) {
+      if (!userToken) {
         throw new HttpException('Otp does not exists', HttpStatus.NOT_FOUND);
       }
 
-      // check if user otp and otp provided are the same
-      if (dto.otp !== userOtp.otp) {
-        throw new HttpException('Incorrect otp', HttpStatus.UNAUTHORIZED);
+      // decpde token from db
+      const decodedOtp = await this.jwtService.verifyAsync(userToken.otp, {
+        secret: this.config.get('OTP_SECRET'),
+      });
+
+      if (!decodedOtp || decodedOtp.otp !== dto.otp) {
+        throw new HttpException('Invalid otp', HttpStatus.UNAUTHORIZED);
       }
 
       // update user verification status
@@ -396,7 +408,7 @@ export class AuthService {
       });
 
       //delete otp
-      await this.prisma.otp.delete({ where: { id: userOtp.id } });
+      await this.prisma.otp.delete({ where: { id: userToken.id } });
 
       return {
         statusCode: HttpStatus.OK,
@@ -428,12 +440,19 @@ export class AuthService {
 
       // generate and send otp
       const otp = this.util.generateOtp();
-
       await this.email.sendOtpEmail(dto.email, otp);
+
+      const payload = { otp: otp };
+
+      // sign otp
+      const token = await this.jwtService.signAsync(payload, {
+        expiresIn: '5m',
+        secret: this.config.get('OTP_SECRET'),
+      });
 
       // save otp to database
       await this.prisma.otp.create({
-        data: { otp: otp, userId: userExists.id },
+        data: { otp: token, userId: userExists.id },
       });
 
       return {
@@ -477,8 +496,12 @@ export class AuthService {
         throw new HttpException('Otp not found', HttpStatus.NOT_FOUND);
       }
 
+      const decodedOtp = await this.jwtService.verifyAsync(userOtp.otp, {
+        secret: this.config.get('OTP_SECRET'),
+      });
+
       // check if user otp and otp provided are the same
-      if (userOtp.otp !== dto.otp) {
+      if (!decodedOtp || decodedOtp.otp !== dto.otp) {
         throw new HttpException('Invalid Otp', HttpStatus.BAD_REQUEST);
       }
 
