@@ -5,6 +5,7 @@ import {
   Injectable,
   Logger,
 } from '@nestjs/common';
+import { Type } from '@prisma/client';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PrismaService } from 'src/prisma.service';
@@ -17,48 +18,101 @@ export class UploadService {
     private cloudinary: CloudinaryService,
   ) {}
 
+  async saveToFile(fileType: Type, title: string, path: string) {
+    try {
+      return await this.prisma.file.create({
+        data: { fileType: fileType, title: title, path: path },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async cloudinaryUpload(
     uploadType: 'ProfilePicture' | 'Artwork' | 'Audio' | 'Video' | 'Image',
     file: Express.Multer.File,
   ) {
     try {
+      // upload artwork
       if (uploadType === 'Artwork') {
         const uploadedArtwork = await this.cloudinary.uploadImage(
           'Artwork',
           file,
         );
+
+        const fileDetails = await this.saveToFile(
+          'IMAGE',
+          uploadedArtwork.filename,
+          uploadedArtwork.path,
+        );
         return {
-          artworkUri: uploadedArtwork.url,
-          artworkName: uploadedArtwork.name,
+          statusCode: HttpStatus.CREATED,
+          fileDetails,
         };
       }
+
+      // upload profile picture
       if (uploadType === 'ProfilePicture') {
-        const uploadedArtwork =
+        const uploadedProfilePicture =
           await this.cloudinary.uploadProfilePicture(file);
+
+        const fileDetails = await this.saveToFile(
+          'IMAGE',
+          uploadedProfilePicture.filename,
+          uploadedProfilePicture.path,
+        );
         return {
-          artworkUri: uploadedArtwork.url,
-          artworkName: uploadedArtwork.name,
+          statusCode: HttpStatus.CREATED,
+          fileDetails,
         };
       }
+
+      // uplaod audio
       if (uploadType === 'Audio') {
-        const uploadedArtwork = await this.cloudinary.uploadAudio(file);
+        const uploadedAudio = await this.cloudinary.uploadAudio(file);
+
+        const fileDetails = await this.saveToFile(
+          'AUDIO',
+          uploadedAudio.filename,
+          uploadedAudio.path,
+        );
         return {
-          artworkUri: uploadedArtwork.url,
-          artworkName: uploadedArtwork.name,
+          statusCode: HttpStatus.CREATED,
+          fileDetails,
         };
       }
+
+      // upload video
       if (uploadType === 'Video') {
-        const uploadedArtwork = await this.cloudinary.uploadVideo(file);
+        const uploadedVideo = await this.cloudinary.uploadVideo(file);
+
+        const fileDetails = await this.saveToFile(
+          'VIDEO',
+          uploadedVideo.filename,
+          uploadedVideo.path,
+        );
         return {
-          artworkUri: uploadedArtwork.url,
-          artworkName: uploadedArtwork.name,
+          statusCode: HttpStatus.CREATED,
+          fileDetails,
         };
       }
+
+      // upload image
       if (uploadType === 'Image') {
-        const uploadedArtwork = await this.cloudinary.uploadVideo(file);
+        const uploadedImage = await this.cloudinary.uploadImage('Image', file);
+
+        const fileDetails = await this.saveToFile(
+          'IMAGE',
+          uploadedImage.filename,
+          uploadedImage.path,
+        );
         return {
-          artworkUri: uploadedArtwork.url,
-          artworkName: uploadedArtwork.name,
+          statusCode: HttpStatus.CREATED,
+          fileDetails,
         };
       }
     } catch (error) {
