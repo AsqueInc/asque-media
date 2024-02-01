@@ -13,6 +13,8 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { MessageService } from 'src/utils/message.service';
 import { PaymentService } from 'src/payment/payment.service';
 import { WithdrawReferralEarningDto } from './dto/withdraw-referral-earning.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ProfileService {
@@ -23,6 +25,8 @@ export class ProfileService {
     private messageSerive: MessageService,
     private cloudinary: CloudinaryService,
     private paymentService: PaymentService,
+    private jwtService: JwtService,
+    private config: ConfigService,
   ) {}
 
   /**
@@ -144,16 +148,20 @@ export class ProfileService {
       // generate otp and send message to user
       const otp = this.util.generateOtp();
 
-      // sign otp with jwt
-
       await this.messageSerive.sendTestMessage(
         numberExists.mobileNumber,
         `your mobile verification otp is : ${otp}. do not share with anyone`,
       );
 
+      // sign otp with jwt
+      const token = await this.jwtService.signAsync(
+        { otp: otp },
+        { expiresIn: '5m', secret: this.config.get('OTP_SECRET') },
+      );
+
       // save otp
       await this.prisma.otp.create({
-        data: { userId: numberExists.user.id, otp: otp },
+        data: { userId: numberExists.user.id, otp: token },
       });
 
       return {
@@ -186,7 +194,12 @@ export class ProfileService {
         include: { user: { select: { email: true } } },
       });
 
-      if (!otpExists) {
+      // decpde token from db
+      const decodedOtp = await this.jwtService.verifyAsync(otpExists.otp, {
+        secret: this.config.get('OTP_SECRET'),
+      });
+
+      if (!decodedOtp || decodedOtp.otp != dto.otp) {
         throw new HttpException('Invalid otp', HttpStatus.UNAUTHORIZED);
       }
 
