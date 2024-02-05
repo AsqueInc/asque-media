@@ -154,6 +154,7 @@ model Order {
   profileId               String
   deliveryAddress         String?
   city                    String?
+  shippingCost            Decimal?
   zip                     String?
   country                 String?
   referrerCode            String?
