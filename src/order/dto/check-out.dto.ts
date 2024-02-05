@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CheckOutDto {
   @IsString()
@@ -21,4 +21,9 @@ export class CheckOutDto {
   @IsNotEmpty()
   @ApiProperty()
   country: string;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  referrerCode: string;
 }
