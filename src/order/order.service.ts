@@ -9,6 +9,8 @@ import { Decimal } from '@prisma/client/runtime/library';
 import { CheckOutDto } from './dto/check-out.dto';
 import { NotifyOrderShipedDto } from './dto/order-shipped.dto';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
+import axios from 'axios';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class OrderService {
@@ -16,6 +18,7 @@ export class OrderService {
     private readonly prisma: PrismaService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private emailService: EmailNotificationService,
+    private config: ConfigService,
   ) {}
 
   /**
@@ -35,7 +38,7 @@ export class OrderService {
         throw new HttpException('Order does not exist', HttpStatus.NOT_FOUND);
       }
 
-      return { statusCode: HttpStatus.OK, data: { order } };
+      return { statusCode: HttpStatus.OK, data: order };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -312,6 +315,19 @@ export class OrderService {
    */
   async checkout(orderId: string, dto: CheckOutDto) {
     try {
+      const paystackApiKey = this.config.get('TOPSHIP_API_KEY');
+
+      const shippingResponse = await axios.get(
+        'https://api-topship.com/api/get-shipment-rate?shipmentDetail= {}',
+        {
+          headers: {
+            Authorization: `Bearer ${paystackApiKey}`,
+          },
+        },
+      );
+
+      const shippingCost = shippingResponse[0].
+
       const checkOutDetails = await this.prisma.order.update({
         where: { id: orderId },
         data: {
@@ -319,6 +335,8 @@ export class OrderService {
           city: dto.city,
           zip: dto.zip,
           country: dto.country,
+          referrerCode: dto.referrerCode,
+          shippingCost: shippingCost,
         },
       });
 
