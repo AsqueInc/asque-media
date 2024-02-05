@@ -36,7 +36,29 @@ export class EmailNotificationService {
       from: this.config.get('USER_EMAIL'),
       to: to,
       subject: 'Verification Otp',
-      text: `Hi there, Here is your verification otp ${otp}`,
+      text: `Hi there, Here is your email verification otp ${otp}`,
+    };
+
+    await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
+      this.logger.error(error);
+      throw new HttpException(
+        'Email not sent',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
+  }
+
+  /**
+   * function to send password reset otp
+   * @param address : email address of user
+   * @param otp : generated otp
+   */
+  async sendForgotPasswordEmail(address: string, otp: string) {
+    const mailOptions = {
+      from: this.config.get('USER_EMAIL'),
+      to: address,
+      subject: 'Password Reset',
+      text: `Hi there, Here is your password reset otp ${otp}`,
     };
 
     await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
