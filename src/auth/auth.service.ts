@@ -48,26 +48,26 @@ export class AuthService {
     return await this.prisma.user.findFirst({ where: { id: id } });
   };
 
-  async createUser(
-    dto: RegisterUserDto,
-    referrerEmail?: string,
-    referrerBalance?: number,
-  ) {
-    // generate referral code for user
-    const referralCode = this.util.generateReferralCode();
+  /**
+   * register a new user
+   * @param dto : register user dto
+   * @returns : response code and user details
+   */
+  async registerUser(dto: RegisterUserDto): Promise<ApiResponse> {
+    try {
+      // check if user already exists
+      const userExists = await this.checkUserExistsByEmail(dto.email);
+      if (userExists) {
+        throw new HttpException('User already exists', HttpStatus.UNAUTHORIZED);
+      }
 
-    // check if user already exists
-    const userExists = await this.checkUserExistsByEmail(dto.email);
-    if (userExists) {
-      throw new HttpException('User already exists', HttpStatus.UNAUTHORIZED);
-    }
+      // hash new password
+      const passwordHash = await bcrypt.hash(dto.password, 12);
 
-    // hash new password
-    const passwordHash = await bcrypt.hash(dto.password, 12);
+      // generate referral code for user
+      const referralCode = this.util.generateReferralCode();
 
-    // code to create user if referral code is used
-    if (referrerEmail) {
-      const newUser = await this.prisma.user.create({
+      const user = await this.prisma.user.create({
         data: {
           email: dto.email,
           password: passwordHash,
@@ -80,12 +80,6 @@ export class AuthService {
           referral: {
             create: {
               code: referralCode,
-              balance: this.config.get('REFERRAL_AMOUNT'),
-            },
-          },
-          referrer: {
-            connect: {
-              userEmail: referrerEmail,
             },
           },
         },
@@ -114,97 +108,10 @@ export class AuthService {
         },
       });
 
-      // update referrer account balance
-      await this.prisma.referral.update({
-        where: { userEmail: referrerEmail },
-        data: { balance: referrerBalance + 500 },
-      });
-
       return {
         statusCode: HttpStatus.CREATED,
-        data: newUser,
+        data: user,
       };
-    }
-
-    // code to create user if referral code is not used
-    const newUser = await this.prisma.user.create({
-      data: {
-        email: dto.email,
-        password: passwordHash,
-        role: dto.type,
-        profile: {
-          create: {
-            name: dto.name,
-          },
-        },
-        referral: {
-          create: {
-            code: referralCode,
-            balance: this.config.get('REFERRAL_AMOUNT'),
-          },
-        },
-      },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-        profile: {
-          select: {
-            id: true,
-            name: true,
-            earning: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-        referral: {
-          select: {
-            id: true,
-            code: true,
-            balance: true,
-            createdAt: true,
-            updatedAt: true,
-          },
-        },
-      },
-    });
-
-    return {
-      statusCode: HttpStatus.CREATED,
-      data: newUser,
-    };
-  }
-
-  /**
-   * register a new user
-   * @param dto : register user dto
-   * @returns : response code and user details
-   */
-  async registerUser(dto: RegisterUserDto): Promise<ApiResponse> {
-    try {
-      if (dto.referralCode === undefined) {
-        return await this.createUser(dto);
-      }
-
-      // verify referral code
-      const referral = await this.prisma.referral.findFirst({
-        where: { code: dto.referralCode },
-      });
-
-      if (!referral) {
-        throw new HttpException(
-          'Invalid referral code',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      return await this.createUser(
-        dto,
-        referral.userEmail,
-        Number(referral.balance),
-      );
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -440,7 +347,7 @@ export class AuthService {
 
       // generate and send otp
       const otp = this.util.generateOtp();
-      await this.email.sendOtpEmail(dto.email, otp);
+      await this.email.sendForgotPasswordEmail(dto.email, otp);
 
       const payload = { otp: otp };
 
