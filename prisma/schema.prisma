@@ -152,10 +152,11 @@ model Order {
   id                      String    @id @default(uuid())
   profile                 Profile   @relation(fields: [profileId], references: [id])
   profileId               String
-  deliveryAddress    String?
+  deliveryAddress         String?
   city                    String?
   zip                     String?
   country                 String?
+  referrerCode            String?
   totalPrice              Decimal?      @default(0)
   status                  OrderStatus   @default(PENDING) 
   payment                 Payment?
