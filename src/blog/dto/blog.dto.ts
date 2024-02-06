@@ -13,7 +13,15 @@ export class CreateBlogDto {
 
   @ApiProperty()
   @IsOptional()
-  imageUris: string[];
+  firstImage: string;
+
+  @ApiProperty()
+  @IsOptional()
+  secondImage: string;
+
+  @ApiProperty()
+  @IsOptional()
+  thirdImage: string;
 }
 
 export class UpdateBlogDto {
@@ -29,5 +37,13 @@ export class UpdateBlogDto {
 
   @ApiProperty()
   @IsOptional()
-  imageUris: string[];
+  firstImage: string;
+
+  @ApiProperty()
+  @IsOptional()
+  secondImage: string;
+
+  @ApiProperty()
+  @IsOptional()
+  thirdImage: string;
 }
