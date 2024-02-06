@@ -326,7 +326,7 @@ export class OrderService {
         },
       );
 
-      const shippingCost = shippingResponse[0].
+      const shippingCost: number = shippingResponse[0].cost;
 
       const checkOutDetails = await this.prisma.order.update({
         where: { id: orderId },
