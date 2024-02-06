@@ -51,6 +51,9 @@ export class BlogService {
         data: {
           title: dto.title,
           content: dto.content,
+          firstImage: dto.firstImage,
+          secondImage: dto.secondImage,
+          thirdImage: dto.thirdImage,
           profile: {
             connect: {
               id: profileId,
@@ -61,7 +64,7 @@ export class BlogService {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: { blog },
+        data: blog,
       };
     } catch (error) {
       this.logger.error(error);
@@ -186,12 +189,15 @@ export class BlogService {
         data: {
           title: dto.title,
           content: dto.content,
+          firstImage: dto.firstImage,
+          secondImage: dto.secondImage,
+          thirdImage: dto.thirdImage,
         },
       });
 
       return {
         statusCode: HttpStatus.OK,
-        message: { updatedBlog },
+        data: updatedBlog,
       };
     } catch (error) {
       this.logger.error(error);
@@ -201,44 +207,4 @@ export class BlogService {
       );
     }
   }
-
-  // async addImageToBlog(
-  //   blogId: string,
-  //   profileId: string,
-  //   file: Express.Multer.File,
-  // ) {
-  //   try {
-  //     const blog = await this.prisma.story.findFirst({ where: { id: blogId } });
-  //     if (!blog) {
-  //       throw new HttpException('Blog does not exists', HttpStatus.NOT_FOUND);
-  //     }
-
-  //     if (blog.profileId !== profileId) {
-  //       throw new HttpException(
-  //         'You cannot upload an image to an blog you did not write',
-  //         HttpStatus.UNAUTHORIZED,
-  //       );
-  //     }
-
-  //     const blogImageUriList = blog.imageUris;
-  //     const uploadedImageUri = await this.cloudinary.uploadImage(file);
-  //     blogImageUriList.push(uploadedImageUri.url);
-
-  //     const updatedBlog = await this.prisma.story.update({
-  //       where: { id: blogId },
-  //       data: { imageUris: blogImageUriList },
-  //     });
-
-  //     return {
-  //       statusCode: HttpStatus.OK,
-  //       message: { updatedBlog },
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw new HttpException(
-  //       error.message,
-  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
 }
