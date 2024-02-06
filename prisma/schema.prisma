@@ -161,6 +161,7 @@ model Order {
   totalPrice              Decimal?      @default(0)
   status                  OrderStatus   @default(PENDING) 
   payment                 Payment?
+  trackingId              String?
   createdAt               DateTime  @default(now())
   orderItem               Order_Item[]
 }
@@ -191,14 +192,19 @@ model Review{
 model Payment {
   id                String    @id @default(uuid())
   amount            Decimal
-  transactionId     String
-  payeeId           String
+  transactionReference     String    @unique
   payeeEmail        String?
+  paymentStatus     PaymentStatus @default(PENDING)
   transactionTime   DateTime  @default(now())
   order             Order  @relation(fields: [orderId], references: [id])  
   orderId           String  @unique
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
 }
 
 model Transfer {
