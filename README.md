@@ -21,6 +21,7 @@ African Americans, post first generation immigrants, and everone with a demonstr
 ## Todo
 
 - endpoint to get trending artwork
+- validate files to upload
 
 ## Installation
 
