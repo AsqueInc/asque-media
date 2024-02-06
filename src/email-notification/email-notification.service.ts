@@ -91,4 +91,25 @@ export class EmailNotificationService {
       );
     });
   }
+
+  /**
+   * notify admin that an order has been paid for
+   * @param orderId : string
+   */
+  async notifyAdminOfCompletePayment(orderId: string) {
+    const mailOptions = {
+      // from: this.config.get('USER_EMAIL'),
+      to: this.config.get('USER_EMAIL'),
+      subject: 'Payment Complete',
+      text: `An order with id: ${orderId} has been payed for.`,
+    };
+
+    await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
+      this.logger.error(error);
+      throw new HttpException(
+        'Email not sent',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
+  }
 }
