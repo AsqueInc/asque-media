@@ -6,6 +6,9 @@ import { ProcessPaymentDto } from './dto/process-payment.dto';
 import axios from 'axios';
 import { ApiResponse } from 'src/types/response.type';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import crypto from 'crypto';
+import { Request } from 'express';
+import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 
 @Injectable()
 export class PaymentService {
@@ -14,6 +17,7 @@ export class PaymentService {
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly emailService: EmailNotificationService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
     this.paystackApiKey = this.configService.get<string>('PAYSTACK_API_KEY');
@@ -24,10 +28,13 @@ export class PaymentService {
    * @param dto : process payment dto
    * @returns : status code with authorization url
    */
-  async processPayment(dto: ProcessPaymentDto): Promise<ApiResponse> {
+  async processPayment(
+    dto: ProcessPaymentDto,
+    profileId: string,
+  ): Promise<ApiResponse> {
     try {
       const profile = await this.prisma.profile.findFirst({
-        where: { id: dto.profileId },
+        where: { id: profileId },
       });
 
       // create transaction with paystack
@@ -51,10 +58,9 @@ export class PaymentService {
       // save transaction details to database
       await this.prisma.payment.create({
         data: {
-          transactionId: responseData.reference,
+          transactionReference: responseData.reference,
           payeeEmail: profile.userEmail,
           amount: dto.amount,
-          payeeId: profile.id,
           orderId: dto.orderId,
         },
       });
@@ -75,13 +81,14 @@ export class PaymentService {
     }
   }
 
+  async checkPaymentStatus() {}
+
   /**
    * verify the status of a payment
    * @param reference : transaction reference
-   * @param orderId : id of order
    * @returns :status code and message
    */
-  async verifyPayment(reference: string, orderId: string) {
+  async verifyPaymentViaPaystack(reference: string) {
     try {
       // make request to paystack
       const response = await axios.get(
@@ -94,31 +101,10 @@ export class PaymentService {
       );
 
       // get response status
-      const status = response.data.data.status;
-
-      switch (status) {
-        case 'success':
-          // update order status if payment status is successful
-          await this.prisma.order.update({
-            where: { id: orderId },
-            data: { status: 'PAID' },
-          });
-
-          return {
-            statusCode: HttpStatus.OK,
-            message: { message: 'Payment successful' },
-          };
-        case 'pending':
-          return {
-            statusCode: HttpStatus.OK,
-            message: { message: 'Payment pending' },
-          };
-        case 'failed':
-          return {
-            statusCode: HttpStatus.OK,
-            message: { message: 'Payment failed' },
-          };
-      }
+      return {
+        statusCode: HttpStatus.OK,
+        data: response.data.data.status,
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -238,6 +224,53 @@ export class PaymentService {
           statusCode: HttpStatus.OK,
           data: cleanedBankData,
         };
+      }
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * confirm payment status
+   * @param req : request object
+   * @returns : status code and message
+   */
+  async verifyPaymentViaWebhook(req: Request) {
+    try {
+      const hash = crypto
+        .createHmac('sha512', this.paystackApiKey)
+        .update(JSON.stringify(req.body))
+        .digest('hex');
+
+      if (hash == req.headers['x-paystack-signature']) {
+        // Retrieve the request's body
+        const { event, data } = req.body;
+        // Do something with event
+        if (event === 'charge.success') {
+          // update payment and order status if payment is successful
+          const payment = await this.prisma.payment.update({
+            where: { transactionReference: data.reference },
+            data: { paymentStatus: 'COMPLETED' },
+          });
+
+          await this.prisma.order.update({
+            where: { id: payment.orderId },
+            data: { status: 'PAID' },
+          });
+
+          // notify admin of order payment
+          await this.emailService.notifyAdminOfCompletePayment(payment.orderId);
+
+          // create shipment order with topship
+          return {
+            statusCode: HttpStatus.OK,
+            message: { message: 'Payment successful' },
+          };
+        }
       }
     } catch (error) {
       this.logger.error(error);
