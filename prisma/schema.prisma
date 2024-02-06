@@ -74,11 +74,13 @@ model Story {
   id        String      @id @default(uuid())
   title     String
   content   String
+  firstImage  String?
+  secondImage  String?
+  thirdImage  String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   profile     Profile      @relation(fields: [profileId], references: [id])
-  profileId   String
-  imageUris   String[]    
+  profileId   String  
 }
 
 model Podcast{
