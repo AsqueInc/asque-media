@@ -156,6 +156,7 @@ export class AuthService {
         userId: userExists.id,
         email: userExists.email,
         profileId: userExists.profile.id,
+        role: userExists.role,
       };
 
       // sign access token
@@ -506,6 +507,7 @@ export class AuthService {
         userId: verifyToken.userId,
         email: verifyToken.email,
         profileId: verifyToken.profileId,
+        role: verifyToken.role,
       };
 
       // generate new access token
