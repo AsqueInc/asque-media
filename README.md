@@ -22,6 +22,7 @@ African Americans, post first generation immigrants, and everone with a demonstr
 
 - endpoint to get trending artwork
 - validate files to upload
+- fund referrer after payment of artwork
 
 ## Installation
 
