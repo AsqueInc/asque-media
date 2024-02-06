@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Req,
   // Query,
   UseGuards,
 } from '@nestjs/common';
@@ -24,24 +25,29 @@ export class PaymentController {
   @ApiSecurity('JWT-auth')
   @Post('')
   @ApiOperation({ summary: 'Process payment for an order' })
-  processPayment(@Body() dto: ProcessPaymentDto) {
-    return this.paymentService.processPayment(dto);
+  processPayment(@Body() dto: ProcessPaymentDto, @Req() req) {
+    return this.paymentService.processPayment(dto, req.user.profileId);
   }
 
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
-  @Post('verify/:reference/:orderId')
-  @ApiOperation({ summary: 'Verify the status of a payment' })
-  registerUser(
-    @Param('reference') reference: string,
-    @Param('orderId') orderId: string,
-  ) {
-    return this.paymentService.verifyPayment(reference, orderId);
+  @Post('verify/:reference')
+  @ApiOperation({
+    summary: 'Manually verify the status of a payment via paystack',
+  })
+  registerUser(@Param('reference') reference: string) {
+    return this.paymentService.verifyPaymentViaPaystack(reference);
   }
 
   @Get('banks')
   @ApiOperation({ summary: 'Get bank details' })
   getBanks() {
     return this.paymentService.getBanks();
+  }
+
+  @Post('webhook')
+  @ApiOperation({ summary: 'Verify payment status webhook endpoint' })
+  verifyPaymentViaWebhook(@Req() req) {
+    return this.paymentService.verifyPaymentViaWebhook(req);
   }
 }
