@@ -5,17 +5,13 @@ import {
   Param,
   Post,
   Req,
-  // Query,
   UseGuards,
 } from '@nestjs/common';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { PaymentService } from './payment.service';
 import { ProcessPaymentDto } from './dto/process-payment.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
-// import { PaginationDto } from 'src/category/dto/pagination.dto';
 
-// @UseGuards(JwtGuard)
-// @ApiSecurity('JWT-auth')
 @ApiTags('payment-endpoints')
 @Controller('payment')
 export class PaymentController {
