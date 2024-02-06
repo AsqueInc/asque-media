@@ -1,8 +1,15 @@
 import { Controller, Param, Post, UseInterceptors } from '@nestjs/common';
 import { UploadService } from './upload.service';
-import { ApiBody, ApiConsumes, ApiOperation, ApiParam } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 
+@ApiTags('upload-endpoints')
 @Controller('upload')
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
