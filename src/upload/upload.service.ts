@@ -18,7 +18,7 @@ export class UploadService {
     private cloudinary: CloudinaryService,
   ) {}
 
-  async saveToFile(fileType: Type, title: string, path: string) {
+  private async saveToFile(fileType: Type, title: string, path: string) {
     try {
       return await this.prisma.file.create({
         data: { fileType: fileType, title: title, path: path },
@@ -57,8 +57,10 @@ export class UploadService {
 
       // upload profile picture
       if (uploadType === 'ProfilePicture') {
-        const uploadedProfilePicture =
-          await this.cloudinary.uploadProfilePicture(file);
+        const uploadedProfilePicture = await this.cloudinary.uploadImage(
+          'Profile',
+          file,
+        );
 
         const fileDetails = await this.saveToFile(
           'IMAGE',
@@ -73,22 +75,23 @@ export class UploadService {
 
       // uplaod audio
       if (uploadType === 'Audio') {
-        const uploadedAudio = await this.cloudinary.uploadAudio(file);
+        const uploadedAudio = await this.cloudinary.uploadOther('Audio', file);
 
         const fileDetails = await this.saveToFile(
           'AUDIO',
           uploadedAudio.filename,
           uploadedAudio.path,
         );
+
         return {
           statusCode: HttpStatus.CREATED,
-          fileDetails,
+          data: fileDetails,
         };
       }
 
       // upload video
       if (uploadType === 'Video') {
-        const uploadedVideo = await this.cloudinary.uploadVideo(file);
+        const uploadedVideo = await this.cloudinary.uploadOther('Video', file);
 
         const fileDetails = await this.saveToFile(
           'VIDEO',
