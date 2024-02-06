@@ -1,4 +1,10 @@
-import { Controller, Param, Post, UseInterceptors } from '@nestjs/common';
+import {
+  Controller,
+  Param,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UploadService } from './upload.service';
 import {
   ApiBody,
@@ -14,7 +20,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  @Post('cloudinary:uploadType')
+  @Post('cloudinary:type')
   @ApiParam({
     name: 'type',
     enum: ['ProfilePicture', 'Artwork', 'Audio', 'Video', 'Image'],
@@ -29,7 +35,7 @@ export class UploadController {
   })
   @UseInterceptors(FileInterceptor('file'))
   cloudinaryUpload(
-    file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
     @Param('type')
     type: 'ProfilePicture' | 'Artwork' | 'Audio' | 'Video' | 'Image',
   ) {
