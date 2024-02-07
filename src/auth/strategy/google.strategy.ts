@@ -5,6 +5,7 @@ import { AuthService } from '../auth.service';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -34,15 +35,23 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     userId: string,
     email: string,
     secret: string,
+    profileId: string,
+    role: Role,
     expiresIn: string,
   ) {
-    const payload = { sub: userId, email: email };
-
     // sign token
-    return await this.jwtService.signAsync(payload, {
-      secret: secret,
-      expiresIn: expiresIn,
-    });
+    return await this.jwtService.signAsync(
+      {
+        userId: userId,
+        email: email,
+        profileId: profileId,
+        role: role,
+      },
+      {
+        secret: secret,
+        expiresIn: expiresIn,
+      },
+    );
   }
 
   async validate(
@@ -51,76 +60,97 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
   ): Promise<any> {
     try {
-      console.log(googleAccessToken);
-      console.log(googleRefreshToken);
-
       // check if user with email already exists
       const userExists = await this.prisma.user.findFirst({
         where: { email: profile._json.email },
+        // include: { profile: true },
       });
-      // create token if user exists
+
+      if (!userExists) {
+        // create new user if user does not exist
+        const googleUser = await this.authService.registerGoogleUser(
+          profile._json.email,
+          profile._json.name,
+        );
+
+        // create access token
+        const accessToken = await this.signToken(
+          googleUser.data.id,
+          googleUser.data.email,
+          this.configService.get('JWT_ACCESS_SECRET'),
+          googleUser.data.profile.id,
+          'USER',
+          this.configService.get('JWT_EXPIRES_IN'),
+        );
+
+        // create refresh token
+        const refreshToken = await this.signToken(
+          googleUser.data.id,
+          googleUser.data.email,
+          this.configService.get('JWT_ACCESS_SECRET'),
+          googleUser.data.profile.id,
+          'USER',
+          '7d',
+        );
+
+        await this.prisma.user.update({
+          where: { id: googleUser.data.id },
+          data: { refreshToken: refreshToken },
+        });
+
+        return {
+          accessToken: accessToken,
+          userId: googleUser.data.id,
+          profileId: googleUser.data.profile.id,
+          email: googleUser.data.email,
+          role: googleUser.data.role,
+          googleAccessToken: googleAccessToken,
+          googleRefreshToken: googleRefreshToken,
+        };
+      }
+
+      // save refresh token to db if user exists
       if (userExists) {
+        const profile = await this.prisma.profile.findFirst({
+          where: { user: { id: userExists }.id },
+        });
+        // create access token
         const accessToken = await this.signToken(
           userExists.id,
           userExists.email,
           this.configService.get('JWT_ACCESS_SECRET'),
-          '15m',
+          profile.id,
+          'USER',
+          this.configService.get('JWT_EXPIRES_IN'),
         );
+
+        // create refresh token
         const refreshToken = await this.signToken(
           userExists.id,
           userExists.email,
           this.configService.get('JWT_REFRESH_SECRET'),
+          profile.id,
+          'USER',
           '7d',
         );
 
-        // save refresh token to user table
         await this.prisma.user.update({
           where: { id: userExists.id },
           data: { refreshToken: refreshToken },
         });
 
         return {
-          accessToken,
+          accessToken: accessToken,
           userId: userExists.id,
-          userEmail: userExists.email,
+          profileId: profile.id,
+          email: userExists.email,
+          role: userExists.role,
+          googleAccessToken: googleAccessToken,
+          googleRefreshToken: googleRefreshToken,
         };
       }
-
-      // create new user if user does not exist
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: profile._json.email,
-          isEmailVerified: true,
-          isGoogleUser: true,
-        },
-      });
-
-      const accessToken = await this.signToken(
-        newUser.id,
-        newUser.email,
-        this.configService.get('JWT_ACCESS_SECRET'),
-        '15m',
-      );
-      const refreshToken = await this.signToken(
-        newUser.id,
-        newUser.email,
-        this.configService.get('JWT_REFRESH_SECRET'),
-        '7d',
-      );
-
-      // save refresh token to user table
-      await this.prisma.user.update({
-        where: { id: newUser.id },
-        data: { refreshToken: refreshToken },
-      });
-
-      return {
-        accessToken,
-        userId: userExists.id,
-        userEmail: userExists.email,
-      };
     } catch (error) {
-      throw new Error(error.message);
+      throw new Error(error);
     }
   }
 }
