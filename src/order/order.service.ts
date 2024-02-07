@@ -445,4 +445,34 @@ export class OrderService {
       );
     }
   }
+
+  async getShipmentDetails(shipmentId: string) {
+    try {
+      const response = await axios.get(
+        `https://topship-staging.africa/api/get-shipment/${shipmentId}`,
+      );
+
+      const responseData = response.data;
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          shipmentStatus: responseData.shipmentStatus,
+          label: responseData.label,
+          trackingUrl: responseData.trackingUrl,
+          shipmentRoute: responseData.shipmentRoute,
+          senderDetails: responseData.senderDetail,
+          recieverDetails: responseData.recieverDetails,
+          estimatedDeliveryDate: responseData.estimatedDeliveryDate,
+          items: responseData.items,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
