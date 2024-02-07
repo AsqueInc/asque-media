@@ -79,4 +79,10 @@ export class OrderController {
   shipOrder(@Body() dto: ShipOrderDto, @Req() req) {
     return this.orderService.shipOrder(req.user.userId, dto);
   }
+
+  @Get('shipment/track/:trackingId')
+  @ApiOperation({ summary: 'Track a shipment' })
+  trackShipment(@Param('trackingId') trackingId: string) {
+    return this.orderService.trackShipment(trackingId);
+  }
 }
