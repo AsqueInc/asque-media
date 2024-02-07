@@ -370,8 +370,6 @@ export class OrderService {
         include: { shipment: true },
       });
 
-      const topshipApiKey = this.config.get('TOPSHIP_API_KEY');
-
       // pay for shipment
       await axios.post(
         'https://api-topship.com/api/pay-from-wallet',
@@ -380,7 +378,7 @@ export class OrderService {
         },
         {
           headers: {
-            Authorization: `Bearer ${topshipApiKey}`,
+            Authorization: `Bearer ${this.config.get('TOPSHIP_API_KEY')}`,
           },
         },
       );

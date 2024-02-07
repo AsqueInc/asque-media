@@ -265,9 +265,6 @@ export class PaymentService {
           await this.emailService.notifyAdminOfCompletePayment(payment.orderId);
 
           // create shipment draft with topship
-          const topshipApiKey = this.config.get('TOPSHIP_API_KEY');
-
-          // create shipment draft
           const topshipResponse = await axios.post(
             'https://api-topship.com/api/save-shipment',
             {
@@ -305,7 +302,7 @@ export class PaymentService {
             },
             {
               headers: {
-                Authorization: `Bearer ${topshipApiKey}`,
+                Authorization: `Bearer ${this.config.get('TOPSHIP_API_KEY')}`,
               },
             },
           );
