@@ -129,6 +129,7 @@ export class AuthService {
       const googleUser = await this.prisma.user.create({
         data: {
           email: email,
+          isGoogleUser: true,
           // refreshToken: refreshToken,
           // password: null,
           role: 'USER',
@@ -195,7 +196,7 @@ export class AuthService {
       }
 
       // ensure google user can only login via google
-      if (userExists.isGoogleUser == true) {
+      if (userExists.isGoogleUser === true) {
         throw new HttpException(
           'User can only login via google as user registered via google',
           HttpStatus.UNAUTHORIZED,
