@@ -113,8 +113,8 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleLoginCallback(@Req() req, @Res() res) {
-    const { accessToken, userId, userEmail } = req.user;
-    return res.send({ accessToken, userId, userEmail });
+    const { accessToken, userId, email, profileId, role } = req.user;
+    return res.send({ accessToken, userId, email, profileId, role });
   }
 
   @Patch('add-admin/:userId')
