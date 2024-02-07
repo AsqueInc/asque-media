@@ -62,7 +62,7 @@ export class PodcastService {
 
   async uploadPodcastAudio(podcastId: string, file: Express.Multer.File) {
     try {
-      const uploadAudio = await this.cloudinary.uploadAudio(file);
+      const uploadAudio = await this.cloudinary.uploadOther('Audio', file);
 
       await this.prisma.podcast.update({
         where: { id: podcastId },
@@ -84,7 +84,7 @@ export class PodcastService {
 
   async uploadVideo(videoId: string, file: Express.Multer.File) {
     try {
-      const uploadVideo = await this.cloudinary.uploadVideo(file);
+      const uploadVideo = await this.cloudinary.uploadOther('Video', file);
 
       await this.prisma.podcast.update({
         where: { id: videoId },
