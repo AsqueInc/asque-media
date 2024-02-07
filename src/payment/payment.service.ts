@@ -15,12 +15,12 @@ export class PaymentService {
   private paystackApiKey: string;
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
     private readonly emailService: EmailNotificationService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {
-    this.paystackApiKey = this.configService.get<string>('PAYSTACK_API_KEY');
+    this.paystackApiKey = this.config.get<string>('PAYSTACK_API_KEY');
   }
 
   /**
@@ -81,8 +81,6 @@ export class PaymentService {
     }
   }
 
-  async checkPaymentStatus() {}
-
   /**
    * verify the status of a payment
    * @param reference : transaction reference
@@ -103,7 +101,7 @@ export class PaymentService {
       // get response status
       return {
         statusCode: HttpStatus.OK,
-        data: response.data.data.status,
+        data: response.data.data,
       };
     } catch (error) {
       this.logger.error(error);
@@ -257,18 +255,76 @@ export class PaymentService {
             data: { paymentStatus: 'COMPLETED' },
           });
 
-          await this.prisma.order.update({
+          const order = await this.prisma.order.update({
             where: { id: payment.orderId },
             data: { status: 'PAID' },
+            include: { profile: true, orderItem: true },
           });
 
           // notify admin of order payment
           await this.emailService.notifyAdminOfCompletePayment(payment.orderId);
 
-          // create shipment order with topship
+          // create shipment draft with topship
+          const topshipApiKey = this.config.get('TOPSHIP_API_KEY');
+
+          // create shipment draft
+          const topshipResponse = await axios.post(
+            'https://api-topship.com/api/save-shipment',
+            {
+              shipment: [
+                {
+                  items: [
+                    {
+                      category: 'Others',
+                      description: `artwork shipment to ${order.profile.name}`,
+                      weight: 2,
+                      quantity: order.orderItem.length,
+                      value: order.totalPrice,
+                    },
+                  ],
+                },
+                {
+                  senderDetail: {
+                    name: 'Asque',
+                    email: this.config.get('USER_EMAIL'),
+                    country: 'NG',
+                    state: 'Lagos',
+                    city: 'Lagos',
+                  },
+                  receiverDetail: {
+                    name: order.profile.name,
+                    email: order.profile.userEmail,
+                    country: order.country,
+                    city: order.city,
+                    countryCode: '234',
+                    addressLine1: order.deliveryAddress,
+                    phoneNumber: order.profile.mobileNumber,
+                  },
+                },
+              ],
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${topshipApiKey}`,
+              },
+            },
+          );
+
+          // save shipment details
+          const shipment = await this.prisma.shipment.create({
+            data: {
+              trackingId: topshipResponse.data.trackingId,
+              cost: topshipResponse.data.totalCharge,
+              order: {
+                connect: { id: order.id },
+              },
+            },
+          });
+
           return {
             statusCode: HttpStatus.OK,
-            message: { message: 'Payment successful' },
+            data: shipment,
+            message: 'Payment successful',
           };
         }
       }
