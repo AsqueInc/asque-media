@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UploadApiErrorResponse, UploadApiResponse, v2 } from 'cloudinary';
 import toStream = require('buffer-to-stream');
+
 @Injectable()
 export class CloudinaryService {
   /**
@@ -65,6 +66,11 @@ export class CloudinaryService {
     type: 'Artwork' | 'Image' | 'Profile',
     file: Express.Multer.File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
+    // ensure only jimages are uploaded
+    if (file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png') {
+      throw new HttpException('Incorrect file type', HttpStatus.BAD_REQUEST);
+    }
+
     if (type === 'Artwork') {
       return await this.uploadHelper(
         'image',
@@ -97,9 +103,17 @@ export class CloudinaryService {
     file: Express.Multer.File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     if (type === 'Audio') {
+      // ensure only audi0 files can be uploaded
+      if (file.mimetype !== 'audio/mpeg') {
+        throw new HttpException('Incorrect file type', HttpStatus.BAD_REQUEST);
+      }
       return await this.uploadHelper('other', 'audio', file);
     }
     if (type === 'Video') {
+      // ensure only video files can be uploaded
+      if (file.mimetype !== 'video/mp4') {
+        throw new HttpException('Incorrect file type', HttpStatus.BAD_REQUEST);
+      }
       return await this.uploadHelper('other', 'video', file);
     }
   }
