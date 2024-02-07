@@ -2,15 +2,14 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
-// import { CreateOrderDto } from './dto/create-order.dto';
 import { ApiResponse } from 'src/types/response.type';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { Decimal } from '@prisma/client/runtime/library';
 import { CheckOutDto } from './dto/check-out.dto';
-import { NotifyOrderShipedDto } from './dto/order-shipped.dto';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
+import { ShipOrderDto } from './dto/order-shipped.dto';
 
 @Injectable()
 export class OrderService {
@@ -31,7 +30,7 @@ export class OrderService {
       // check if order exists
       const order = await this.prisma.order.findFirst({
         where: { id: orderId },
-        include: { orderItem: true, profile: true },
+        include: { orderItem: true, profile: true, shipment: true },
       });
 
       if (!order) {
@@ -315,13 +314,13 @@ export class OrderService {
    */
   async checkout(orderId: string, dto: CheckOutDto) {
     try {
-      const paystackApiKey = this.config.get('TOPSHIP_API_KEY');
+      const topshipApiKey = this.config.get('TOPSHIP_API_KEY');
 
       const shippingResponse = await axios.get(
         'https://api-topship.com/api/get-shipment-rate?shipmentDetail= {}',
         {
           headers: {
-            Authorization: `Bearer ${paystackApiKey}`,
+            Authorization: `Bearer ${topshipApiKey}`,
           },
         },
       );
@@ -353,15 +352,10 @@ export class OrderService {
     }
   }
 
-  /**
-   * notify a user of order shipment via emails
-   * @param dto ; notify order shipped dto
-   * @returns status code and message
-   */
-  async notifyUserOrderShipped(dto: NotifyOrderShipedDto) {
+  async shipOrder(userId: string, dto: ShipOrderDto) {
     try {
       const user = await this.prisma.user.findFirst({
-        where: { id: dto.userId },
+        where: { id: userId },
       });
 
       if (user.role !== 'ADMIN') {
@@ -370,19 +364,51 @@ export class OrderService {
           HttpStatus.UNAUTHORIZED,
         );
       }
-      await this.prisma.order.update({
+
+      const orderDetails = await this.prisma.order.findFirst({
         where: { id: dto.orderId },
-        data: { status: 'SHIPPED' },
+        include: { shipment: true },
       });
 
-      await this.emailService.sendOrderShippedEmail(
-        dto.payerEmail,
-        dto.orderId,
+      const topshipApiKey = this.config.get('TOPSHIP_API_KEY');
+
+      // pay for shipment
+      await axios.post(
+        'https://api-topship.com/api/pay-from-wallet',
+        {
+          detail: { shipmentId: dto.shipmentId },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${topshipApiKey}`,
+          },
+        },
       );
+
+      // update order status, shipment status and notify user of shipment
+      await this.prisma.order
+        .update({
+          where: { id: dto.orderId },
+          data: { status: 'SHIPPED' },
+        })
+        .then(async () => {
+          await this.prisma.shipment
+            .update({
+              where: { id: orderDetails.shipment.id },
+              data: { isPaid: true },
+            })
+            .then(async () => {
+              await this.emailService.sendOrderShippedEmail(
+                dto.payerEmail,
+                dto.orderId,
+                orderDetails.shipment.trackingId,
+              );
+            });
+        });
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Order shipment email sent' },
+        message: 'Order shipped and shipment email sent',
       };
     } catch (error) {
       this.logger.error(error);
