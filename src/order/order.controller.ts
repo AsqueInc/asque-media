@@ -80,6 +80,12 @@ export class OrderController {
     return this.orderService.shipOrder(req.user.userId, dto);
   }
 
+  @Get('shipment/:shipmentId')
+  @ApiOperation({ summary: 'Get details of a shipment' })
+  getShipmentDetails(@Param('shipmentId') shipmentId: string) {
+    return this.orderService.getShipmentDetails(shipmentId);
+  }
+
   @Get('shipment/track/:trackingId')
   @ApiOperation({ summary: 'Track a shipment' })
   trackShipment(@Param('trackingId') trackingId: string) {
