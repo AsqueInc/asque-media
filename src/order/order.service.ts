@@ -317,7 +317,17 @@ export class OrderService {
       const topshipApiKey = this.config.get('TOPSHIP_API_KEY');
 
       const shippingResponse = await axios.get(
-        'https://api-topship.com/api/get-shipment-rate?shipmentDetail= {}',
+        `https://api-topship.com/api/get-shipment-rate?shipmentDetail={
+          senderDetails: {
+            cityName: Lagos
+            countryCode: NG
+          },
+          senderDetails: {
+            cityName: ${dto.city}
+            countryCode: NG
+          },
+          totalWeight: 2
+        }`,
         {
           headers: {
             Authorization: `Bearer ${topshipApiKey}`,
