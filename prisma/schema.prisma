@@ -163,7 +163,7 @@ model Order {
   totalPrice              Decimal?      @default(0)
   status                  OrderStatus   @default(PENDING) 
   payment                 Payment?
-  trackingId              String?
+  shipment                Shipment?
   createdAt               DateTime  @default(now())
   orderItem               Order_Item[]
 }
@@ -244,4 +244,15 @@ enum Type {
   IMAGE
   AUDIO
   VIDEO
+}
+
+model Shipment {
+  id                String      @id @default(uuid())
+  trackingId        String
+  cost              Decimal
+  order             Order       @relation(fields: [orderId], references: [id])  
+  orderId           String      @unique
+  isPaid            Boolean     @default(false)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 }
