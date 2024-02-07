@@ -236,9 +236,11 @@ export class ProfileService {
     file: Express.Multer.File,
   ): Promise<ApiResponse> {
     try {
-      // upload image of artwork
-      const uploadedProfilePicture =
-        await this.cloudinary.uploadProfilePicture(file);
+      // upload profile picture
+      const uploadedProfilePicture = await this.cloudinary.uploadImage(
+        'Profile',
+        file,
+      );
 
       // update profile with profile picture public id
       await this.prisma.profile.update({
@@ -248,7 +250,7 @@ export class ProfileService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: 'Profile picture updated',
+        message: 'Profile picture uploaded',
       };
     } catch (error) {
       this.logger.error(error);
