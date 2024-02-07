@@ -75,12 +75,12 @@ export class EmailNotificationService {
    * @param to : email address of reciepient
    * @param orderItemId : id of order item
    */
-  async sendOrderShippedEmail(to: string, orderId: string) {
+  async sendOrderShippedEmail(to: string, orderId: string, trackingId: string) {
     const mailOptions = {
       from: this.config.get('USER_EMAIL'),
       to: to,
       subject: 'Order Shipment',
-      text: `Your order with id: ${orderId} has been shipped.`,
+      text: `Your order with id: ${orderId} has been shipped. Your tracking id is ${trackingId}`,
     };
 
     await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
