@@ -65,6 +65,48 @@ export class PaymentService {
         },
       });
 
+      const order = await this.prisma.order.findFirst({
+        where: { id: dto.orderId },
+      });
+
+      // calculate referral amount and fund referrer if referrer code is present
+      if (order.referrerCode !== null) {
+        // get details of referrer
+        const referrer = await this.prisma.referral.findFirst({
+          where: { code: order.referrerCode },
+          include: { user: { select: { profile: true } } },
+        });
+
+        if (!referrer) {
+          return {
+            statusCode: HttpStatus.OK,
+            data: {
+              redirectUrl: responseData.authorization_url,
+              reference: responseData.reference,
+            },
+          };
+        }
+
+        // calculate referral amount
+        const referralAmount =
+          (Number(this.config.get('REFERRAL_PERCENTAGE')) *
+            Number(order.totalPrice)) /
+          100;
+
+        await this.prisma.referral.update({
+          where: { id: referrer.id },
+          data: { balance: referralAmount },
+        });
+
+        return {
+          statusCode: HttpStatus.OK,
+          data: {
+            redirectUrl: responseData.authorization_url,
+            reference: responseData.reference,
+          },
+        };
+      }
+
       return {
         statusCode: HttpStatus.OK,
         data: {
