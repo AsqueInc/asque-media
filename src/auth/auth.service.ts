@@ -198,7 +198,7 @@ export class AuthService {
       // ensure google user can only login via google
       if (userExists.isGoogleUser === true) {
         throw new HttpException(
-          'User can only login via google as user registered via google',
+          'You can only login via google as you registered via google',
           HttpStatus.UNAUTHORIZED,
         );
       }
