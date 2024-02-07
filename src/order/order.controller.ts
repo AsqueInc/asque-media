@@ -10,10 +10,10 @@ import {
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
-// import { CreateOrderDto } from './dto/create-order.dto';
+
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
 import { CheckOutDto } from './dto/check-out.dto';
-import { NotifyOrderShipedDto } from './dto/order-shipped.dto';
+import { ShipOrderDto } from './dto/order-shipped.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @ApiTags('order-endpoints')
@@ -33,30 +33,20 @@ export class OrderController {
   @ApiOperation({
     summary: 'Get a list of orders and order items made by a user',
   })
-  getUserOrders(
-    // @Param('profileId') profileId: string,
-    @Req() req,
-  ) {
+  getUserOrders(@Req() req) {
     return this.orderService.getUserOrders(req.user.profileId);
   }
 
   // needs refactoring
   @Patch('cancel/:orderId/')
   @ApiOperation({ summary: 'Cancel an order' })
-  cancelOrder(
-    // @Param('profileId') profileId: string,
-    @Param('orderId') orderId: string,
-    @Req() req,
-  ) {
+  cancelOrder(@Param('orderId') orderId: string, @Req() req) {
     return this.orderService.cancelOrder(orderId, req.user.profileId);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create an order' })
-  createOrder(
-    // @Body() dto: CreateOrderDto,
-    @Req() req,
-  ) {
+  createOrder(@Req() req) {
     return this.orderService.createOrder(req.user.profileId);
   }
 
@@ -69,7 +59,6 @@ export class OrderController {
   @Patch('remove-order-item/:orderItemId')
   @ApiOperation({ summary: 'removed selected artwork from an order' })
   removeOrderItemFromOrder(
-    // @Param('profileId') profileId: string,
     @Param('orderItemId') orderItemId: string,
     @Req() req,
   ) {
@@ -85,9 +74,9 @@ export class OrderController {
     return this.orderService.checkout(orderId, dto);
   }
 
-  @Post('shipment-notification')
-  @ApiOperation({ summary: 'Notify a user about order shipment via email' })
-  notifyUserOrderShipped(@Body() dto: NotifyOrderShipedDto) {
-    return this.orderService.notifyUserOrderShipped(dto);
+  @Post('ship')
+  @ApiOperation({ summary: 'Ship a user order' })
+  shipOrder(@Body() dto: ShipOrderDto, @Req() req) {
+    return this.orderService.shipOrder(req.user.userId, dto);
   }
 }
