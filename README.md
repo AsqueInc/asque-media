@@ -21,10 +21,10 @@ African Americans, post first generation immigrants, and everone with a demonstr
 ## Todo
 
 - endpoint to get trending artwork
-- validate files to upload
 - fund referrer after payment of artwork
 - integrate automatic shipping with topship
 - create endpoint for multiple file upload
+- endpoint to get shipment details
 
 ## Installation
 
