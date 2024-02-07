@@ -121,6 +121,66 @@ export class AuthService {
     }
   }
 
+  async registerGoogleUser(email: string, name: string) {
+    try {
+      // generate referral code for user
+      const referralCode = this.util.generateReferralCode();
+
+      const googleUser = await this.prisma.user.create({
+        data: {
+          email: email,
+          // refreshToken: refreshToken,
+          // password: null,
+          role: 'USER',
+          profile: {
+            create: {
+              name: name,
+            },
+          },
+          referral: {
+            create: {
+              code: referralCode,
+            },
+          },
+        },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+          profile: {
+            select: {
+              id: true,
+              name: true,
+              earning: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
+          referral: {
+            select: {
+              id: true,
+              code: true,
+              balance: true,
+            },
+          },
+        },
+      });
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        data: googleUser,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   /**
    * login a user
    * @param dto : login user dto
