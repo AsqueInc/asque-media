@@ -1,7 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class NotifyOrderShipedDto {
+export class ShipOrderDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  payerEmail: string;
+
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
@@ -10,10 +15,5 @@ export class NotifyOrderShipedDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  userId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
-  payerEmail: string;
+  shipmentId: string;
 }
