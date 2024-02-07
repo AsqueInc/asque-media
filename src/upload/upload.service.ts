@@ -37,8 +37,8 @@ export class UploadService {
     file: Express.Multer.File,
   ) {
     try {
-      // upload artwork
       if (uploadType === 'Artwork') {
+        // upload artwork
         const uploadedArtwork = await this.cloudinary.uploadImage(
           'Artwork',
           file,
@@ -46,8 +46,8 @@ export class UploadService {
 
         const fileDetails = await this.saveToFile(
           'IMAGE',
-          uploadedArtwork.filename,
-          uploadedArtwork.path,
+          file.originalname,
+          uploadedArtwork.url,
         );
         return {
           statusCode: HttpStatus.CREATED,
@@ -64,8 +64,8 @@ export class UploadService {
 
         const fileDetails = await this.saveToFile(
           'IMAGE',
-          uploadedProfilePicture.filename,
-          uploadedProfilePicture.path,
+          file.originalname,
+          uploadedProfilePicture.url,
         );
         return {
           statusCode: HttpStatus.CREATED,
@@ -79,8 +79,8 @@ export class UploadService {
 
         const fileDetails = await this.saveToFile(
           'AUDIO',
-          uploadedAudio.filename,
-          uploadedAudio.path,
+          file.originalname,
+          uploadedAudio.url,
         );
 
         return {
@@ -95,8 +95,8 @@ export class UploadService {
 
         const fileDetails = await this.saveToFile(
           'VIDEO',
-          uploadedVideo.filename,
-          uploadedVideo.path,
+          file.originalname,
+          uploadedVideo.url,
         );
         return {
           statusCode: HttpStatus.CREATED,
@@ -110,8 +110,8 @@ export class UploadService {
 
         const fileDetails = await this.saveToFile(
           'IMAGE',
-          uploadedImage.filename,
-          uploadedImage.path,
+          file.originalname,
+          uploadedImage.url,
         );
         return {
           statusCode: HttpStatus.CREATED,
