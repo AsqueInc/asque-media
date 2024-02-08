@@ -21,7 +21,6 @@ African Americans, post first generation immigrants, and everone with a demonstr
 ## Todo
 
 - endpoint to get trending artwork
-- fund referrer after payment of artwork
 - create endpoint for multiple file upload
 
 ## Installation
