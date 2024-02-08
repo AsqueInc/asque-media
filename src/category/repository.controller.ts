@@ -25,11 +25,7 @@ export class RepositoryController {
   @ApiSecurity('JWT-auth')
   @Post('')
   @ApiOperation({ summary: 'Create a category' })
-  CreateRepository(
-    @Body() dto: CreateRepositoryDto,
-    // @Param('userId') userId: string,
-    @Req() req,
-  ) {
+  CreateRepository(@Body() dto: CreateRepositoryDto, @Req() req) {
     return this.repositoryService.createRepository(dto, req.user.userId);
   }
 
@@ -39,7 +35,6 @@ export class RepositoryController {
   @ApiOperation({ summary: 'Update a category details' })
   updateRepository(
     @Body() dto: UpdateRepositoryDto,
-    // @Param('userId') userId: string,
     @Param('categoryId') categoryId: string,
     @Req() req,
   ) {
