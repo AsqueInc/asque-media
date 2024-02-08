@@ -27,11 +27,6 @@ export class RegisterUserDto {
   type: 'USER' | 'ARTIST';
 
   @IsString()
-  @IsOptional()
-  @ApiProperty()
-  referralCode: string;
-
-  @IsString()
   @IsNotEmpty()
   @ApiProperty()
   @MinLength(8, {
