@@ -140,7 +140,7 @@ export class RepositoryService {
 
       // find all artwork in the repository
       const results = await this.prisma.artWork.findMany({
-        where: { category: repositoryExists.title },
+        where: { categoryId: repositoryId },
         skip: skip,
       });
 
