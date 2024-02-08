@@ -37,6 +37,10 @@ export class PaymentService {
         where: { id: profileId },
       });
 
+      const order = await this.prisma.order.findFirst({
+        where: { id: dto.orderId },
+      });
+
       // create transaction with paystack
       const response = await axios.post(
         'https://api.paystack.co/transaction/initialize',
@@ -63,10 +67,6 @@ export class PaymentService {
           amount: dto.amount,
           orderId: dto.orderId,
         },
-      });
-
-      const order = await this.prisma.order.findFirst({
-        where: { id: dto.orderId },
       });
 
       // calculate referral amount and fund referrer if referrer code is present
