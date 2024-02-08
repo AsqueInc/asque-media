@@ -38,6 +38,17 @@ export class ArtworkService {
         );
       }
 
+      const category = await this.prisma.category.findFirst({
+        where: { id: dto.categoryId },
+      });
+
+      if (!category) {
+        throw new HttpException(
+          'Category does not exist',
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
       const artwork = await this.prisma.artWork.create({
         data: {
           title: dto.title,
@@ -51,7 +62,8 @@ export class ArtworkService {
           saleType: dto.saleType,
           quantity: dto.saleType == 'ORIGINAL' ? 0 : dto.quantity,
           imageUris: dto.imageUris,
-          category: dto.category,
+          category: { connect: { id: category.id } },
+          // categoryId: category.id,
         },
       });
 
@@ -98,7 +110,8 @@ export class ArtworkService {
           title: dto.title,
           description: dto.description,
           price: dto.price,
-          category: dto.category,
+          category: { connect: { id: dto.categoryId } },
+          // category: { connectOrCreate: { create: { id: dto.categoryId } } },
         },
       });
       return {
