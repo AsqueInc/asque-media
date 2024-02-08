@@ -15,7 +15,7 @@ export class UpdateArtworkDto {
   @IsString()
   @ApiProperty()
   @IsOptional()
-  category: string;
+  categoryId: string;
 
   @ApiProperty()
   @IsOptional()

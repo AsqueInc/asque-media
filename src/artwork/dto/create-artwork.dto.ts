@@ -11,7 +11,7 @@ export class CreateArtworkDto {
   @IsString()
   @ApiProperty()
   @IsNotEmpty()
-  category: string;
+  categoryId: string;
 
   @IsString()
   @ApiProperty()
@@ -26,8 +26,7 @@ export class CreateArtworkDto {
   @IsNotEmpty()
   price: number;
 
-  @IsString()
-  @ApiProperty()
+  @ApiProperty({ enum: SaleType })
   @IsOptional()
   saleType: SaleType;
 
