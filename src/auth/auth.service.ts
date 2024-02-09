@@ -55,6 +55,12 @@ export class AuthService {
    */
   async registerUser(dto: RegisterUserDto): Promise<ApiResponse> {
     try {
+      if (dto.type === 'ADMIN') {
+        throw new HttpException(
+          'You cannot create an admin',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
       // check if user already exists
       const userExists = await this.checkUserExistsByEmail(dto.email);
       if (userExists) {
