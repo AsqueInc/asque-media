@@ -20,7 +20,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class UploadController {
   constructor(private readonly uploadService: UploadService) {}
 
-  @Post('cloudinary:type')
+  @Post('cloudinary/:type')
   @ApiParam({
     name: 'type',
     enum: ['ProfilePicture', 'Artwork', 'Audio', 'Video', 'Image'],
