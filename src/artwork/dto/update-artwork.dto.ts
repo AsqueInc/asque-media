@@ -12,10 +12,9 @@ export class UpdateArtworkDto {
   @IsOptional()
   description: string;
 
-  @IsString()
   @ApiProperty()
   @IsOptional()
-  categoryId: string;
+  category: string[];
 
   @ApiProperty()
   @IsOptional()
