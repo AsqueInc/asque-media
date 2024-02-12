@@ -179,4 +179,33 @@ export class ArtworkService {
       );
     }
   }
+
+  async getAllArtworkInACategory(categoryName: string, dto: PaginationDto) {
+    try {
+      const skip = (dto.page - 1) * dto.pageSize;
+
+      const artworks = await this.prisma.artWork.findMany({
+        where: { category: { has: categoryName } },
+        skip: skip,
+      });
+
+      const totalRecords = artworks.length;
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          currentPage: dto.page,
+          pageSize: dto.pageSize,
+          totalRecord: totalRecords,
+          data: artworks,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

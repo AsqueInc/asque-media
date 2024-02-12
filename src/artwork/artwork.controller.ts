@@ -54,4 +54,13 @@ export class ArtworkController {
       dto,
     );
   }
+
+  @Get('category/:categoryName')
+  @ApiOperation({ summary: 'Get all artwork by category name' })
+  getAllArtworkInACategory(
+    @Query() dto: PaginationDto,
+    @Param('categoryName') categoryName: string,
+  ) {
+    return this.artWorkService.getAllArtworkInACategory(categoryName, dto);
+  }
 }
