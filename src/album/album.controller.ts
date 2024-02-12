@@ -65,4 +65,13 @@ export class AlbumController {
   ) {
     return this.albumService.deleteAlbumImage(albumId, req.user.profileId, dto);
   }
+
+  @Get('category/:categoryName')
+  @ApiOperation({ summary: 'Get all albums by category name' })
+  getAllAlbumsInACategory(
+    @Query() dto: PaginationDto,
+    @Param('categoryName') categoryName: string,
+  ) {
+    return this.albumService.getAllAlbumsInACategory(categoryName, dto);
+  }
 }
