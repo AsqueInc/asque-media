@@ -126,6 +126,46 @@ export class OrderService {
     }
   }
 
+  // /**
+  //  *
+  //  * @param dto
+  //  */
+  // async addOrderItemsToOrder(dto: OrderItemsDto) {
+  //   try {
+  //     let currentTotalPrice = 0;
+  //     dto.orderItems.forEach(async (orderItem) => {
+  //       const artwork = await this.prisma.artWork.findFirst({
+  //         where: { id: orderItem.artworkId },
+  //       });
+
+  //       // check to see quantity ordered does not exceed available quantity
+  //       if (orderItem.quantity > artwork.quantity) {
+  //         throw new HttpException(
+  //           `There are only ${artwork.quantity} available in the store.`,
+  //           HttpStatus.BAD_REQUEST,
+  //         );
+  //       }
+
+  //       const totalArtworkPrice = Number(artwork.price) * orderItem.quantity;
+
+  //       await this.prisma.order_Item.create({
+  //         data: {
+  //           artworkId: orderItem.artworkId,
+  //           quantity: orderItem.quantity,
+  //           price: totalArtworkPrice,
+  //           // order: { connect: { id: orderItem.orderId } },
+  //           orderId: orderItem.orderId,
+  //         },
+  //       });
+  //     });
+  //   } catch (error) {
+  //     throw new HttpException(
+  //       error.message,
+  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
+
   /**
    * add selected artwork to an order and update available quantity in store
    * @param dto : create order item dto
