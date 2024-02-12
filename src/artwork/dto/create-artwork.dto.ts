@@ -8,10 +8,9 @@ export class CreateArtworkDto {
   @IsNotEmpty()
   title: string;
 
-  @IsString()
   @ApiProperty()
   @IsNotEmpty()
-  categoryId: string;
+  category: string[];
 
   @IsString()
   @ApiProperty()
