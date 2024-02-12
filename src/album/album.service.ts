@@ -76,38 +76,6 @@ export class AlbumService {
   }
 
   /**
-   * get details of an album via artwork id
-   * @param artWorkId : artworkId of album
-   * @returns : status code and album details
-   */
-  // async getAlbumDetailsByArtworkId(artWorkId: string): Promise<ApiResponse> {
-  //   try {
-  //     const album = await this.prisma.album.findFirst({
-  //       where: { artworkId: artWorkId },
-  //       include: { artwork: true },
-  //     });
-
-  //     if (!album) {
-  //       throw new HttpException(
-  //         'An album has not been created for this artwork',
-  //         HttpStatus.NOT_FOUND,
-  //       );
-  //     }
-
-  //     return {
-  //       statusCode: HttpStatus.OK,
-  //       data: album,
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw new HttpException(
-  //       error.message,
-  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
-
-  /**
    * get all albums posted by a profile via profile id
    * @param profileId : id of profile
    * @param dto : paginationDto
@@ -227,70 +195,6 @@ export class AlbumService {
       );
     }
   }
-
-  /**
-   * upload an image to an album
-   * @param albumId : album id
-   * @param profileId : profile id
-   * @param file : file to be uploaded
-   * @returns : status code and updated album
-   */
-  // async uploadImageToAlbum(
-  //   albumId: string,
-  //   profileId: string,
-  //   file: Express.Multer.File,
-  // ): Promise<ApiResponse> {
-  //   try {
-  //     const album = await this.prisma.album.findFirst({
-  //       where: { id: albumId },
-  //     });
-
-  //     if (!album) {
-  //       throw new HttpException('Album does not exist', HttpStatus.NOT_FOUND);
-  //     }
-
-  //     // ensure only owner of album can delete album
-  //     if (album.profileId !== profileId) {
-  //       throw new HttpException(
-  //         'You cannot upload an image to an album you did not create',
-  //         HttpStatus.UNAUTHORIZED,
-  //       );
-  //     }
-
-  //     // ensure an album does not have more than 20 images
-  //     if (album.albumImageUris.length >= 20) {
-  //       throw new HttpException(
-  //         'You cannot upload more than 20 images to an album',
-  //         HttpStatus.BAD_REQUEST,
-  //       );
-  //     }
-
-  //     // get album image uri list
-  //     const albumImageUriList = album.albumImageUris;
-
-  //     // upload image to cloudinary
-  //     const uploadedImageUri = await this.cloudinary.uploadImage(file);
-
-  //     albumImageUriList.push(uploadedImageUri.url);
-
-  //     // update album
-  //     const updatedAlbum = await this.prisma.album.update({
-  //       where: { id: albumId },
-  //       data: { albumImageUris: albumImageUriList },
-  //     });
-
-  //     return {
-  //       statusCode: HttpStatus.OK,
-  //       data: updatedAlbum,
-  //     };
-  //   } catch (error) {
-  //     this.logger.error(error);
-  //     throw new HttpException(
-  //       error.message,
-  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
 
   /**
    * delete an album image
