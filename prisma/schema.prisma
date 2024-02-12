@@ -142,7 +142,7 @@ model Album {
   id                String      @id @default(uuid())
   title             String
   category          String[]
-  profileId         String      @unique
+  profileId         String      
   profile           Profile     @relation(fields: [profileId], references: [id])
   albumImageUris    String[]
   description       String?
