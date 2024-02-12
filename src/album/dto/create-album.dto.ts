@@ -9,8 +9,7 @@ export class CreateAlbumDto {
 
   @IsNotEmpty()
   @ApiProperty()
-  @IsString()
-  category: string;
+  category: string[];
 
   @IsNotEmpty()
   @ApiProperty()
@@ -19,6 +18,5 @@ export class CreateAlbumDto {
 
   @IsOptional()
   @ApiProperty()
-  @IsString()
   albumImageUris: string[];
 }
