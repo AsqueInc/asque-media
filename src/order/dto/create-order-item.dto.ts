@@ -17,3 +17,7 @@ export class CreateOrderItemDto {
   @ApiProperty()
   quantity: number = 1;
 }
+
+export class OrderItemsDto {
+  orderItems: CreateOrderItemDto[];
+}
