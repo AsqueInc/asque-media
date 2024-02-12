@@ -112,7 +112,6 @@ model Category {
   id                      String    @id @default(uuid())
   title                   String
   description             String
-  artwork                 ArtWork[]
   createdAt               DateTime  @default(now())
   updatedAt               DateTime  @updatedAt
 }
@@ -127,8 +126,7 @@ model ArtWork {
   imageUris         String[]
   artistProfile     Profile  @relation(fields: [artistProfileId], references: [id])
   artistProfileId   String
-  category          Category  @relation(fields: [categoryId], references: [id])
-  categoryId        String
+  category          String[]
   review            Review[]
   orderItem         Order_Item[]
   createdAt         DateTime  @default(now())
@@ -143,7 +141,7 @@ enum SaleType {
 model Album {
   id                String      @id @default(uuid())
   title             String
-  category          String
+  category          String[]
   profileId         String      @unique
   profile           Profile     @relation(fields: [profileId], references: [id])
   albumImageUris    String[]
