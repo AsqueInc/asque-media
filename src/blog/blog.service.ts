@@ -111,7 +111,7 @@ export class BlogService {
         include: { profile: { select: { name: true } } },
       });
       if (!blog) {
-        throw new HttpException('Blog does not exists', HttpStatus.NOT_FOUND);
+        throw new HttpException('Story does not exists', HttpStatus.NOT_FOUND);
       }
 
       return {
@@ -131,19 +131,17 @@ export class BlogService {
     try {
       const blog = await this.prisma.story.findFirst({ where: { id: blogId } });
       if (!blog) {
-        throw new HttpException('Blog does not exists', HttpStatus.NOT_FOUND);
+        throw new HttpException('Story does not exists', HttpStatus.NOT_FOUND);
       }
 
       const profile = await this.prisma.profile.findFirst({
         where: { id: profileId },
+        include: { user: true },
       });
-      if (!profile) {
-        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
-      }
 
-      if (blog.profileId !== profileId) {
+      if (blog.profileId !== profile.id && profile.user.role !== 'ADMIN') {
         throw new HttpException(
-          'You cannot delete a blog that you did not write',
+          'You cannot delete a story that you did not write',
           HttpStatus.UNAUTHORIZED,
         );
       }
@@ -152,7 +150,7 @@ export class BlogService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: { message: 'Blog deleted' },
+        message: 'Story deleted',
       };
     } catch (error) {
       this.logger.error(error);
@@ -167,19 +165,19 @@ export class BlogService {
     try {
       const blog = await this.prisma.story.findFirst({ where: { id: blogId } });
       if (!blog) {
-        throw new HttpException('Blog does not exists', HttpStatus.NOT_FOUND);
+        throw new HttpException('Story does not exists', HttpStatus.NOT_FOUND);
       }
 
       const profile = await this.prisma.profile.findFirst({
         where: { id: profileId },
       });
       if (!profile) {
-        throw new HttpException('User does not exists', HttpStatus.NOT_FOUND);
+        throw new HttpException('Story does not exists', HttpStatus.NOT_FOUND);
       }
 
       if (blog.profileId !== profileId) {
         throw new HttpException(
-          'You cannot update a blog that you did not write',
+          'You cannot update a story that you did not write',
           HttpStatus.UNAUTHORIZED,
         );
       }
