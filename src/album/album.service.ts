@@ -137,19 +137,19 @@ export class AlbumService {
       }
 
       // ensure only owner of album can delete album
-      if (album.profileId === profileId || profile.user.role === 'ADMIN') {
-        await this.prisma.album.delete({ where: { id: albumId } });
-
-        return {
-          statusCode: HttpStatus.OK,
-          message: 'Album deleted',
-        };
+      if (album.profileId !== profileId && profile.user.role !== 'ADMIN') {
+        throw new HttpException(
+          'You cannot delete an album that you did not create',
+          HttpStatus.UNAUTHORIZED,
+        );
       }
 
-      throw new HttpException(
-        'You cannot delete an album you did not create',
-        HttpStatus.UNAUTHORIZED,
-      );
+      await this.prisma.album.delete({ where: { id: albumId } });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Album deleted',
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
