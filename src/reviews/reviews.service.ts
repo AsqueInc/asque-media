@@ -67,22 +67,24 @@ export class ReviewsService {
     dto: PaginationDto,
   ): Promise<ApiResponse> {
     try {
+      const totalReviews = await this.prisma.review.count({
+        where: { artworkId: artworkId },
+      });
+
       const skip = (dto.page - 1) * dto.pageSize;
 
       const reviews = await this.prisma.review.findMany({
         where: { artworkId: artworkId },
         skip: skip,
+        take: Number(dto.pageSize),
       });
-
-      // get length of result array
-      const totalRecords = reviews.length;
 
       return {
         statusCode: HttpStatus.OK,
         data: {
           currentPage: dto.page,
           pageSize: dto.pageSize,
-          totalRecord: totalRecords,
+          totalRecord: totalReviews,
           data: reviews,
         },
       };

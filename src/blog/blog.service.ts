@@ -16,16 +16,16 @@ export class BlogService {
 
   async getAllBlogs(dto: PaginationDto) {
     try {
+      const totalRecords = await this.prisma.story.count();
       const skip = (dto.page - 1) * dto.pageSize;
 
       const blogs = await this.prisma.story.findMany({
         skip: skip,
+        take: Number(dto.pageSize),
         orderBy: {
           createdAt: 'desc',
         },
       });
-
-      const totalRecords = blogs.length;
 
       return {
         statusCode: HttpStatus.OK,
@@ -77,14 +77,16 @@ export class BlogService {
 
   async getAllUserBlogs(profileId: string, dto: PaginationDto) {
     try {
+      const totalRecords = await this.prisma.story.count({
+        where: { profileId: profileId },
+      });
       const skip = (dto.page - 1) * dto.pageSize;
 
       const blogs = await this.prisma.story.findMany({
         where: { profileId: profileId },
         skip: skip,
+        take: Number(dto.pageSize),
       });
-
-      const totalRecords = blogs.length;
 
       return {
         statusCode: HttpStatus.OK,

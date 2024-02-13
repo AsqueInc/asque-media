@@ -153,14 +153,17 @@ export class ArtworkService {
     dto: PaginationDto,
   ): Promise<ApiResponse> {
     try {
+      const totalRecords = await this.prisma.artWork.count({
+        where: { artistProfileId: profileId },
+      });
+
       const skip = (dto.page - 1) * dto.pageSize;
 
       const userArtworks = await this.prisma.artWork.findMany({
         where: { artistProfileId: profileId },
         skip: skip,
+        take: Number(dto.pageSize),
       });
-
-      const totalRecords = userArtworks.length;
 
       return {
         statusCode: HttpStatus.OK,
@@ -182,14 +185,17 @@ export class ArtworkService {
 
   async getAllArtworkInACategory(categoryName: string, dto: PaginationDto) {
     try {
+      const totalRecords = await this.prisma.artWork.count({
+        where: { category: { has: categoryName } },
+      });
+
       const skip = (dto.page - 1) * dto.pageSize;
 
       const artworks = await this.prisma.artWork.findMany({
         where: { category: { has: categoryName } },
         skip: skip,
+        take: Number(dto.pageSize),
       });
-
-      const totalRecords = artworks.length;
 
       return {
         statusCode: HttpStatus.OK,

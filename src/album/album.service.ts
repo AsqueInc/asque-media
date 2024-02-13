@@ -47,15 +47,15 @@ export class AlbumService {
 
   async getAllAlbums(dto: PaginationDto): Promise<ApiResponse> {
     try {
+      const totalRecords = await this.prisma.album.count();
+
       const skip = (dto.page - 1) * dto.pageSize;
 
       const albums = await this.prisma.album.findMany({
         skip: skip,
+        take: Number(dto.pageSize),
         orderBy: { createdAt: 'desc' },
       });
-
-      // get length of result array
-      const totalRecords = albums.length;
 
       return {
         statusCode: HttpStatus.OK,
@@ -86,16 +86,17 @@ export class AlbumService {
     dto: PaginationDto,
   ): Promise<ApiResponse> {
     try {
+      const totalRecords = await this.prisma.album.count({
+        where: { profileId: profileId },
+      });
       const skip = (dto.page - 1) * dto.pageSize;
 
       const albums = await this.prisma.album.findMany({
         where: { profileId: profileId },
         include: { profile: { select: { name: true, briefBio: true } } },
         skip: skip,
+        take: Number(dto.pageSize),
       });
-
-      // get length of result array
-      const totalRecords = albums.length;
 
       return {
         statusCode: HttpStatus.OK,
@@ -244,14 +245,17 @@ export class AlbumService {
 
   async getAllAlbumsInACategory(categoryName: string, dto: PaginationDto) {
     try {
+      const totalRecords = await this.prisma.album.count({
+        where: { category: { has: categoryName } },
+      });
+
       const skip = (dto.page - 1) * dto.pageSize;
 
       const albums = await this.prisma.album.findMany({
         where: { category: { has: categoryName } },
         skip: skip,
+        take: Number(dto.pageSize),
       });
-
-      const totalRecords = albums.length;
 
       return {
         statusCode: HttpStatus.OK,
