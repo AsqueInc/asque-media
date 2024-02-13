@@ -23,16 +23,16 @@ import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
-  @Get(':albumId')
-  @ApiOperation({ summary: 'Get an album by album id' })
-  getAlbumDetailsById(@Param('albumId') albumId: string) {
-    return this.albumService.getAlbumDetailsById(albumId);
-  }
-
   @Get('own')
   @ApiOperation({ summary: 'Get all albums created by a profile' })
   getAllAlbumsByProfileId(@Req() req, @Query() dto: PaginationDto) {
     return this.albumService.getAllAlbumsByProfileId(req.user.profileId, dto);
+  }
+
+  @Get(':albumId')
+  @ApiOperation({ summary: 'Get an album by album id' })
+  getAlbumDetailsById(@Param('albumId') albumId: string) {
+    return this.albumService.getAlbumDetailsById(albumId);
   }
 
   @Get('all')
@@ -41,13 +41,10 @@ export class AlbumController {
     return this.albumService.getAllAlbums(dto);
   }
 
-  @Delete(':albumId/:profileId')
+  @Delete(':albumId')
   @ApiOperation({ summary: 'Delete an album' })
-  deleteAlbum(
-    @Param('albumId') albumId: string,
-    @Param('profileId') profileId: string,
-  ) {
-    return this.albumService.deleteAlbum(albumId, profileId);
+  deleteAlbum(@Param('albumId') albumId: string, @Req() req) {
+    return this.albumService.deleteAlbum(albumId, req.user.profileId);
   }
 
   @Post()
