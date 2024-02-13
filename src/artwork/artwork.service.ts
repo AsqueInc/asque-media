@@ -208,4 +208,43 @@ export class ArtworkService {
       );
     }
   }
+
+  async deleteArtwork(profileId: string, artworkId: string) {
+    try {
+      const artwork = await this.prisma.artWork.findFirst({
+        where: { id: artworkId },
+      });
+      if (!artwork) {
+        throw new HttpException('Artwork does not exist', HttpStatus.NOT_FOUND);
+      }
+
+      const profile = await this.prisma.profile.findFirst({
+        where: { id: profileId },
+        include: { user: true },
+      });
+
+      if (
+        artwork.artistProfileId !== profile.id &&
+        profile.user.role !== 'ADMIN'
+      ) {
+        throw new HttpException(
+          'You cannot delete an album that you did not create',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      await this.prisma.artWork.delete({ where: { id: artworkId } });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Artwork deleted',
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

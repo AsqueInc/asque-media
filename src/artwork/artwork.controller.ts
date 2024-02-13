@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -62,5 +63,11 @@ export class ArtworkController {
     @Param('categoryName') categoryName: string,
   ) {
     return this.artWorkService.getAllArtworkInACategory(categoryName, dto);
+  }
+
+  @Delete(':artworkId')
+  @ApiOperation({ summary: 'Delete an artwork' })
+  deleteArtwork(@Param('artworkId') artworkId: string, @Req() req) {
+    return this.artWorkService.deleteArtwork(req.user.profileId, artworkId);
   }
 }
