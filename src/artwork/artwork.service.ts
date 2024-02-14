@@ -49,7 +49,7 @@ export class ArtworkService {
           description: dto.description,
           price: dto.price,
           saleType: dto.saleType,
-          quantity: dto.saleType == 'ORIGINAL' ? 0 : dto.quantity,
+          quantity: dto.saleType == 'ORIGINAL' ? 1 : dto.quantity,
           imageUris: dto.imageUris,
           category: dto.category,
         },
