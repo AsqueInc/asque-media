@@ -30,6 +30,12 @@ export class ArtworkController {
     return this.artWorkService.getAllArtworkByUser(req.user.profileId, dto);
   }
 
+  @Get('all')
+  @ApiOperation({ summary: 'Get all artwork ' })
+  getAllArtwork(@Query() dto: PaginationDto) {
+    return this.artWorkService.getAllArtwork(dto);
+  }
+
   @Get(':artworkId')
   @ApiOperation({ summary: 'Get a single artwork by id' })
   getSingleArtWorkById(@Param('artworkId') artworkId: string) {
