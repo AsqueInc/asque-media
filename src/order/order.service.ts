@@ -126,46 +126,6 @@ export class OrderService {
     }
   }
 
-  // /**
-  //  *
-  //  * @param dto
-  //  */
-  // async addOrderItemsToOrder(dto: OrderItemsDto) {
-  //   try {
-  //     let currentTotalPrice = 0;
-  //     dto.orderItems.forEach(async (orderItem) => {
-  //       const artwork = await this.prisma.artWork.findFirst({
-  //         where: { id: orderItem.artworkId },
-  //       });
-
-  //       // check to see quantity ordered does not exceed available quantity
-  //       if (orderItem.quantity > artwork.quantity) {
-  //         throw new HttpException(
-  //           `There are only ${artwork.quantity} available in the store.`,
-  //           HttpStatus.BAD_REQUEST,
-  //         );
-  //       }
-
-  //       const totalArtworkPrice = Number(artwork.price) * orderItem.quantity;
-
-  //       await this.prisma.order_Item.create({
-  //         data: {
-  //           artworkId: orderItem.artworkId,
-  //           quantity: orderItem.quantity,
-  //           price: totalArtworkPrice,
-  //           // order: { connect: { id: orderItem.orderId } },
-  //           orderId: orderItem.orderId,
-  //         },
-  //       });
-  //     });
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       error.message,
-  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
-
   /**
    * add selected artwork to an order and update available quantity in store
    * @param dto : create order item dto
@@ -209,6 +169,14 @@ export class OrderService {
       // reduce available quantity after order item is created and added to user's order
       const previousQuantity = artwork.quantity;
       const currentQuantity = previousQuantity - dto.quantity;
+
+      // set purchase status to sold out if remaining quantity is 0
+      if (currentQuantity === 0) {
+        await this.prisma.artWork.update({
+          where: { id: dto.artworkId },
+          data: { quantity: currentQuantity, purchaseStatus: 'SoldOut' },
+        });
+      }
 
       await this.prisma.artWork.update({
         where: { id: dto.artworkId },
@@ -266,6 +234,13 @@ export class OrderService {
 
       // update artwork quantity after removing from order
       const newArtworkQuantity = orderItem.quantity + artwork.quantity;
+
+      if (artwork.quantity === 0) {
+        await this.prisma.artWork.update({
+          where: { id: orderItem.artworkId },
+          data: { quantity: newArtworkQuantity, purchaseStatus: 'InStock' },
+        });
+      }
 
       await this.prisma.artWork.update({
         where: { id: orderItem.artworkId },
