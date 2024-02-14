@@ -118,7 +118,7 @@ export class AuthController {
     return res.send({ accessToken, userId, email, profileId, role });
   }
 
-  @Patch('add-admin/:userId')
+  @Patch('add-admin')
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Add admin user' })
