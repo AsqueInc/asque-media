@@ -122,7 +122,8 @@ model ArtWork {
   description       String?
   quantity          Int?
   price             Decimal
-  saleType          SaleType  
+  saleType          SaleType
+  purchaseStatus    PurchaseStatus    @default(InStock)
   imageUris         String[]
   artistProfile     Profile  @relation(fields: [artistProfileId], references: [id])
   artistProfileId   String
@@ -131,6 +132,11 @@ model ArtWork {
   orderItem         Order_Item[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+}
+
+enum PurchaseStatus {
+  SoldOut
+  InStock
 }
 
 enum SaleType {
