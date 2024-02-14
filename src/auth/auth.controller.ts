@@ -19,6 +19,7 @@ import { SendResetPasswordEmailDto } from './dto/send-reset-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtGuard } from './guards/jwt.guard';
 import { GoogleAuthGuard } from './guards/google.guard';
+import { AddAdminDto } from './dto/add-admin.dto';
 
 @ApiTags('auth-endpoints')
 @Controller('auth')
@@ -121,11 +122,7 @@ export class AuthController {
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Add admin user' })
-  addAdmin(
-    @Req() req,
-    @Param('userId') userId: string,
-    // @Param('adminId') adminId: string
-  ) {
-    return this.authService.addAdmin(req.user.userId, userId);
+  addAdmin(@Req() req, @Body() dto: AddAdminDto) {
+    return this.authService.addAdmin(req.user.userId, dto);
   }
 }

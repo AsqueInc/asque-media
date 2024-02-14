@@ -15,6 +15,7 @@ import { EmailNotificationService } from 'src/email-notification/email-notificat
 import { VerifyEmailDto } from './dto/verify-email.otp';
 import { SendResetPasswordEmailDto } from './dto/send-reset-email.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { AddAdminDto } from './dto/add-admin.dto';
 
 @Injectable()
 export class AuthService {
@@ -602,20 +603,29 @@ export class AuthService {
    * @param userId : id of user to be made admin
    * @returns : status code and message
    */
-  async addAdmin(adminId: string, userId: string): Promise<ApiResponse> {
+  async addAdmin(adminId: string, dto: AddAdminDto): Promise<ApiResponse> {
     try {
       const admin = await this.prisma.user.findFirst({
         where: { id: adminId },
       });
-      if (admin.isAdmin !== true) {
+      if (admin.role !== 'ADMIN') {
         throw new HttpException(
           'Only admins can add new admin users',
           HttpStatus.UNAUTHORIZED,
         );
       }
+
+      const user = await this.prisma.user.findFirst({
+        where: { email: dto.email },
+      });
+
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+
       await this.prisma.user.update({
-        where: { id: userId },
-        data: { isAdmin: true },
+        where: { email: dto.email },
+        data: { role: 'ADMIN' },
       });
 
       return {
