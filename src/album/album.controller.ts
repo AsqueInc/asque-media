@@ -29,16 +29,16 @@ export class AlbumController {
     return this.albumService.getAllAlbumsByProfileId(req.user.profileId, dto);
   }
 
-  @Get(':albumId')
-  @ApiOperation({ summary: 'Get an album by album id' })
-  getAlbumDetailsById(@Param('albumId') albumId: string) {
-    return this.albumService.getAlbumDetailsById(albumId);
-  }
-
   @Get('all')
   @ApiOperation({ summary: 'Get all albums ' })
   getAllAlbums(@Query() dto: PaginationDto) {
     return this.albumService.getAllAlbums(dto);
+  }
+
+  @Get(':albumId')
+  @ApiOperation({ summary: 'Get an album by album id' })
+  getAlbumDetailsById(@Param('albumId') albumId: string) {
+    return this.albumService.getAlbumDetailsById(albumId);
   }
 
   @Delete(':albumId')

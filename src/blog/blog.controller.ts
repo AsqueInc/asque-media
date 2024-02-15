@@ -7,24 +7,13 @@ import {
   Delete,
   Patch,
   UseGuards,
-  // UseInterceptors,
-  // UploadedFile,
-  // ParseFilePipe,
-  // FileTypeValidator,
   Req,
   Query,
 } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import {
-  // ApiBody,
-  // ApiConsumes,
-  ApiOperation,
-  ApiSecurity,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
-// import { FileInterceptor } from '@nestjs/platform-express';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
 
 @UseGuards(JwtGuard)
@@ -40,6 +29,12 @@ export class BlogController {
     return this.blogService.getAllUserBlogs(req.user.profileId, dto);
   }
 
+  @Get('all')
+  @ApiOperation({ summary: 'Get all stories' })
+  getAllBlogs(@Query() dto: PaginationDto) {
+    return this.blogService.getAllBlogs(dto);
+  }
+
   @Get(':storyId')
   @ApiOperation({ summary: 'Get a single story by id' })
   getProfile(@Param('storyId') storyId: string) {
@@ -50,12 +45,6 @@ export class BlogController {
   @ApiOperation({ summary: 'Create a story' })
   createProfile(@Body() dto: CreateBlogDto, @Req() req) {
     return this.blogService.createBlog(dto, req.user.profileId);
-  }
-
-  @Get('all')
-  @ApiOperation({ summary: 'Get all stories' })
-  getAllBlogs(@Query() dto: PaginationDto) {
-    return this.blogService.getAllBlogs(dto);
   }
 
   @Delete(':storyId')
