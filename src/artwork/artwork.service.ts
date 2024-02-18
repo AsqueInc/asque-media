@@ -254,25 +254,42 @@ export class ArtworkService {
     }
   }
   async getAllArtwork(dto: PaginationDto) {
-    const totalRecords = await this.prisma.artWork.count({});
-
-    const skip = (dto.page - 1) * dto.pageSize;
-
-    const artworks = await this.prisma.artWork.findMany({
-      skip: skip,
-      take: Number(dto.pageSize),
-    });
-
-    return {
-      statusCode: HttpStatus.OK,
-      data: {
-        currentPage: dto.page,
-        pageSize: dto.pageSize,
-        totalRecord: totalRecords,
-        data: artworks,
-      },
-    };
     try {
+      const totalRecords = await this.prisma.artWork.count({});
+
+      const skip = (dto.page - 1) * dto.pageSize;
+
+      const artworks = await this.prisma.artWork.findMany({
+        skip: skip,
+        take: Number(dto.pageSize),
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          currentPage: dto.page,
+          pageSize: dto.pageSize,
+          totalRecord: totalRecords,
+          data: artworks,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getNewestArtwork() {
+    try {
+      const artworks = await this.prisma.artWork.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return { statusCode: HttpStatus.OK, data: artworks };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
