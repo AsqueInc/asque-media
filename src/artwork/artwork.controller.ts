@@ -31,9 +31,15 @@ export class ArtworkController {
   }
 
   @Get('newest')
-  @ApiOperation({ summary: 'Get newest artwork ' })
+  @ApiOperation({ summary: 'Get ten newest artwork ' })
   getNewestArtwork() {
     return this.artWorkService.getNewestArtwork();
+  }
+
+  @Get('oldest')
+  @ApiOperation({ summary: 'Get ten oldest artwork ' })
+  getOldestArtwork() {
+    return this.artWorkService.getOldestArtwork();
   }
 
   @Get('all')
