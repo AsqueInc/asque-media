@@ -30,6 +30,12 @@ export class ArtworkController {
     return this.artWorkService.getAllArtworkByUser(req.user.profileId, dto);
   }
 
+  @Get('newest')
+  @ApiOperation({ summary: 'Get newest artwork ' })
+  getNewestArtwork() {
+    return this.artWorkService.getNewestArtwork();
+  }
+
   @Get('all')
   @ApiOperation({ summary: 'Get all artwork ' })
   getAllArtwork(@Query() dto: PaginationDto) {
