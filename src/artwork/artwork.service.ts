@@ -298,4 +298,21 @@ export class ArtworkService {
       );
     }
   }
+
+  async getOldestArtwork() {
+    try {
+      const artworks = await this.prisma.artWork.findMany({
+        take: 10,
+        orderBy: { createdAt: 'asc' },
+      });
+
+      return { statusCode: HttpStatus.OK, data: artworks };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
