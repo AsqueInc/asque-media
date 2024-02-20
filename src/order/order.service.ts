@@ -3,7 +3,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
 import { ApiResponse } from 'src/types/response.type';
-import { CreateOrderItemDto } from './dto/create-order-item.dto';
+import { CreateOrderItemDto, OrderItemsDto } from './dto/create-order-item.dto';
 import { Decimal } from '@prisma/client/runtime/library';
 import { CheckOutDto } from './dto/check-out.dto';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
@@ -489,6 +489,56 @@ export class OrderService {
           estimatedDeliveryDate: responseData.estimatedDeliveryDate,
           items: responseData.items,
         },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async addOrderItems(orderId: string, dto: OrderItemsDto[]) {
+    try {
+      let currentOrderTotal = 0;
+
+      await Promise.all(
+        dto.map(async (orderItem) => {
+          let currentItemOrderTotal = 0;
+
+          // get artwork and price of current order item
+          const artwork = await this.prisma.artWork.findFirst({
+            where: { id: orderItem.artworkId },
+          });
+
+          // check to see quantity ordered does not exceed available quantity
+          if (artwork.quantity < orderItem.quantity) {
+            throw new HttpException(
+              `There are only ${artwork.quantity} available in the store.`,
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+          currentItemOrderTotal = orderItem.quantity * Number(artwork.price);
+
+          // create item order
+          await this.prisma.order_Item.create({
+            data: {
+              orderId: orderId,
+              quantity: orderItem.quantity,
+              artworkId: orderItem.artworkId,
+              price: currentItemOrderTotal,
+            },
+          });
+
+          // update current total price
+          currentOrderTotal += currentItemOrderTotal;
+        }),
+      );
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        data: { dto, total: currentOrderTotal },
       };
     } catch (error) {
       this.logger.error(error);
