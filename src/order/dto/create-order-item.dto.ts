@@ -19,5 +19,13 @@ export class CreateOrderItemDto {
 }
 
 export class OrderItemsDto {
-  orderItems: CreateOrderItemDto[];
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty()
+  artworkId: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty()
+  quantity: number = 1;
 }
