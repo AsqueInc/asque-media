@@ -3,6 +3,7 @@ import {
   Controller,
   FileTypeValidator,
   Get,
+  Param,
   // Param,
   ParseFilePipe,
   Patch,
@@ -37,25 +38,23 @@ export class ProfileController {
 
   @Patch('update-profile')
   @ApiOperation({ summary: 'Update a user profile' })
-  updateProfile(
-    @Body() dto: UpdateProfileDto,
-    @Req() req,
-    // @Param('userId') userId: string,
-    // @Param('profileId') profileId: string,
-  ) {
+  updateProfile(@Body() dto: UpdateProfileDto, @Req() req) {
     return this.profileService.updateProfile(
       dto,
-      // req.user.userId,
+
       req.user.profileId,
     );
   }
 
-  @Get('')
-  @ApiOperation({ summary: 'Get a single profile by profile id' })
-  getProfile(
-    @Req() req,
-    // @Param('profileId') profileId: string
-  ) {
+  @Get('other/:profileId')
+  @ApiOperation({ summary: 'Get profile details' })
+  getProfileById(@Param('profileId') profileId: string) {
+    return this.profileService.getProfileById(profileId);
+  }
+
+  @Get('own')
+  @ApiOperation({ summary: 'Get own profile' })
+  getProfile(@Req() req) {
     return this.profileService.getProfile(req.user.profileId);
   }
 

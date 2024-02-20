@@ -231,6 +231,25 @@ export class ProfileService {
     }
   }
 
+  async getProfileById(profileId: string) {
+    try {
+      const profile = await this.prisma.profile.findFirst({
+        where: { id: profileId },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: profile,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async uploadProfilePicture(
     profileId: string,
     file: Express.Multer.File,
