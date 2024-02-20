@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
-// import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UtilService } from 'src/utils/util.service';
 import { Profile } from '@prisma/client';
@@ -240,36 +239,6 @@ export class ProfileService {
       return {
         statusCode: HttpStatus.OK,
         data: profile,
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  async uploadProfilePicture(
-    profileId: string,
-    file: Express.Multer.File,
-  ): Promise<ApiResponse> {
-    try {
-      // upload profile picture
-      const uploadedProfilePicture = await this.cloudinary.uploadImage(
-        'Profile',
-        file,
-      );
-
-      // update profile with profile picture public id
-      await this.prisma.profile.update({
-        where: { id: profileId },
-        data: { profilePicUri: uploadedProfilePicture.url },
-      });
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Profile picture uploaded',
       };
     } catch (error) {
       this.logger.error(error);
