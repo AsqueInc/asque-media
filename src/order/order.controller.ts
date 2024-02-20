@@ -9,9 +9,9 @@ import {
   Req,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 
-import { CreateOrderItemDto } from './dto/create-order-item.dto';
+import { CreateOrderItemDto, OrderItemsDto } from './dto/create-order-item.dto';
 import { CheckOutDto } from './dto/check-out.dto';
 import { ShipOrderDto } from './dto/order-shipped.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
@@ -50,10 +50,21 @@ export class OrderController {
     return this.orderService.createOrder(req.user.profileId);
   }
 
+  // to be removed
   @Post('order-item')
   @ApiOperation({ summary: 'add selected artwork and quantity to an order' })
   addOrderItemToOrder(@Body() dto: CreateOrderItemDto) {
     return this.orderService.addOrderItemToOrder(dto);
+  }
+
+  @Patch('add-order-items/:orderId')
+  @ApiBody({ type: [OrderItemsDto] })
+  @ApiOperation({ summary: 'add order items to an order' })
+  addOrderItems(
+    @Body() dto: OrderItemsDto[],
+    @Param('orderId') orderId: string,
+  ) {
+    return this.orderService.addOrderItems(orderId, dto);
   }
 
   @Patch('remove-order-item/:orderItemId')
