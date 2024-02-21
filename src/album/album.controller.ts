@@ -35,6 +35,12 @@ export class AlbumController {
     return this.albumService.getAllAlbums(dto);
   }
 
+  @Get('newest')
+  @ApiOperation({ summary: 'Get ten newest albums ' })
+  getNewestArtwork() {
+    return this.albumService.getNewestAlbums();
+  }
+
   @Get(':albumId')
   @ApiOperation({ summary: 'Get an album by album id' })
   getAlbumDetailsById(@Param('albumId') albumId: string) {

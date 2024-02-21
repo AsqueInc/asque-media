@@ -274,4 +274,21 @@ export class AlbumService {
       );
     }
   }
+
+  async getNewestAlbums() {
+    try {
+      const albums = await this.prisma.album.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return { statusCode: HttpStatus.OK, data: albums };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
