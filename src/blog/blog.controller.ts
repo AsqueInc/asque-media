@@ -29,6 +29,12 @@ export class BlogController {
     return this.blogService.getAllUserBlogs(req.user.profileId, dto);
   }
 
+  @Get('newest')
+  @ApiOperation({ summary: 'Get ten newest stories ' })
+  getNewestArtwork() {
+    return this.blogService.getNewestStories();
+  }
+
   @Get('all')
   @ApiOperation({ summary: 'Get all stories' })
   getAllBlogs(@Query() dto: PaginationDto) {

@@ -207,4 +207,21 @@ export class BlogService {
       );
     }
   }
+
+  async getNewestStories() {
+    try {
+      const stories = await this.prisma.story.findMany({
+        take: 10,
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return { statusCode: HttpStatus.OK, data: stories };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
