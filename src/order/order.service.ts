@@ -10,6 +10,7 @@ import { EmailNotificationService } from 'src/email-notification/email-notificat
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { ShipOrderDto } from './dto/order-shipped.dto';
+import { ChangeOrderStatusDto } from './dto/change-status.dto';
 
 @Injectable()
 export class OrderService {
@@ -494,6 +495,26 @@ export class OrderService {
       return {
         statusCode: HttpStatus.OK,
         message: 'Order and order items deleted',
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async changeOrderStatus(orderId: string, dto: ChangeOrderStatusDto) {
+    try {
+      await this.prisma.order.update({
+        where: { id: orderId },
+        data: { status: dto.status },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: `Order status changed to ${dto.status}`,
       };
     } catch (error) {
       this.logger.error(error);
