@@ -418,8 +418,19 @@ export class OrderService {
     }
   }
 
-  async addOrderItems(orderId: string, dto: OrderItemsDto) {
+  async addOrderItems(profileId: string, dto: OrderItemsDto) {
     try {
+      // create order
+      const order = await this.prisma.order.create({
+        data: {
+          profileId: profileId,
+          deliveryAddress: dto.address,
+          zip: dto.zip,
+          city: dto.city,
+          country: dto.country,
+          referrerCode: dto.referrerCOde,
+        },
+      });
       let currentOrderTotal = 0;
 
       await Promise.all(
@@ -438,12 +449,12 @@ export class OrderService {
               HttpStatus.BAD_REQUEST,
             );
           }
-          currentItemOrderTotal = orderItem.quantity * Number(artwork.price);
+          currentItemOrderTotal = orderItem.quantity * orderItem.price;
 
           // create item order
           await this.prisma.order_Item.create({
             data: {
-              orderId: orderId,
+              orderId: order.id,
               quantity: orderItem.quantity,
               artworkId: orderItem.artworkId,
               price: currentItemOrderTotal,
@@ -455,9 +466,15 @@ export class OrderService {
         }),
       );
 
+      const updatedOrder = await this.prisma.order.update({
+        where: { id: order.id },
+        data: { totalPrice: currentOrderTotal },
+        include: { orderItem: true },
+      });
+
       return {
         statusCode: HttpStatus.CREATED,
-        data: { dto, total: currentOrderTotal },
+        data: updatedOrder,
       };
     } catch (error) {
       this.logger.error(error);
