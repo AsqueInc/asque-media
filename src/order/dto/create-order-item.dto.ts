@@ -5,27 +5,24 @@ export class CreateOrderItemDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  orderId: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty()
   artworkId: string;
 
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty()
   quantity: number = 1;
+
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty()
+  price: number;
 }
 
 export class OrderItemsDto {
-  @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  artworkId: string;
+  address: string;
 
-  @IsNumber()
-  @IsNotEmpty()
   @ApiProperty()
-  quantity: number = 1;
+  orderItems: CreateOrderItemDto[];
 }
