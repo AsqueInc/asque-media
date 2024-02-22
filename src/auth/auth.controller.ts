@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Param,
   Post,
   Patch,
   UseGuards,
@@ -42,11 +41,7 @@ export class AuthController {
   @ApiSecurity('JWT-auth')
   @Patch('change-password')
   @ApiOperation({ summary: 'Change a user password' })
-  changePassword(
-    @Body() dto: ChangePasswordDto,
-    @Req() req,
-    // @Param('userId') userId: string,
-  ) {
+  changePassword(@Body() dto: ChangePasswordDto, @Req() req) {
     return this.authService.changePassword(dto, req.user.userId);
   }
 
@@ -54,10 +49,7 @@ export class AuthController {
   @ApiSecurity('JWT-auth')
   @ApiOperation({ summary: 'Request email verification otp' })
   @Post('request-email-verification')
-  requestEmailVerification(
-    @Req() req,
-    // @Param('userId') userId: string
-  ) {
+  requestEmailVerification(@Req() req) {
     return this.authService.requestEmailVerification(req.user.userId);
   }
 
@@ -65,11 +57,7 @@ export class AuthController {
   @ApiSecurity('JWT-auth')
   @Patch('verify-email')
   @ApiOperation({ summary: 'Verify email' })
-  verifyEmail(
-    @Body() dto: VerifyEmailDto,
-    // @Param('userId') userId: string,
-    @Req() req,
-  ) {
+  verifyEmail(@Body() dto: VerifyEmailDto, @Req() req) {
     return this.authService.verifyEmail(req.user.userId, dto);
   }
 
@@ -89,22 +77,8 @@ export class AuthController {
   @ApiSecurity('JWT-auth')
   @Get('')
   @ApiOperation({ summary: 'Get user details by Id' })
-  getUserDetailsById(
-    @Req() req,
-    // @Param('userId') userId: string
-  ) {
+  getUserDetailsById(@Req() req) {
     return this.authService.getUserDetailsById(req.user.userId);
-  }
-
-  // @UseGuards(JwtGuard)
-  // @ApiSecurity('JWT-auth')
-  @Post('refresh-access-token/:userId')
-  @ApiOperation({ summary: 'Refresh access token' })
-  refreshAccessToken(
-    // @Req() req,
-    @Param('userId') userId: string,
-  ) {
-    return this.authService.refreshAccessToken(userId);
   }
 
   @Get('google')
