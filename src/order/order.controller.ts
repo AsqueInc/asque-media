@@ -10,7 +10,7 @@ import {
   Delete,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
-import { ApiBody, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 
 import { OrderItemsDto } from './dto/create-order-item.dto';
 import { CheckOutDto } from './dto/check-out.dto';
@@ -52,11 +52,11 @@ export class OrderController {
     return this.orderService.createOrder(req.user.profileId);
   }
 
-  @Patch('add-order-items/:orderId')
-  @ApiBody({ type: [OrderItemsDto] })
-  @ApiOperation({ summary: 'add order items to an order' })
-  addOrderItems(@Body() dto: OrderItemsDto, @Param('orderId') orderId: string) {
-    return this.orderService.addOrderItems(orderId, dto);
+  @Patch('add-order-items')
+  // @ApiBody({ type: [OrderItemsDto] })
+  @ApiOperation({ summary: 'create order and add order items' })
+  addOrderItems(@Body() dto: OrderItemsDto, @Req() req) {
+    return this.orderService.addOrderItems(req.user.profileId, dto);
   }
 
   @Patch('remove-order-item/:orderItemId')
