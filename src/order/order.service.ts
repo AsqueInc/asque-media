@@ -3,7 +3,7 @@ import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
 import { ApiResponse } from 'src/types/response.type';
-import { CreateOrderItemDto, OrderItemsDto } from './dto/create-order-item.dto';
+import { OrderItemsDto } from './dto/create-order-item.dto';
 import { Decimal } from '@prisma/client/runtime/library';
 import { CheckOutDto } from './dto/check-out.dto';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
@@ -59,13 +59,6 @@ export class OrderService {
         include: { orderItem: true },
       });
 
-      if (!orders) {
-        throw new HttpException(
-          'User has not made any orders before',
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
       return { statusCode: HttpStatus.OK, data: { orders } };
     } catch (error) {
       this.logger.error(error);
@@ -117,81 +110,6 @@ export class OrderService {
       return {
         statusCode: HttpStatus.OK,
         message: { message: 'Order cancelled' },
-      };
-    } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  /**
-   * add selected artwork to an order and update available quantity in store
-   * @param dto : create order item dto
-   * @returns status code and order item object
-   */
-  async addOrderItemToOrder(dto: CreateOrderItemDto) {
-    try {
-      const artwork = await this.prisma.artWork.findFirst({
-        where: { id: dto.artworkId },
-      });
-
-      // check to see quantity ordered does not exceed available quantity
-      if (dto.quantity > artwork.quantity) {
-        throw new HttpException(
-          `There are only ${artwork.quantity} available in the store.`,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-      // calculate price of artwork
-      const totalPrice = Number(artwork.price) * dto.quantity;
-      const totalPriceDecimal = new Decimal(totalPrice);
-
-      // calculate new total price of order
-      const order = await this.prisma.order.findFirst({
-        where: { id: dto.orderId },
-      });
-
-      const previousTotalPrice = order.totalPrice;
-      const newTotalPrice = Number(previousTotalPrice) + totalPrice;
-      const newTotalPriceDecimal = new Decimal(newTotalPrice);
-
-      const orderItem = await this.prisma.order_Item.create({
-        data: {
-          orderId: dto.orderId,
-          artworkId: dto.artworkId,
-          quantity: dto.quantity,
-          price: totalPriceDecimal,
-        },
-      });
-
-      // reduce available quantity after order item is created and added to user's order
-      const previousQuantity = artwork.quantity;
-      const currentQuantity = previousQuantity - dto.quantity;
-
-      // set purchase status to sold out if remaining quantity is 0
-      if (currentQuantity === 0) {
-        await this.prisma.artWork.update({
-          where: { id: dto.artworkId },
-          data: { quantity: currentQuantity, purchaseStatus: 'SoldOut' },
-        });
-      }
-
-      await this.prisma.artWork.update({
-        where: { id: dto.artworkId },
-        data: { quantity: currentQuantity },
-      });
-
-      // update order total price
-      await this.prisma.order.update({
-        where: { id: dto.orderId },
-        data: { totalPrice: newTotalPriceDecimal },
-      });
-
-      return {
-        statusCode: HttpStatus.CREATED,
-        data: { orderItem },
       };
     } catch (error) {
       throw new HttpException(
@@ -499,12 +417,12 @@ export class OrderService {
     }
   }
 
-  async addOrderItems(orderId: string, dto: OrderItemsDto[]) {
+  async addOrderItems(orderId: string, dto: OrderItemsDto) {
     try {
       let currentOrderTotal = 0;
 
       await Promise.all(
-        dto.map(async (orderItem) => {
+        dto.orderItems.map(async (orderItem) => {
           let currentItemOrderTotal = 0;
 
           // get artwork and price of current order item
@@ -539,6 +457,43 @@ export class OrderService {
       return {
         statusCode: HttpStatus.CREATED,
         data: { dto, total: currentOrderTotal },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async deleteOrder(orderId: string, profileId: string) {
+    try {
+      const order = await this.prisma.order.findFirst({
+        where: { id: orderId },
+      });
+      if (!order) {
+        throw new HttpException('Order does not exist', HttpStatus.NOT_FOUND);
+      }
+
+      if (order.profileId !== profileId) {
+        throw new HttpException(
+          'You cannot delete an order you did not make',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      // delete order items
+      await this.prisma.order_Item.deleteMany({
+        where: { order: { id: orderId } },
+      });
+
+      // delete order
+      await this.prisma.order.delete({ where: { id: orderId } });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Order and order items deleted',
       };
     } catch (error) {
       this.logger.error(error);
