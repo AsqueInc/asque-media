@@ -538,66 +538,6 @@ export class AuthService {
   }
 
   /**
-   * generate new access token for user using refres token
-   * @param userId : user id
-   * @returns : status code and new access token
-   */
-  async refreshAccessToken(userId: string) {
-    try {
-      // get refresh token
-      const refreshTokenExists = await this.prisma.user.findFirst({
-        where: { id: userId },
-      });
-
-      if (!refreshTokenExists) {
-        throw new HttpException(
-          'Refresh Token does not exist. Login again',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      // check refresh token
-      const verifyToken = this.jwtService.verify(
-        refreshTokenExists.refreshToken,
-        {
-          secret: this.config.get('JWT_REFRESH_SECRET'),
-        },
-      );
-      // return response if verify token has expired
-      if (!verifyToken) {
-        throw new HttpException(
-          'Refresh token expired. Login again',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      const payload = {
-        userId: verifyToken.userId,
-        email: verifyToken.email,
-        profileId: verifyToken.profileId,
-        role: verifyToken.role,
-      };
-
-      // generate new access token
-      const accessToken = await this.jwtService.signAsync(payload, {
-        expiresIn: this.config.get('JWT_EXPIRES_IN'),
-        secret: this.config.get('JWT_ACCESS_SECRET'),
-      });
-
-      return {
-        statusCode: HttpStatus.OK,
-        message: { accessToken: accessToken },
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  /**
    * make a user an admin
    * @param adminId : id of the admin
    * @param userId : id of user to be made admin
