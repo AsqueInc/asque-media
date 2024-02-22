@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateOrderItemDto {
   @IsString()
@@ -23,6 +23,23 @@ export class OrderItemsDto {
   @ApiProperty()
   address: string;
 
+  @IsNotEmpty()
   @ApiProperty()
+  city: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  zip: string;
+
+  @IsNotEmpty()
+  @ApiProperty()
+  country: string;
+
+  @IsOptional()
+  @ApiProperty()
+  referrerCOde: string;
+
+  @ApiProperty({ type: [CreateOrderItemDto] })
+  @IsNotEmpty()
   orderItems: CreateOrderItemDto[];
 }
