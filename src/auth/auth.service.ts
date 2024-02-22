@@ -248,7 +248,9 @@ export class AuthService {
         statusCode: HttpStatus.OK,
         data: {
           accessToken: accessToken,
-          refreshToken: refreshToken,
+          userId: userExists.id,
+          profileId: userExists.profile.id,
+          email: userExists.email,
         },
       };
     } catch (error) {
