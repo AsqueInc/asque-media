@@ -16,6 +16,7 @@ import { OrderItemsDto } from './dto/create-order-item.dto';
 import { CheckOutDto } from './dto/check-out.dto';
 import { ShipOrderDto } from './dto/order-shipped.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
+import { ChangeOrderStatusDto } from './dto/change-status.dto';
 
 @ApiTags('order-endpoints')
 @UseGuards(JwtGuard)
@@ -98,5 +99,14 @@ export class OrderController {
   @ApiOperation({ summary: 'Delete an order' })
   deleteOrder(@Param('orderId') orderId: string, @Req() req) {
     return this.orderService.deleteOrder(orderId, req.user.profileId);
+  }
+
+  @Patch('status')
+  @ApiOperation({ summary: 'Change order status' })
+  changeOrderStatus(
+    @Body() dto: ChangeOrderStatusDto,
+    @Param('orderId') orderId: string,
+  ) {
+    return this.orderService.changeOrderStatus(orderId, dto);
   }
 }
