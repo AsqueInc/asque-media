@@ -27,7 +27,7 @@ export class OrderItemsDto {
   @ApiProperty()
   city: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @ApiProperty()
   zip: string;
 
