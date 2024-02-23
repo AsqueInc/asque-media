@@ -6,7 +6,6 @@ import { ProcessPaymentDto } from './dto/process-payment.dto';
 import axios from 'axios';
 import { ApiResponse } from 'src/types/response.type';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import CryptoJS from 'crypto-js';
 import { Request } from 'express';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 
@@ -288,91 +287,84 @@ export class PaymentService {
    */
   async verifyPaymentViaWebhook(req: Request) {
     try {
-      console.log(req.body);
-      const hash = CryptoJS.createHmac('sha512', this.paystackApiKey)
-        .update(JSON.stringify(req.body))
-        .digest('hex');
+      // Retrieve the request's body
+      const { event, data } = req.body;
+      // Do something with event
+      if (event === 'charge.success') {
+        // update payment and order status if payment is successful
+        const payment = await this.prisma.payment.update({
+          where: { transactionReference: data.reference },
+          data: { paymentStatus: 'COMPLETED' },
+        });
 
-      if (hash == req.headers['x-paystack-signature']) {
-        // Retrieve the request's body
-        const { event, data } = req.body;
-        // Do something with event
-        if (event === 'charge.success') {
-          // update payment and order status if payment is successful
-          const payment = await this.prisma.payment.update({
-            where: { transactionReference: data.reference },
-            data: { paymentStatus: 'COMPLETED' },
-          });
+        const order = await this.prisma.order.update({
+          where: { id: payment.orderId },
+          data: { status: 'PAID' },
+          include: { profile: true, orderItem: true },
+        });
 
-          const order = await this.prisma.order.update({
-            where: { id: payment.orderId },
-            data: { status: 'PAID' },
-            include: { profile: true, orderItem: true },
-          });
+        // notify admin of order payment
+        await this.emailService.notifyAdminOfCompletePayment(payment.orderId);
 
-          // notify admin of order payment
-          await this.emailService.notifyAdminOfCompletePayment(payment.orderId);
-
-          // create shipment draft with topship
-          const topshipResponse = await axios.post(
-            'https://api-topship.com/api/save-shipment',
-            {
-              shipment: [
-                {
-                  items: [
-                    {
-                      category: 'Others',
-                      description: `artwork shipment to ${order.profile.name}`,
-                      weight: 2,
-                      quantity: order.orderItem.length,
-                      value: order.totalPrice,
-                    },
-                  ],
-                },
-                {
-                  senderDetail: {
-                    name: 'Asque',
-                    email: this.config.get('USER_EMAIL'),
-                    country: 'NG',
-                    state: 'Lagos',
-                    city: 'Lagos',
+        // create shipment draft with topship
+        const topshipResponse = await axios.post(
+          'https://api-topship.com/api/save-shipment',
+          {
+            shipment: [
+              {
+                items: [
+                  {
+                    category: 'Others',
+                    description: `artwork shipment to ${order.profile.name}`,
+                    weight: 2,
+                    quantity: order.orderItem.length,
+                    value: order.totalPrice,
                   },
-                  receiverDetail: {
-                    name: order.profile.name,
-                    email: order.profile.userEmail,
-                    country: order.country,
-                    city: order.city,
-                    countryCode: '234',
-                    addressLine1: order.deliveryAddress,
-                    phoneNumber: order.profile.mobileNumber,
-                  },
+                ],
+              },
+              {
+                senderDetail: {
+                  name: 'Asque',
+                  email: this.config.get('USER_EMAIL'),
+                  country: 'NG',
+                  state: 'Lagos',
+                  city: 'Lagos',
                 },
-              ],
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${this.config.get('TOPSHIP_API_KEY')}`,
+                receiverDetail: {
+                  name: order.profile.name,
+                  email: order.profile.userEmail,
+                  country: order.country,
+                  city: order.city,
+                  countryCode: '234',
+                  addressLine1: order.deliveryAddress,
+                  phoneNumber: order.profile.mobileNumber,
+                },
               },
+            ],
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.config.get('TOPSHIP_API_KEY')}`,
             },
-          );
+          },
+        );
 
-          // save shipment details
-          const shipment = await this.prisma.shipment.create({
-            data: {
-              trackingId: topshipResponse.data.trackingId,
-              cost: topshipResponse.data.totalCharge,
-              order: {
-                connect: { id: order.id },
-              },
+        // save shipment details
+        const shipment = await this.prisma.shipment.create({
+          data: {
+            trackingId: topshipResponse.data.trackingId,
+            cost: topshipResponse.data.totalCharge,
+            order: {
+              connect: { id: order.id },
             },
-          });
+          },
+        });
 
-          return {
-            statusCode: HttpStatus.OK,
-            data: shipment,
-            message: 'Payment successful',
-          };
-        }
+        return {
+          statusCode: HttpStatus.OK,
+          data: shipment,
+          message: 'Payment successful',
+        };
       }
     } catch (error) {
       this.logger.error(error);
