@@ -41,6 +41,13 @@ export class PaymentService {
         where: { id: dto.orderId },
       });
 
+      if (dto.amount < Number(order.shippingCost) + Number(order.totalPrice)) {
+        throw new HttpException(
+          'You did not input the correct amount',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       // create transaction with paystack
       const response = await axios.post(
         'https://api.paystack.co/transaction/initialize',
