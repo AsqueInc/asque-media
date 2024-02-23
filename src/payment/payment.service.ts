@@ -295,6 +295,8 @@ export class PaymentService {
       if (hash == req.headers['x-paystack-signature']) {
         // Retrieve the request's body
         const { event, data } = req.body;
+        console.log(event);
+        console.log(data);
         // Do something with event
         if (event === 'charge.success') {
           // update payment and order status if payment is successful
