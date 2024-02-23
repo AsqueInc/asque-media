@@ -288,6 +288,7 @@ export class PaymentService {
    */
   async verifyPaymentViaWebhook(req: Request) {
     try {
+      console.log(req.body);
       const hash = CryptoJS.createHmac('sha512', this.paystackApiKey)
         .update(JSON.stringify(req.body))
         .digest('hex');
@@ -295,8 +296,6 @@ export class PaymentService {
       if (hash == req.headers['x-paystack-signature']) {
         // Retrieve the request's body
         const { event, data } = req.body;
-        console.log(event);
-        console.log(data);
         // Do something with event
         if (event === 'charge.success') {
           // update payment and order status if payment is successful
