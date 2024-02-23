@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
-import { ApiResponse } from 'src/types/response.type';
 import { OrderItemsDto } from './dto/create-order-item.dto';
 import { Decimal } from '@prisma/client/runtime/library';
 import { CheckOutDto } from './dto/check-out.dto';
@@ -190,58 +189,6 @@ export class OrderService {
   }
 
   /**
-   * create order for user
-   * @param dto : create order dto containing customer profileId
-   * @returns :status code and order object
-   */
-  async createOrder(profileId: string): Promise<ApiResponse> {
-    try {
-      // get the most recent order
-      const orders = await this.prisma.order.findMany({
-        where: { profileId: profileId },
-        orderBy: { createdAt: 'desc' },
-      });
-
-      const mostRecentOrder = orders[0];
-
-      // if most recent order is undefined create and return an order
-      if (mostRecentOrder === undefined) {
-        const order = await this.prisma.order.create({
-          data: { profileId: profileId },
-        });
-
-        return {
-          statusCode: HttpStatus.CREATED,
-          data: { order },
-        };
-      }
-
-      // return order to user if order is pending
-      if (mostRecentOrder.status === 'PENDING') {
-        return {
-          statusCode: HttpStatus.OK,
-          data: { mostRecentOrder },
-        };
-      }
-
-      // create order
-      const order = await this.prisma.order.create({
-        data: { profileId: profileId },
-      });
-
-      return {
-        statusCode: HttpStatus.CREATED,
-        data: { order },
-      };
-    } catch (error) {
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  /**
    * calculate total cost of order and check out
    * @param orderId: id of order
    * @param dto: checkout dto
@@ -274,11 +221,6 @@ export class OrderService {
       const checkOutDetails = await this.prisma.order.update({
         where: { id: orderId },
         data: {
-          deliveryAddress: dto.deliveryAddress,
-          city: dto.city,
-          zip: dto.zip,
-          country: dto.country,
-          referrerCode: dto.referrerCode,
           shippingCost: shippingCost,
         },
       });
@@ -441,6 +383,13 @@ export class OrderService {
           const artwork = await this.prisma.artWork.findFirst({
             where: { id: orderItem.artworkId },
           });
+
+          if (!artwork) {
+            throw new HttpException(
+              `Artwork with ${artwork.id} not found`,
+              HttpStatus.NOT_FOUND,
+            );
+          }
 
           // check to see quantity ordered does not exceed available quantity
           if (artwork.quantity < orderItem.quantity) {
