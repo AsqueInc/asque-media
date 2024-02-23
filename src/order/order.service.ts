@@ -4,7 +4,6 @@ import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
 import { OrderItemsDto } from './dto/create-order-item.dto';
 import { Decimal } from '@prisma/client/runtime/library';
-import { CheckOutDto } from './dto/check-out.dto';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
@@ -193,30 +192,39 @@ export class OrderService {
    * @param orderId: id of order
    * @param dto: checkout dto
    */
-  async checkout(orderId: string, dto: CheckOutDto) {
+  async checkout(orderId: string) {
     try {
-      const topshipApiKey = this.config.get('TOPSHIP_API_KEY');
+      const order = await this.prisma.order.findFirst({
+        where: { id: orderId },
+      });
+      if (!order) {
+        throw new HttpException('Order not found', HttpStatus.NOT_FOUND);
+      }
 
-      const shippingResponse = await axios.get(
-        `https://api-topship.com/api/get-shipment-rate?shipmentDetail={
-          senderDetails: {
-            cityName: Lagos
-            countryCode: NG
-          },
-          senderDetails: {
-            cityName: ${dto.city}
-            countryCode: NG
-          },
-          totalWeight: 2
-        }`,
-        {
-          headers: {
-            Authorization: `Bearer ${topshipApiKey}`,
-          },
-        },
-      );
+      const shippingCost = (25 * Number(order.totalPrice)) / 100;
 
-      const shippingCost: number = shippingResponse[0].cost;
+      // const topshipApiKey = this.config.get('TOPSHIP_API_KEY');
+
+      // const shippingResponse = await axios.get(
+      //   `https://api-topship.com/api/get-shipment-rate?shipmentDetail={
+      //     senderDetails: {
+      //       cityName: Lagos
+      //       countryCode: NG
+      //     },
+      //     senderDetails: {
+      //       cityName: ${order.city}
+      //       countryCode: NG
+      //     },
+      //     totalWeight: 2
+      //   }`,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${topshipApiKey}`,
+      //     },
+      //   },
+      // );
+
+      // const shippingCost: number = shippingResponse[0].cost;
 
       const checkOutDetails = await this.prisma.order.update({
         where: { id: orderId },
@@ -398,7 +406,7 @@ export class OrderService {
               HttpStatus.BAD_REQUEST,
             );
           }
-          currentItemOrderTotal = orderItem.quantity * orderItem.price;
+          currentItemOrderTotal = orderItem.quantity * Number(artwork.price);
 
           // create item order
           await this.prisma.order_Item.create({
