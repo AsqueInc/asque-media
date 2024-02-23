@@ -46,14 +46,7 @@ export class OrderController {
     return this.orderService.cancelOrder(orderId, req.user.profileId);
   }
 
-  @Post()
-  @ApiOperation({ summary: 'Create an order' })
-  createOrder(@Req() req) {
-    return this.orderService.createOrder(req.user.profileId);
-  }
-
-  @Patch('add-order-items')
-  // @ApiBody({ type: [OrderItemsDto] })
+  @Post('add-order-items')
   @ApiOperation({ summary: 'create order and add order items' })
   addOrderItems(@Body() dto: OrderItemsDto, @Req() req) {
     return this.orderService.addOrderItems(req.user.profileId, dto);
