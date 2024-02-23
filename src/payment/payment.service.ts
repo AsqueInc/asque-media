@@ -6,7 +6,7 @@ import { ProcessPaymentDto } from './dto/process-payment.dto';
 import axios from 'axios';
 import { ApiResponse } from 'src/types/response.type';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
-import crypto from 'crypto';
+import CryptoJS from 'crypto-js';
 import { Request } from 'express';
 import { EmailNotificationService } from 'src/email-notification/email-notification.service';
 
@@ -288,8 +288,7 @@ export class PaymentService {
    */
   async verifyPaymentViaWebhook(req: Request) {
     try {
-      const hash = crypto
-        .createHmac('sha512', this.paystackApiKey)
+      const hash = CryptoJS.createHmac('sha512', this.paystackApiKey)
         .update(JSON.stringify(req.body))
         .digest('hex');
 
