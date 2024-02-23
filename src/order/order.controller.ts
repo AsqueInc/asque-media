@@ -13,7 +13,6 @@ import { OrderService } from './order.service';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 
 import { OrderItemsDto } from './dto/create-order-item.dto';
-import { CheckOutDto } from './dto/check-out.dto';
 import { ShipOrderDto } from './dto/order-shipped.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { ChangeOrderStatusDto } from './dto/change-status.dto';
@@ -66,8 +65,8 @@ export class OrderController {
 
   @Patch('checkout/:orderId')
   @ApiOperation({ summary: 'checkout order' })
-  checkout(@Body() dto: CheckOutDto, @Param('orderId') orderId: string) {
-    return this.orderService.checkout(orderId, dto);
+  checkout(@Param('orderId') orderId: string) {
+    return this.orderService.checkout(orderId);
   }
 
   @Post('ship')
