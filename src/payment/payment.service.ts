@@ -38,6 +38,7 @@ export class PaymentService {
 
       const order = await this.prisma.order.findFirst({
         where: { id: dto.orderId },
+        include: { orderItem: true },
       });
 
       if (dto.amount < Number(order.shippingCost) + Number(order.totalPrice)) {
@@ -74,6 +75,22 @@ export class PaymentService {
           orderId: dto.orderId,
         },
       });
+
+      // reduce available artwork quantity
+      await Promise.all(
+        order.orderItem.map(async (orderItem) => {
+          const artwork = await this.prisma.artWork.findFirst({
+            where: { id: orderItem.artworkId },
+          });
+
+          const artworkQuantityLeft = artwork.quantity - orderItem.quantity;
+
+          await this.prisma.artWork.update({
+            where: { id: artwork.id },
+            data: { quantity: artworkQuantityLeft },
+          });
+        }),
+      );
 
       // calculate referral amount and fund referrer if referrer code is present
       if (order.referrerCode !== null) {
