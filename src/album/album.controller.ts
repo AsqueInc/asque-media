@@ -17,12 +17,12 @@ import { CreateAlbumDto } from './dto/create-album.dto';
 import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
 
 @ApiTags('album-endpoints')
-@UseGuards(JwtGuard)
-@ApiSecurity('JWT-auth')
 @Controller('album')
 export class AlbumController {
   constructor(private readonly albumService: AlbumService) {}
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Get('own')
   @ApiOperation({ summary: 'Get all albums created by a profile' })
   getAllAlbumsByProfileId(@Req() req, @Query() dto: PaginationDto) {
@@ -47,18 +47,24 @@ export class AlbumController {
     return this.albumService.getAlbumDetailsById(albumId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Delete(':albumId')
   @ApiOperation({ summary: 'Delete an album' })
   deleteAlbum(@Param('albumId') albumId: string, @Req() req) {
     return this.albumService.deleteAlbum(albumId, req.user.profileId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Post()
   @ApiOperation({ summary: 'Create an album for an artwork' })
   createAlbum(@Body() dto: CreateAlbumDto, @Req() req) {
     return this.albumService.createAlbum(dto, req.user.profileId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Delete('image/:albumId')
   @ApiOperation({ summary: 'Delete an album image ' })
   deleteAlbumImage(

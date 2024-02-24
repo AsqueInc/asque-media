@@ -18,12 +18,12 @@ import { UpdateArtworkDto } from './dto/update-artwork.dto';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
 
 @ApiTags('artwork-endpoints')
-@UseGuards(JwtGuard)
-@ApiSecurity('JWT-auth')
 @Controller('artwork')
 export class ArtworkController {
   constructor(private readonly artWorkService: ArtworkService) {}
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Get('own')
   @ApiOperation({ summary: 'Get all artwork produced by a user' })
   getAllArtworkByUser(@Query() dto: PaginationDto, @Req() req) {
@@ -54,12 +54,16 @@ export class ArtworkController {
     return this.artWorkService.getSingleArtWorkById(artworkId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Post('')
   @ApiOperation({ summary: 'Create an artwork' })
   createArtwork(@Body() dto: CreateArtworkDto, @Req() req) {
     return this.artWorkService.createArtwork(dto, req.user.profileId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Patch(':artworkId')
   @ApiOperation({ summary: 'Update artwork details' })
   updateArtWork(
@@ -83,6 +87,8 @@ export class ArtworkController {
     return this.artWorkService.getAllArtworkInACategory(categoryName, dto);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Delete(':artworkId')
   @ApiOperation({ summary: 'Delete an artwork' })
   deleteArtwork(@Param('artworkId') artworkId: string, @Req() req) {

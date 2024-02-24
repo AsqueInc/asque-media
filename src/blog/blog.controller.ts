@@ -16,13 +16,13 @@ import { CreateBlogDto, UpdateBlogDto } from './dto/blog.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
 
-@UseGuards(JwtGuard)
-@ApiSecurity('JWT-auth')
 @ApiTags('story-endpoints')
 @Controller('story')
 export class BlogController {
   constructor(private readonly blogService: BlogService) {}
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Get('own')
   @ApiOperation({ summary: 'Get all stories by a profile' })
   getAllUserBlogs(@Req() req, @Query() dto: PaginationDto) {
@@ -47,18 +47,24 @@ export class BlogController {
     return this.blogService.getSingleBlog(storyId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Post('')
   @ApiOperation({ summary: 'Create a story' })
   createProfile(@Body() dto: CreateBlogDto, @Req() req) {
     return this.blogService.createBlog(dto, req.user.profileId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Delete(':storyId')
   @ApiOperation({ summary: 'Delete a story' })
   deleteBlog(@Param('storyId') storyId: string, @Req() req) {
     return this.blogService.deleteBlog(req.user.profileId, storyId);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Patch(':storyId')
   @ApiOperation({ summary: 'Update a story' })
   updateBlog(
