@@ -54,7 +54,7 @@ export class PaymentService {
         {
           email: profile.userEmail,
           amount: dto.amount * 100,
-          currency: 'NGN', // Nigerian Naira
+          currency: 'USD', // Nigerian Naira
         },
         {
           headers: {
