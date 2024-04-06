@@ -16,8 +16,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private readonly jwtService: JwtService,
   ) {
     super({
-      clientID: configService.get('AUTH_CLIENT_ID'),
-      clientSecret: configService.get('AUTH_CLIENT_SECRET'),
+      clientID: configService.get('EMAIL_CLIENT_ID'),
+      clientSecret: configService.get('EMAIL_CLIENT_SECRET'),
       callbackURL: configService.get('CALLBACK_URL'),
       scope: ['profile', 'email'],
     });

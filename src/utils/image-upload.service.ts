@@ -26,7 +26,7 @@ export class AwsImageUploadService {
       });
 
       // create params object that would be used to upload the image to the s3 bucket
-      const params: AWS.S3.PutObjectRequest = {
+      const params = S3.PutObjectRequest = {
         Bucket: this.configService.get('AWS_S3_BUCKET_NAME'),
         Key: `${Date.now()}-${file.originalname}`,
         Body: file.buffer,

@@ -85,7 +85,7 @@ export class PaymentService {
 
           const artworkQuantityLeft = artwork.quantity - orderItem.quantity;
 
-          await this.prisma.artWork.update({
+          await this.prisma.artWork.update({ 
             where: { id: artwork.id },
             data: { quantity: artworkQuantityLeft },
           });
