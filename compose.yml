@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  dev_db:
+    image: postgres
+    container_name: asque-media
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=asque-media
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
