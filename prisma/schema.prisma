@@ -56,7 +56,6 @@ model Profile {
   review                  Review[]
   albums                  Album[]
   stories                 Story[]
-  podcast                 Podcast[]
 }
 
 model Referral {
@@ -81,23 +80,6 @@ model Story {
   updatedAt DateTime  @updatedAt
   profile     Profile      @relation(fields: [profileId], references: [id])
   profileId   String  
-}
-
-model Podcast{
-  id            String    @id @default(uuid()) 
-  title         String
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  profile       Profile    @relation(fields: [profileId], references: [id])
-  profileId     String
-  description   String?
-  uri    String?
-  type  PodcastType   @default(AUDIO)
-}
-
-enum PodcastType {
-  AUDIO
-  VIDEO
 }
 
 model Otp {
