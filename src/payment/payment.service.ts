@@ -21,7 +21,6 @@ export class PaymentService {
   ) {
     this.paystackApiKey = this.config.get<string>('PAYSTACK_API_KEY');
   }
-
   /**
    * process payment for an order
    * @param dto : process payment dto
@@ -40,6 +39,13 @@ export class PaymentService {
         where: { id: dto.orderId },
         include: { orderItem: true },
       });
+
+      if (!order || !profile) {
+        throw new HttpException(
+          'Order or profile not found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
 
       if (dto.amount < Number(order.shippingCost) + Number(order.totalPrice)) {
         throw new HttpException(
@@ -66,69 +72,57 @@ export class PaymentService {
       // get response details
       const responseData = response.data.data;
 
-      // save transaction details to database
-      await this.prisma.payment.create({
-        data: {
-          transactionReference: responseData.reference,
-          payeeEmail: profile.userEmail,
-          amount: dto.amount,
-          orderId: dto.orderId,
-        },
-      });
+      await this.prisma.$transaction(async (prisma) => {
+        // save transaction details to database
+        await prisma.payment.create({
+          data: {
+            transactionReference: responseData.reference,
+            payeeEmail: profile.userEmail,
+            amount: dto.amount,
+            orderId: dto.orderId,
+          },
+        });
 
-      // reduce available artwork quantity
-      await Promise.all(
-        order.orderItem.map(async (orderItem) => {
-          const artwork = await this.prisma.artWork.findFirst({
+        // reduce available artwork quantity
+        for (const orderItem of order.orderItem) {
+          const artwork = await prisma.artWork.findFirst({
             where: { id: orderItem.artworkId },
           });
 
+          if (!artwork) {
+            throw new HttpException('Artwork not found', HttpStatus.NOT_FOUND);
+          }
+
           const artworkQuantityLeft = artwork.quantity - orderItem.quantity;
 
-          await this.prisma.artWork.update({
+          await prisma.artWork.update({
             where: { id: artwork.id },
             data: { quantity: artworkQuantityLeft },
           });
-        }),
-      );
-
-      // calculate referral amount and fund referrer if referrer code is present
-      if (order.referrerCode !== null) {
-        // get details of referrer
-        const referrer = await this.prisma.referral.findFirst({
-          where: { code: order.referrerCode },
-          include: { user: { select: { profile: true } } },
-        });
-
-        if (!referrer) {
-          return {
-            statusCode: HttpStatus.OK,
-            data: {
-              redirectUrl: responseData.authorization_url,
-              reference: responseData.reference,
-            },
-          };
         }
 
-        // calculate referral amount
-        const referralAmount =
-          (Number(this.config.get('REFERRAL_PERCENTAGE')) *
-            Number(order.totalPrice)) /
-          100;
+        // calculate referral amount and fund referrer if referrer code is present
+        if (order.referrerCode !== null) {
+          // get details of referrer
+          const referrer = await prisma.referral.findFirst({
+            where: { code: order.referrerCode },
+            include: { user: { select: { profile: true } } },
+          });
 
-        await this.prisma.referral.update({
-          where: { id: referrer.id },
-          data: { balance: referralAmount },
-        });
+          if (referrer) {
+            // calculate referral amount
+            const referralAmount =
+              (Number(this.config.get('REFERRAL_PERCENTAGE')) *
+                Number(order.totalPrice)) /
+              100;
 
-        return {
-          statusCode: HttpStatus.OK,
-          data: {
-            redirectUrl: responseData.authorization_url,
-            reference: responseData.reference,
-          },
-        };
-      }
+            await prisma.referral.update({
+              where: { id: referrer.id },
+              data: { balance: referralAmount },
+            });
+          }
+        }
+      });
 
       return {
         statusCode: HttpStatus.OK,
@@ -145,7 +139,6 @@ export class PaymentService {
       );
     }
   }
-
   /**
    * verify the status of a payment
    * @param reference : transaction reference
