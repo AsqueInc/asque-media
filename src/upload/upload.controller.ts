@@ -23,7 +23,7 @@ export class UploadController {
   @Post('cloudinary/:type')
   @ApiParam({
     name: 'type',
-    enum: ['ProfilePicture', 'Artwork', 'Audio', 'Video', 'Image'],
+    enum: ['ProfilePicture', 'Artwork', 'Image'],
   })
   @ApiOperation({ summary: 'Upload media via cloudinary' })
   @ApiConsumes('multipart/form-data')
@@ -37,7 +37,7 @@ export class UploadController {
   cloudinaryUpload(
     @UploadedFile() file: Express.Multer.File,
     @Param('type')
-    type: 'ProfilePicture' | 'Artwork' | 'Audio' | 'Video' | 'Image',
+    type: 'ProfilePicture' | 'Artwork' | 'Image',
   ) {
     return this.uploadService.cloudinaryUpload(type, file);
   }
