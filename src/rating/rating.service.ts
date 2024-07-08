@@ -20,6 +20,10 @@ export class RatingService {
    */
   async rateItem(profileId: string, dto: RateItemDto): Promise<ApiResponse> {
     try {
+      // check item type
+      if (dto.itemType !== 'ALBUM' || 'ARTWORK' || 'BLOG') {
+        throw new HttpException('Incorrect item type', HttpStatus.BAD_REQUEST);
+      }
       const likeDetails = await this.prisma.like.create({
         data: {
           itemId: dto.itemId,
