@@ -72,9 +72,9 @@ export class PaymentService {
       // get response details
       const responseData = response.data.data;
 
-      await this.prisma.$transaction(async (prisma) => {
+      await this.prisma.$transaction(async (trx) => {
         // save transaction details to database
-        await prisma.payment.create({
+        await trx.payment.create({
           data: {
             transactionReference: responseData.reference,
             payeeEmail: profile.userEmail,
@@ -85,7 +85,7 @@ export class PaymentService {
 
         // reduce available artwork quantity
         for (const orderItem of order.orderItem) {
-          const artwork = await prisma.artWork.findFirst({
+          const artwork = await trx.artWork.findFirst({
             where: { id: orderItem.artworkId },
           });
 
@@ -95,7 +95,7 @@ export class PaymentService {
 
           const artworkQuantityLeft = artwork.quantity - orderItem.quantity;
 
-          await prisma.artWork.update({
+          await trx.artWork.update({
             where: { id: artwork.id },
             data: { quantity: artworkQuantityLeft },
           });
@@ -104,7 +104,7 @@ export class PaymentService {
         // calculate referral amount and fund referrer if referrer code is present
         if (order.referrerCode !== null) {
           // get details of referrer
-          const referrer = await prisma.referral.findFirst({
+          const referrer = await trx.referral.findFirst({
             where: { code: order.referrerCode },
             include: { user: { select: { profile: true } } },
           });
@@ -116,7 +116,7 @@ export class PaymentService {
                 Number(order.totalPrice)) /
               100;
 
-            await prisma.referral.update({
+            await trx.referral.update({
               where: { id: referrer.id },
               data: { balance: referralAmount },
             });
