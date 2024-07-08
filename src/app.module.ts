@@ -16,6 +16,7 @@ import { BlogModule } from './blog/blog.module';
 import { ReferralModule } from './referral/referral.module';
 import { UploadModule } from './upload/upload.module';
 import { SearchModule } from './search/search.module';
+import { RatingModule } from './rating/rating.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { SearchModule } from './search/search.module';
     ReferralModule,
     UploadModule,
     SearchModule,
+    RatingModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
