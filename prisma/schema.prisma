@@ -57,6 +57,7 @@ model Profile {
   albums                  Album[]
   stories                 Story[]
   likes                   Like[]
+  advert                   Advert?
 }
 
 model Referral {
@@ -260,3 +261,15 @@ enum LikeType {
   BLOG
   ALBUM
 }
+
+model Advert {
+  id          String      @id @default(uuid())
+  profile     Profile     @relation(fields: [adminProfileId], references: [id])
+  adminProfileId   String      @unique
+  title       String
+  link        String
+  text        String
+  imageUris   String[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+} 
