@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AdvertService } from './advert.service';
-import { AdvertController } from './advert.controller';
 import { PrismaService } from 'src/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
+import { AdvertController } from './advert.controller';
 
 @Module({
   providers: [AdvertService, PrismaService],
