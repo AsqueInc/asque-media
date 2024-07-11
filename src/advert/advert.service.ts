@@ -4,6 +4,8 @@ import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { ApiResponse } from 'src/types/response.type';
+import { PaginationDto } from 'src/category/dto/pagination.dto';
+import { UpdateAdvertDto } from './dto/update-advert.dto';
 
 @Injectable()
 export class AdvertService {
@@ -30,7 +32,7 @@ export class AdvertService {
       return {
         statusCode: HttpStatus.CREATED,
         data: advert,
-        message: 'advert created',
+        message: 'Advert created',
       };
     } catch (error) {
       this.logger.error(error);
@@ -41,9 +43,154 @@ export class AdvertService {
     }
   }
 
-  async getSingleAdvert() {}
+  async getSingleAdvert(advertId: string): Promise<ApiResponse> {
+    try {
+      const advert = await this.prisma.advert.findFirst({
+        where: { id: advertId },
+        select: {
+          id: true,
+          title: true,
+          link: true,
+          text: true,
+          imageUris: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-  async updateAdvert() {}
+      if (!advert) {
+        throw new HttpException('Advert does not exist', HttpStatus.NOT_FOUND);
+      }
 
-  async deleteAdver() {}
+      return { statusCode: HttpStatus.OK, data: advert };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new HttpException('Advert does not exist', HttpStatus.NOT_FOUND);
+      }
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getAllAdverts(dto: PaginationDto): Promise<ApiResponse> {
+    try {
+      const totalRecords = await this.prisma.advert.count();
+      const skip = (dto.page - 1) * dto.pageSize;
+
+      const adverts = await this.prisma.advert.findMany({
+        skip: skip,
+        take: Number(dto.pageSize),
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          link: true,
+          text: true,
+          imageUris: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          adverts,
+          pageSize: dto.pageSize,
+          currentPage: dto.page,
+          totalRecord: totalRecords,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateAdvert(
+    profileId: string,
+    advertId: string,
+    dto: UpdateAdvertDto,
+  ): Promise<ApiResponse> {
+    try {
+      const profile = await this.prisma.profile.findFirst({
+        where: { id: profileId },
+        select: { user: { select: { isAdmin: true } } },
+      });
+
+      if (profile.user.isAdmin !== true) {
+        throw new HttpException(
+          'Only admins can update adverts',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      const updatedAdvert = await this.prisma.advert.update({
+        where: { id: advertId },
+        data: { ...dto },
+        select: {
+          id: true,
+          title: true,
+          link: true,
+          text: true,
+          imageUris: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: { updatedAdvert },
+        message: 'Advert updated',
+      };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new HttpException('Advert does not exist', HttpStatus.NOT_FOUND);
+      }
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async deleteAdvert(
+    profileId: string,
+    advertId: string,
+  ): Promise<ApiResponse> {
+    try {
+      const profile = await this.prisma.profile.findFirst({
+        where: { id: profileId },
+        select: { user: { select: { isAdmin: true } } },
+      });
+
+      if (profile.user.isAdmin !== true) {
+        throw new HttpException(
+          'Only admins can delete adverts',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      await this.prisma.advert.delete({ where: { id: advertId } });
+
+      return { statusCode: HttpStatus.OK, message: 'Advert deleted' };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new HttpException('Advert does not exist', HttpStatus.NOT_FOUND);
+      }
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
