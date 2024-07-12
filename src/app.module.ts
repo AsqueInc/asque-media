@@ -4,10 +4,8 @@ import { EmailNotificationModule } from './email-notification/email-notification
 import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { ProfileModule } from './profile/profile.module';
-// import { RepositoryModule } from './category/repository.module';
 import { ArtworkModule } from './artwork/artwork.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
-// import { ReviewsModule } from './reviews/reviews.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import * as winston from 'winston';
@@ -15,10 +13,11 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { AlbumModule } from './album/album.module';
 import { BlogModule } from './blog/blog.module';
-// import { PodcastModule } from './podcasts/podcast.module';
 import { ReferralModule } from './referral/referral.module';
 import { UploadModule } from './upload/upload.module';
 import { SearchModule } from './search/search.module';
+import { RatingModule } from './rating/rating.module';
+import { AdvertModule } from './advert/advert.module';
 
 @Module({
   imports: [
@@ -42,10 +41,8 @@ import { SearchModule } from './search/search.module';
       ),
     }),
     ProfileModule,
-    // RepositoryModule,
     ArtworkModule,
     CloudinaryModule,
-    // ReviewsModule,
     OrderModule,
     PaymentModule,
     ThrottlerModule.forRoot([
@@ -56,10 +53,11 @@ import { SearchModule } from './search/search.module';
     ]),
     AlbumModule,
     BlogModule,
-    // PodcastModule,
     ReferralModule,
     UploadModule,
     SearchModule,
+    RatingModule,
+    AdvertModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],

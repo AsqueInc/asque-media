@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { LikeType } from '@prisma/client';
 import { IsNotEmpty, IsString } from 'class-validator';
 
-export class PodcastDto {
-  @IsString()
-  @ApiProperty()
+export class RateItemDto {
+  @ApiProperty({ enum: LikeType })
   @IsNotEmpty()
-  title: string;
+  itemType: LikeType;
 
   @IsString()
   @ApiProperty()
   @IsNotEmpty()
-  description: string;
+  itemId: string;
 }

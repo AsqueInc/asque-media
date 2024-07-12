@@ -8,7 +8,6 @@ import { Profile } from '@prisma/client';
 import { RequestMobileVerificationDto } from './dto/request-mobile-verification.dto';
 import { ApiResponse } from 'src/types/response.type';
 import { VerifyMobileDto } from './dto/verify-mobile.dto';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { MessageService } from 'src/utils/message.service';
 import { PaymentService } from 'src/payment/payment.service';
 import { WithdrawReferralEarningDto } from './dto/withdraw-referral-earning.dto';
@@ -22,7 +21,6 @@ export class ProfileService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private util: UtilService,
     private messageSerive: MessageService,
-    private cloudinary: CloudinaryService,
     private paymentService: PaymentService,
     private jwtService: JwtService,
     private config: ConfigService,

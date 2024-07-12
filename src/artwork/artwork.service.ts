@@ -131,7 +131,7 @@ export class ArtworkService {
 
       return {
         statusCode: HttpStatus.OK,
-        data: artWork,
+        data: { artWork },
       };
     } catch (error) {
       this.logger.error(error);

@@ -53,3 +53,5 @@ $ npm run test:cov
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+- Figure out how to get the number of likes

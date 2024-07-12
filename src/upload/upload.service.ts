@@ -33,7 +33,7 @@ export class UploadService {
   }
 
   async cloudinaryUpload(
-    uploadType: 'ProfilePicture' | 'Artwork' | 'Audio' | 'Video' | 'Image',
+    uploadType: 'ProfilePicture' | 'Artwork' | 'Image',
     file: Express.Multer.File,
   ) {
     try {
@@ -73,37 +73,6 @@ export class UploadService {
         };
       }
 
-      // uplaod audio
-      if (uploadType === 'Audio') {
-        const uploadedAudio = await this.cloudinary.uploadOther('Audio', file);
-
-        const fileDetails = await this.saveToFile(
-          'AUDIO',
-          file.originalname,
-          uploadedAudio.url,
-        );
-
-        return {
-          statusCode: HttpStatus.CREATED,
-          data: fileDetails,
-        };
-      }
-
-      // upload video
-      if (uploadType === 'Video') {
-        const uploadedVideo = await this.cloudinary.uploadOther('Video', file);
-
-        const fileDetails = await this.saveToFile(
-          'VIDEO',
-          file.originalname,
-          uploadedVideo.url,
-        );
-        return {
-          statusCode: HttpStatus.CREATED,
-          fileDetails,
-        };
-      }
-
       // upload image
       if (uploadType === 'Image') {
         const uploadedImage = await this.cloudinary.uploadImage('Image', file);
@@ -131,7 +100,5 @@ export class UploadService {
 export enum UploadTypeEnum {
   ProfilePicture,
   Artwork,
-  Audio,
-  Video,
   Image,
 }
