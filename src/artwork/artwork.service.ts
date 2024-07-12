@@ -129,13 +129,9 @@ export class ArtworkService {
         throw new HttpException('Artwork not found', HttpStatus.NOT_FOUND);
       }
 
-      const artworkLikeCount = await this.prisma.like.count({
-        where: { itemId: artworkId, itemType: 'ARTWORK' },
-      });
-
       return {
         statusCode: HttpStatus.OK,
-        data: { artWork, numberOfLikes: artworkLikeCount },
+        data: { artWork },
       };
     } catch (error) {
       this.logger.error(error);
