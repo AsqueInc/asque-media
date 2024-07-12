@@ -83,7 +83,7 @@ model Story {
   updatedAt       DateTime  @updatedAt
   profile         Profile   @relation(fields: [profileId], references: [id])
   profileId       String
-  numberOfLikes   Int  
+  numberOfLikes   Int       @default(0) 
 }
 
 model Otp {
@@ -118,7 +118,7 @@ model ArtWork {
   orderItem         Order_Item[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
-  numberOfLikes     Int
+  numberOfLikes     Int       @default(0)
 }
 
 enum PurchaseStatus {
@@ -141,7 +141,7 @@ model Album {
   description       String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
-  numberOfLikes     Int
+  numberOfLikes     Int         @default(0)
 }
 
 model Order {
