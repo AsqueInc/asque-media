@@ -2,7 +2,7 @@
   "name": "asque-media",
   "version": "0.0.1",
   "description": "BE code for asque africa",
-  "author": "alahir jeffrey",
+  "author": "alahira jeffrey",
   "private": true,
   "engines": {
     "node": ">=18.18.0 <19.0.0"
