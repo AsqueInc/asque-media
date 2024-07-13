@@ -58,6 +58,7 @@ model Profile {
   stories                 Story[]
   likes                   Like[]
   adverts                   Advert[]
+  subscriptions           Subscription[]
 }
 
 model Referral {
@@ -81,7 +82,8 @@ model Story {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   profile         Profile   @relation(fields: [profileId], references: [id])
-  profileId       String  
+  profileId       String
+  numberOfLikes   Int       @default(0) 
 }
 
 model Otp {
@@ -116,6 +118,7 @@ model ArtWork {
   orderItem         Order_Item[]
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+  numberOfLikes     Int       @default(0)
 }
 
 enum PurchaseStatus {
@@ -138,6 +141,7 @@ model Album {
   description       String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
+  numberOfLikes     Int         @default(0)
 }
 
 model Order {
@@ -273,3 +277,22 @@ model Advert {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 } 
+
+model Subscription {
+  id          String        @id @default(uuid())
+  profile     Profile       @relation(fields: [profileId], references: [id])
+  profileId   String
+  interval    String
+  amount      String
+  duration    String
+  status      SubscriptionStatus
+  plan_token  String
+  currency    String
+  subscriptionDate   DateTime      @default(now())
+  subscriptionExpirtDate  DateTime      
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+}

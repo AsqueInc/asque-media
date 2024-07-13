@@ -1,8 +1,8 @@
 {
   "name": "asque-media",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "BE code for asque africa",
+  "author": "alahira jeffrey",
   "private": true,
   "engines": {
     "node": ">=18.18.0 <19.0.0"
