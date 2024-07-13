@@ -12,6 +12,59 @@ export class RatingService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
+  async updateLikeCount(
+    itemId: string,
+    itemType: 'ALBUM' | 'ARTWORK' | 'BLOG',
+  ) {
+    if (itemType === 'ARTWORK') {
+      const artwork = await this.prisma.artWork.findFirst({
+        where: { id: itemId },
+      });
+
+      const newLikeCount = artwork.numberOfLikes + 1;
+
+      // update artwork like count
+      const updatedArtwork = await this.prisma.artWork.update({
+        where: { id: itemId },
+        data: { numberOfLikes: newLikeCount },
+      });
+
+      return updatedArtwork;
+    }
+    if (itemType === 'ALBUM') {
+      const album = await this.prisma.album.findFirst({
+        where: { id: itemId },
+      });
+
+      const newLikeCount = album.numberOfLikes + 1;
+
+      // update album like count
+      const updatedAlbum = await this.prisma.album.update({
+        where: { id: itemId },
+        data: { numberOfLikes: newLikeCount },
+      });
+
+      return updatedAlbum;
+    }
+    if (itemType === 'BLOG') {
+      const blog = await this.prisma.story.findFirst({
+        where: { id: itemId },
+      });
+
+      const newLikeCount = blog.numberOfLikes + 1;
+
+      // update blog like count
+      const updatedBlog = await this.prisma.story.update({
+        where: { id: itemId },
+        data: { numberOfLikes: newLikeCount },
+      });
+
+      return updatedBlog;
+    }
+
+    return;
+  }
+
   /**
    * rate an album, artwork or story
    * @param profileId : id of the user
@@ -26,16 +79,41 @@ export class RatingService {
         throw new HttpException('Incorrect item type', HttpStatus.BAD_REQUEST);
       }
 
+      // ensure user has not like an item before
+      const isItemAlreadyLiked = await this.prisma.like.findFirst({
+        where: {
+          profileId: profileId,
+          itemId: dto.itemId,
+          itemType: dto.itemType,
+        },
+      });
+      if (isItemAlreadyLiked) {
+        throw new HttpException(
+          'You cannot like an item more than once',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
       const likeDetails = await this.prisma.like.create({
         data: {
           itemId: dto.itemId,
           itemType: dto.itemType,
-          profileId: profileId,
-          // profile: { connect: { id: profileId } },
+          profile: { connect: { id: profileId } },
         },
       });
 
-      return { statusCode: HttpStatus.OK, data: likeDetails };
+      const updatedItemDetails = await this.updateLikeCount(
+        dto.itemId,
+        dto.itemType,
+      );
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          likeDetails: likeDetails,
+          updatedItemDetails: updatedItemDetails,
+        },
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
