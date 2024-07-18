@@ -295,11 +295,141 @@ export class PaymentService {
   }
 
   /**
+   * helper function to subscribe
+   * @param plan: paystack plan code
+   * @param profileEmail: email of user
+   * @returns: axios response data
+   */
+  async subscriptionHelper(plan: string, profileEmail: string, amount: string) {
+    try {
+      // create subscription with paystack
+      const response = await axios.post(
+        'https://api.paystack.co/transaction/initialize',
+        {
+          email: profileEmail,
+          plan: plan,
+          amount: amount,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.paystackApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * subscribe to fremium or premium packages
+   * @param profileId : profile id gotten from request object
+   * @param dto : subscrption dto with subscription type field
+   * @returns : status code, message and data
+   */
+  async subscribe(
+    profileEmail: string,
+    dto: SubscribeDto,
+  ): Promise<ApiResponse> {
+    try {
+      // check if there is a pending subscription
+      const isSubscriptionPending = await this.prisma.subscription.findFirst({
+        where: { profile: { userEmail: profileEmail } },
+      });
+
+      // check to see if there is an active subscription
+      if (isSubscriptionPending.status === 'ACTIVE')
+        throw new HttpException(
+          'You still have an active subscription',
+          HttpStatus.BAD_REQUEST,
+        );
+
+      // check to see if there is a pending subscription
+      if (isSubscriptionPending.status === 'PENDING')
+        throw new HttpException(
+          'You still have a pending subscription',
+          HttpStatus.BAD_REQUEST,
+        );
+      // for fremium plan
+      if (dto.subscriptionPlan === SubscriptionEnum.Freemium) {
+        const fremiumResponse = await this.subscriptionHelper(
+          this.config.get<string>('FREEMIUM_PLAN_CODE'),
+          profileEmail,
+          this.config.get<string>('FREEMIUM_AMOUNT'),
+        );
+
+        await this.prisma.subscription.create({
+          data: {
+            profile: { connect: { userEmail: profileEmail } },
+            status: 'PENDING',
+            currency: 'NG',
+            subscriptionPlan: 'FREEMIUM',
+            transactionReference: fremiumResponse.data.reference,
+          },
+        });
+
+        return {
+          statusCode: HttpStatus.OK,
+          data: {
+            authorizationUrl: fremiumResponse.data.authorization_url,
+            accessCode: fremiumResponse.data.access_code,
+            reference: fremiumResponse.data.reference,
+          },
+        };
+        // for premium plans
+      } else if (dto.subscriptionPlan === SubscriptionEnum.Premium) {
+        const premiumResponse = await this.subscriptionHelper(
+          this.config.get<string>('PREMIUM_PLAN_CODE'),
+          profileEmail,
+          this.config.get<string>('PREMIUM_AMOUNT'),
+        );
+
+        await this.prisma.subscription.create({
+          data: {
+            profile: { connect: { userEmail: profileEmail } },
+            status: 'PENDING',
+            currency: 'NG',
+            subscriptionPlan: 'PREMIUM',
+            transactionReference: premiumResponse.data.reference,
+          },
+        });
+
+        return {
+          statusCode: HttpStatus.OK,
+          data: {
+            authorizationUrl: premiumResponse.data.authorization_url,
+            accessCode: premiumResponse.data.access_code,
+            reference: premiumResponse.data.reference,
+          },
+        };
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'error occured',
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
    * confirm payment status
    * @param req : request object
    * @returns : status code and message
    */
-  async verifyPaymentViaWebhook(req: Request) {
+  async webhookVerification(req: Request) {
     try {
       // Retrieve the request's body
       const { event, data } = req.body;
@@ -380,110 +510,61 @@ export class PaymentService {
           message: 'Payment successful',
         };
       }
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
 
-  /**
-   * helper function to subscribe
-   * @param plan: paystack plan code
-   * @param profileEmail: email of user
-   * @returns: axios response data
-   */
-  async subscriptionHelper(plan: string, profileEmail: string) {
-    try {
-      // create subscription with paystack
-      const response = await axios.post(
-        'https://api.paystack.co/subscription',
-        {
-          customer: profileEmail,
-          plan: plan,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${this.paystackApiKey}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
+      // Do something with event
+      if (event === 'subscription.create') {
+        // get subscription details
+        const subscriptionDetails = await this.prisma.subscription.findFirst({
+          where: { profile: { userEmail: data.customer.email } },
+          select: { id: true, transactionReference: true },
+        });
 
-      return response.data;
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  /**
-   * subscribe to fremium or premium packages
-   * @param profileId : profile id gotten from request object
-   * @param dto : subscrption dto with subscription type field
-   * @returns : status code, message and data
-   */
-  async subscribe(profileId: string, dto: SubscribeDto): Promise<ApiResponse> {
-    try {
-      if (dto.subscriptionPlan === SubscriptionEnum.Freemium) {
-        const fremiumResponse = await this.subscriptionHelper(
-          this.config.get<string>('FREEMIUM_PLAN_CODE'),
-          profileId,
-        );
-
-        const subscriptionData = await this.prisma.subscription.create({
+        // update subscription infor
+        await this.prisma.subscription.update({
+          where: { id: subscriptionDetails.id },
           data: {
-            profile: { connect: { id: profileId } },
-            cancelledAt: fremiumResponse.data.cancelledAt,
             status: 'ACTIVE',
-            subscriptionCode: fremiumResponse.data.subscription_code,
-            nextPaymentDate: fremiumResponse.data.next_payment_date,
-            emailToken: fremiumResponse.data.email_token,
-            currency: 'NG',
-            subscriptionPlan: 'FREEMIUM',
+            subscriptionCode: data.subscription_code,
+            nextPaymentDate: data.next_payment_date,
           },
         });
 
-        return {
-          statusCode: HttpStatus.OK,
-          data: subscriptionData,
-          message: 'Subscription successful',
-        };
-      } else if (dto.subscriptionPlan === SubscriptionEnum.Premium) {
-        const premiumResponse = await this.subscriptionHelper(
-          this.config.get<string>('PREMIUM_PLAN_CODE'),
-          profileId,
+        // notify admin of completed subscription
+        await this.emailService.notifyAdminOfCompletePayment(
+          subscriptionDetails.transactionReference,
         );
 
-        const subscriptionData = await this.prisma.subscription.create({
-          data: {
-            profile: { connect: { id: profileId } },
-            cancelledAt: premiumResponse.data.cancelledAt,
-            status: 'ACTIVE',
-            subscriptionCode: premiumResponse.data.subscription_code,
-            nextPaymentDate: premiumResponse.data.next_payment_date,
-            emailToken: premiumResponse.data.email_token,
-            currency: 'NG',
-            subscriptionPlan: 'PREMIUM',
-          },
-        });
-
         return {
           statusCode: HttpStatus.OK,
-          data: subscriptionData,
           message: 'Subscription successful',
         };
       }
 
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'error occured',
-      };
+      if (event === 'subscription.not_renew') {
+        // get subscription details
+        const subscriptionDetails = await this.prisma.subscription.findFirst({
+          where: { profile: { userEmail: data.customer.email } },
+          select: { id: true, transactionReference: true },
+        });
+
+        // update subscription information
+        await this.prisma.subscription.update({
+          where: { id: subscriptionDetails.id },
+          data: {
+            status: 'CANCELED',
+          },
+        });
+
+        // notify admin of cancellation of subscription
+        await this.emailService.notifyAdminOfCanceledSubscription(
+          subscriptionDetails.transactionReference,
+        );
+
+        return {
+          statusCode: HttpStatus.OK,
+          message: 'Subscription cancelled',
+        };
+      }
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(

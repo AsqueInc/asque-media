@@ -50,8 +50,8 @@ export class PaymentController {
   }
 
   @Post('webhook')
-  @ApiOperation({ summary: 'Verify payment status webhook endpoint' })
+  @ApiOperation({ summary: 'Webhook for paystack verification' })
   verifyPaymentViaWebhook(@Req() req) {
-    return this.paymentService.verifyPaymentViaWebhook(req);
+    return this.paymentService.webhookVerification(req);
   }
 }
