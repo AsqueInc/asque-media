@@ -282,17 +282,25 @@ model Subscription {
   id          String        @id @default(uuid())
   profile     Profile       @relation(fields: [profileId], references: [id])
   profileId   String
-  interval    String
-  amount      String
-  duration    String
-  status      SubscriptionStatus
-  plan_token  String
-  currency    String
+  cancelledAt   String?
+  status      SubscriptionStatus  @default(PENDING)
+  subscriptionCode  String?
+  nextPaymentDate   String?
+  emailToken        String?
+  transactionReference      String?
+  currency    String?
   subscriptionDate   DateTime      @default(now())
-  subscriptionExpirtDate  DateTime      
+  createdAt   DateTime      @default(now()) 
+  subscriptionPlan SubscriptionPlan 
+}
+
+enum SubscriptionPlan {
+  FREEMIUM
+  PREMIUM
 }
 
 enum SubscriptionStatus {
   PENDING
   ACTIVE
+  CANCELED
 }
