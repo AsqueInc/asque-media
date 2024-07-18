@@ -141,8 +141,8 @@ export class EmailNotificationService {
     const mailOptions = {
       // from: this.config.get('USER_EMAIL'),
       to: this.config.get('USER_EMAIL'),
-      subject: 'Subscription Canceled',
-      text: `A subscription with reference: ${transactionReference} has been canceled.`,
+      subject: 'Subscription Cancelled',
+      text: `A subscription with reference: ${transactionReference} has been cancelled.`,
     };
 
     await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
