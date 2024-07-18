@@ -282,14 +282,19 @@ model Subscription {
   id          String        @id @default(uuid())
   profile     Profile       @relation(fields: [profileId], references: [id])
   profileId   String
-  interval    String
-  amount      String
-  duration    String
+  subscriptionId  String
+  periodStart String?
+  periodEnd    String?
+  invoiceCode   String?
   status      SubscriptionStatus
-  plan_token  String
-  currency    String
+  subscriptionCode  String?
+  nextPaymentDate   String?
+  emailToken        String?
+  transactionReference      String?
+  currency    String?
   subscriptionDate   DateTime      @default(now())
-  subscriptionExpirtDate  DateTime      
+  subscriptionExpirtDate  DateTime     
+  createdAt   DateTime      @default(now()) 
 }
 
 enum SubscriptionStatus {
