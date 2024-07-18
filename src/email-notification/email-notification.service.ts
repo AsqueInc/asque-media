@@ -112,4 +112,25 @@ export class EmailNotificationService {
       );
     });
   }
+
+  /**
+   * notify admin that a subscription has successful occured
+   * @param orderId : string
+   */
+  async notifyAdminOfCompleteSubscription(transactionReference: string) {
+    const mailOptions = {
+      // from: this.config.get('USER_EMAIL'),
+      to: this.config.get('USER_EMAIL'),
+      subject: 'Subscription Complete',
+      text: `A subscription with reference: ${transactionReference} has been completed for.`,
+    };
+
+    await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
+      this.logger.error(error);
+      throw new HttpException(
+        'Email not sent',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
+  }
 }
