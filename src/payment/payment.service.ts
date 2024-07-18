@@ -436,9 +436,22 @@ export class PaymentService {
           profileId,
         );
 
+        const subscriptionData = await this.prisma.subscription.create({
+          data: {
+            profile: { connect: { id: profileId } },
+            cancelledAt: fremiumResponse.data.cancelledAt,
+            status: 'ACTIVE',
+            subscriptionCode: fremiumResponse.data.subscription_code,
+            nextPaymentDate: fremiumResponse.data.next_payment_date,
+            emailToken: fremiumResponse.data.email_token,
+            currency: 'NG',
+            subscriptionPlan: 'FREEMIUM',
+          },
+        });
+
         return {
           statusCode: HttpStatus.OK,
-          data: fremiumResponse.data,
+          data: subscriptionData,
           message: 'Subscription successful',
         };
       } else if (dto.subscriptionPlan === SubscriptionEnum.Premium) {
@@ -447,9 +460,22 @@ export class PaymentService {
           profileId,
         );
 
+        const subscriptionData = await this.prisma.subscription.create({
+          data: {
+            profile: { connect: { id: profileId } },
+            cancelledAt: premiumResponse.data.cancelledAt,
+            status: 'ACTIVE',
+            subscriptionCode: premiumResponse.data.subscription_code,
+            nextPaymentDate: premiumResponse.data.next_payment_date,
+            emailToken: premiumResponse.data.email_token,
+            currency: 'NG',
+            subscriptionPlan: 'PREMIUM',
+          },
+        });
+
         return {
           statusCode: HttpStatus.OK,
-          data: premiumResponse.data,
+          data: subscriptionData,
           message: 'Subscription successful',
         };
       }
@@ -459,7 +485,6 @@ export class PaymentService {
         message: 'error occured',
       };
     } catch (error) {
-      console.log(error);
       this.logger.error(error);
       throw new HttpException(
         error.message,
