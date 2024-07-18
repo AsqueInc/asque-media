@@ -2,7 +2,11 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
-import { ProcessPaymentDto } from './dto/process-payment.dto';
+import {
+  ProcessPaymentDto,
+  SubscribeDto,
+  SubscriptionEnum,
+} from './dto/process-payment.dto';
 import axios from 'axios';
 import { ApiResponse } from 'src/types/response.type';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
@@ -377,6 +381,85 @@ export class PaymentService {
         };
       }
     } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * helper function to subscribe
+   * @param plan: paystack plan code
+   * @param profileEmail: email of user
+   * @returns: axios response data
+   */
+  async subscriptionHelper(plan: string, profileEmail: string) {
+    try {
+      // create subscription with paystack
+      const response = await axios.post(
+        'https://api.paystack.co/subscription',
+        {
+          customer: profileEmail,
+          plan: plan,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${this.paystackApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  /**
+   * subscribe to fremium or premium packages
+   * @param profileId : profile id gotten from request object
+   * @param dto : subscrption dto with subscription type field
+   * @returns : status code, message and data
+   */
+  async subscribe(profileId: string, dto: SubscribeDto): Promise<ApiResponse> {
+    try {
+      if (dto.subscriptionPlan === SubscriptionEnum.Freemium) {
+        const fremiumResponse = await this.subscriptionHelper(
+          this.config.get<string>('FREEMIUM_PLAN_CODE'),
+          profileId,
+        );
+
+        return {
+          statusCode: HttpStatus.OK,
+          data: fremiumResponse.data,
+          message: 'Subscription successful',
+        };
+      } else if (dto.subscriptionPlan === SubscriptionEnum.Premium) {
+        const premiumResponse = await this.subscriptionHelper(
+          this.config.get<string>('PREMIUM_PLAN_CODE'),
+          profileId,
+        );
+
+        return {
+          statusCode: HttpStatus.OK,
+          data: premiumResponse.data,
+          message: 'Subscription successful',
+        };
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'error occured',
+      };
+    } catch (error) {
+      console.log(error);
       this.logger.error(error);
       throw new HttpException(
         error.message,
