@@ -133,4 +133,24 @@ export class EmailNotificationService {
       );
     });
   }
+  /**
+   * notify admin that an order has been paid for
+   * @param orderId : string
+   */
+  async notifyAdminOfCanceledSubscription(transactionReference: string) {
+    const mailOptions = {
+      // from: this.config.get('USER_EMAIL'),
+      to: this.config.get('USER_EMAIL'),
+      subject: 'Subscription Canceled',
+      text: `A subscription with reference: ${transactionReference} has been canceled.`,
+    };
+
+    await this.nodeMailerTransport.sendMail(mailOptions).catch((error) => {
+      this.logger.error(error);
+      throw new HttpException(
+        'Email not sent',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    });
+  }
 }
