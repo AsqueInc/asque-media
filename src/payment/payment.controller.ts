@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { PaymentService } from './payment.service';
-import { ProcessPaymentDto } from './dto/process-payment.dto';
+import { ProcessPaymentDto, SubscribeDto } from './dto/process-payment.dto';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 
 @ApiTags('payment-endpoints')
@@ -23,6 +23,14 @@ export class PaymentController {
   @ApiOperation({ summary: 'Process payment for an order' })
   processPayment(@Body() dto: ProcessPaymentDto, @Req() req) {
     return this.paymentService.processPayment(dto, req.user.profileId);
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @Post('/subscribe')
+  @ApiOperation({ summary: 'Subscribe to asque' })
+  subscribe(@Body() dto: SubscribeDto, @Req() req) {
+    return this.paymentService.subscribe(req.user.email, dto);
   }
 
   @UseGuards(JwtGuard)
