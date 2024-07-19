@@ -103,8 +103,8 @@ export class CloudinaryService {
     file: Express.Multer.File,
   ): Promise<UploadApiResponse | UploadApiErrorResponse> {
     if (type === 'Audio') {
-      // ensure only audi0 files can be uploaded
-      if (file.mimetype !== 'audio/mpeg') {
+      // ensure only audio files can be uploaded
+      if (file.mimetype !== 'audio/mpeg' && file.mimetype !== 'audio/mp3') {
         throw new HttpException('Incorrect file type', HttpStatus.BAD_REQUEST);
       }
       return await this.uploadHelper('other', 'audio', file);
