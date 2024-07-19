@@ -32,7 +32,7 @@ export class UploadService {
     }
   }
 
-  async cloudinaryUpload(
+  async cloudinaryUploadImage(
     uploadType: 'ProfilePicture' | 'Artwork' | 'Image',
     file: Express.Multer.File,
   ) {
@@ -88,6 +88,29 @@ export class UploadService {
         };
       }
     } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async cloudinaryUploadAudio(file: Express.Multer.File) {
+    try {
+      const uploadedAudio = await this.cloudinary.uploadOther('Audio', file);
+
+      const fileDetails = await this.saveToFile(
+        'AUDIO',
+        file.originalname,
+        uploadedAudio.url,
+      );
+      return {
+        statusCode: HttpStatus.CREATED,
+        fileDetails,
+      };
+    } catch (error) {
+      console.log(error);
       this.logger.error(error);
       throw new HttpException(
         error.message,
