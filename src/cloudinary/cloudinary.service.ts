@@ -43,6 +43,7 @@ export class CloudinaryService {
       return await new Promise((resolve, reject) => {
         const upload = v2.uploader.upload_stream(
           {
+            resource_type: 'auto',
             folder: folderName,
           },
           (error, result) => {
