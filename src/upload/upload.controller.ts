@@ -25,7 +25,7 @@ export class UploadController {
     name: 'type',
     enum: ['ProfilePicture', 'Artwork', 'Image'],
   })
-  @ApiOperation({ summary: 'Upload media via cloudinary' })
+  @ApiOperation({ summary: 'Upload images via cloudinary' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -39,6 +39,20 @@ export class UploadController {
     @Param('type')
     type: 'ProfilePicture' | 'Artwork' | 'Image',
   ) {
-    return this.uploadService.cloudinaryUpload(type, file);
+    return this.uploadService.cloudinaryUploadImage(type, file);
+  }
+
+  @Post('audio')
+  @ApiOperation({ summary: 'Upload audio via cloudinary' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: { file: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  cloudinaryUploadAudio(@UploadedFile() file: Express.Multer.File) {
+    return this.uploadService.cloudinaryUploadAudio(file);
   }
 }
