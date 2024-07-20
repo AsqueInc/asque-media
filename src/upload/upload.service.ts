@@ -96,7 +96,11 @@ export class UploadService {
     }
   }
 
-  async cloudinaryUploadAudio(file: Express.Multer.File) {
+  async cloudinaryUploadAudio(
+    file: Express.Multer.File,
+    itemType: 'artwork' | 'story' | 'album',
+    itemId,
+  ) {
     try {
       const uploadedAudio = await this.cloudinary.uploadOther('Audio', file);
 
@@ -105,12 +109,34 @@ export class UploadService {
         file.originalname,
         uploadedAudio.url,
       );
+
+      if (itemType === 'album') {
+        await this.prisma.album.update({
+          where: { id: itemId },
+          data: { audioUrl: fileDetails.path },
+        });
+      }
+      if (itemType === 'artwork') {
+        await this.prisma.artWork.update({
+          where: { id: itemId },
+          data: { audioUrl: fileDetails.path },
+        });
+      }
+      if (itemType === 'story') {
+        await this.prisma.story.update({
+          where: { id: itemId },
+          data: { audioUrl: fileDetails.path },
+        });
+      }
       return {
         statusCode: HttpStatus.CREATED,
-        fileDetails,
+        data: fileDetails,
+        message: 'audio saved',
       };
     } catch (error) {
-      console.log(error);
+      if (error.code === 'P2025') {
+        throw new HttpException('item does not exist', HttpStatus.NOT_FOUND);
+      }
       this.logger.error(error);
       throw new HttpException(
         error.message,
