@@ -44,8 +44,8 @@ export class UploadController {
 
   @Post('audio/:itemType/:itemId')
   @ApiParam({
-    name: 'type',
-    enum: ['ProfilePicture', 'Artwork', 'Image'],
+    name: 'itemType',
+    enum: ['artwork', 'story', 'album'],
   })
   @ApiOperation({ summary: 'Upload audio via cloudinary' })
   @ApiConsumes('multipart/form-data')
