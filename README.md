@@ -2,14 +2,6 @@
 
 Asque is an e-commerce/media gallery for african art enthusiasts to explore, shop and earn while promoting African visual art and their crafts.
 
-## Problem Statement
-
-Though significantly ingenious, African fine artists and photographers often struggle with penetrating overseas markets. Locally, they are equally challenged with identifying their target market and effectively positioning themselves to reach them. We are out to right these.
-
-## Target Niche
-
-African Americans, post first generation immigrants, and everone with a demonstrated history of interest in African art and culture
-
 ## Requirements
 
 - [Nodejs](https://nodejs.org/en/) is a JavaScript runtime built on Chrome's V8 JavaScript engine.
