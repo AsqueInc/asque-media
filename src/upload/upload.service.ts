@@ -32,7 +32,7 @@ export class UploadService {
     }
   }
 
-  async cloudinaryUpload(
+  async cloudinaryUploadImage(
     uploadType: 'ProfilePicture' | 'Artwork' | 'Image',
     file: Express.Multer.File,
   ) {
@@ -88,6 +88,55 @@ export class UploadService {
         };
       }
     } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async cloudinaryUploadAudio(
+    file: Express.Multer.File,
+    itemType: 'artwork' | 'story' | 'album',
+    itemId,
+  ) {
+    try {
+      const uploadedAudio = await this.cloudinary.uploadOther('Audio', file);
+
+      const fileDetails = await this.saveToFile(
+        'AUDIO',
+        file.originalname,
+        uploadedAudio.url,
+      );
+
+      if (itemType === 'album') {
+        await this.prisma.album.update({
+          where: { id: itemId },
+          data: { audioUrl: fileDetails.path },
+        });
+      }
+      if (itemType === 'artwork') {
+        await this.prisma.artWork.update({
+          where: { id: itemId },
+          data: { audioUrl: fileDetails.path },
+        });
+      }
+      if (itemType === 'story') {
+        await this.prisma.story.update({
+          where: { id: itemId },
+          data: { audioUrl: fileDetails.path },
+        });
+      }
+      return {
+        statusCode: HttpStatus.CREATED,
+        data: fileDetails,
+        message: 'audio saved',
+      };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new HttpException('item does not exist', HttpStatus.NOT_FOUND);
+      }
       this.logger.error(error);
       throw new HttpException(
         error.message,

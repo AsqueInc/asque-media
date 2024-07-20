@@ -84,6 +84,7 @@ model Story {
   profile         Profile   @relation(fields: [profileId], references: [id])
   profileId       String
   numberOfLikes   Int       @default(0) 
+  audioUrl          String?
 }
 
 model Otp {
@@ -119,6 +120,7 @@ model ArtWork {
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
   numberOfLikes     Int       @default(0)
+  audioUrl          String?
 }
 
 enum PurchaseStatus {
@@ -142,6 +144,7 @@ model Album {
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   numberOfLikes     Int         @default(0)
+  audioUrl              String?
 }
 
 model Order {
@@ -231,7 +234,7 @@ model File {
   updatedAt         DateTime  @updatedAt
   fileType          Type
   title             String
-  path              String
+  path              String  
 }
 
 enum Type {
