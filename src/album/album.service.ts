@@ -7,6 +7,7 @@ import { ApiResponse } from 'src/types/response.type';
 import { Logger } from 'winston';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
+import { CreateStockImageDto } from './dto/create-stock-image.dto';
 
 @Injectable()
 export class AlbumService {
@@ -174,6 +175,7 @@ export class AlbumService {
         data: {
           title: dto.title,
           category: dto.category,
+          subTitle: dto.subTitle,
           description: dto.description,
           albumImageUris: dto.albumImageUris,
           profile: {
@@ -283,6 +285,57 @@ export class AlbumService {
       });
 
       return { statusCode: HttpStatus.OK, data: albums };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async createStockImage(dto: CreateStockImageDto) {
+    try {
+      const stockImage = await this.prisma.stockImage.create({
+        data: {
+          stockImageUrl: dto.imageUrl,
+        },
+      });
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        data: stockImage,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getAllStockImages(id: string, dto: PaginationDto) {
+    try {
+      const totalRecords = await this.prisma.stockImage.count();
+
+      const skip = (dto.page - 1) * dto.pageSize;
+
+      const stockImages = await this.prisma.stockImage.findMany({
+        skip: skip,
+        take: Number(dto.pageSize),
+        orderBy: { createdAt: 'desc' },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          currentPage: dto.page,
+          pageSize: dto.pageSize,
+          totalRecord: totalRecords,
+          data: stockImages,
+        },
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
