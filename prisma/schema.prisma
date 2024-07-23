@@ -145,12 +145,6 @@ model Album {
   numberOfLikes     Int         @default(0)
 }
 
-model StockImage {
-  id                String      @id @default(uuid())
-  stockImageUrl     String
-  createdAt         DateTime    @default(now())
-}
-
 model Order {
   id                      String    @id @default(uuid())
   profile                 Profile   @relation(fields: [profileId], references: [id])
