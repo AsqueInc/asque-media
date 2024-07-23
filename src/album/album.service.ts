@@ -315,7 +315,7 @@ export class AlbumService {
     }
   }
 
-  async getAllStockImages(id: string, dto: PaginationDto) {
+  async getAllStockImages(dto: PaginationDto) {
     try {
       const totalRecords = await this.prisma.stockImage.count();
 
