@@ -7,7 +7,6 @@ import { ApiResponse } from 'src/types/response.type';
 import { Logger } from 'winston';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
-import { CreateStockImageDto } from './dto/create-stock-image.dto';
 
 @Injectable()
 export class AlbumService {
@@ -294,46 +293,22 @@ export class AlbumService {
     }
   }
 
-  async createStockImage(dto: CreateStockImageDto) {
+  // cache this later on
+  async getAllStockImages() {
     try {
-      const stockImage = await this.prisma.stockImage.create({
-        data: {
-          stockImageUrl: dto.imageUrl,
-        },
-      });
+      const stockImageUrls = [];
 
-      return {
-        statusCode: HttpStatus.CREATED,
-        data: stockImage,
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+      const albums = await this.prisma.album.findMany();
 
-  async getAllStockImages(dto: PaginationDto) {
-    try {
-      const totalRecords = await this.prisma.stockImage.count();
-
-      const skip = (dto.page - 1) * dto.pageSize;
-
-      const stockImages = await this.prisma.stockImage.findMany({
-        skip: skip,
-        take: Number(dto.pageSize),
-        orderBy: { createdAt: 'desc' },
-      });
+      // save the first image in every album
+      for (const album of albums) {
+        stockImageUrls.push(album.albumImageUris[0]);
+      }
 
       return {
         statusCode: HttpStatus.OK,
         data: {
-          currentPage: dto.page,
-          pageSize: dto.pageSize,
-          totalRecord: totalRecords,
-          data: stockImages,
+          stockImageUrls,
         },
       };
     } catch (error) {
