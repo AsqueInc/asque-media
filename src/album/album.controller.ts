@@ -64,15 +64,15 @@ export class AlbumController {
     return this.albumService.createAlbum(dto, req.user.profileId);
   }
 
-  // @UseGuards(JwtGuard)
-  // @ApiSecurity('JWT-auth')
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Post('stock')
   @ApiOperation({ summary: 'Create stock image' })
   createStockImage(@Body() dto: CreateStockImageDto) {
     return this.albumService.createStockImage(dto);
   }
 
-  @Get('stock')
+  @Get('stock/all')
   @ApiOperation({ summary: 'Get all stock images' })
   getAllStockImages(@Query() dto: PaginationDto) {
     return this.albumService.getAllStockImages(dto);
