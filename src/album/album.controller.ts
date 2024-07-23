@@ -15,6 +15,7 @@ import { AlbumService } from './album.service';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
+import { CreateStockImageDto } from './dto/create-stock-image.dto';
 
 @ApiTags('album-endpoints')
 @Controller('album')
@@ -61,6 +62,23 @@ export class AlbumController {
   @ApiOperation({ summary: 'Create an album for an artwork' })
   createAlbum(@Body() dto: CreateAlbumDto, @Req() req) {
     return this.albumService.createAlbum(dto, req.user.profileId);
+  }
+
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
+  @Post('stock')
+  @ApiOperation({ summary: 'Create stock image' })
+  createStockImage(@Body() dto: CreateStockImageDto) {
+    return this.albumService.createStockImage(dto);
+  }
+
+  @Get('stock/:stockImageId')
+  @ApiOperation({ summary: 'Get all stock images' })
+  getAllStockImages(
+    @Query() dto: PaginationDto,
+    @Param('stockImageId') stockImageId: string,
+  ) {
+    return this.albumService.getAllStockImages(stockImageId, dto);
   }
 
   @UseGuards(JwtGuard)
