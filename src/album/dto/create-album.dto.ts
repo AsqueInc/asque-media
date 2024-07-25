@@ -7,6 +7,11 @@ export class CreateAlbumDto {
   @ApiProperty()
   title: string;
 
+  @IsString()
+  @IsOptional()
+  @ApiProperty()
+  subTitle: string;
+
   @IsNotEmpty()
   @ApiProperty()
   category: string[];

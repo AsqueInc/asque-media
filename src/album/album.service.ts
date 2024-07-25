@@ -174,6 +174,7 @@ export class AlbumService {
         data: {
           title: dto.title,
           category: dto.category,
+          subTitle: dto.subTitle,
           description: dto.description,
           albumImageUris: dto.albumImageUris,
           profile: {
@@ -283,6 +284,33 @@ export class AlbumService {
       });
 
       return { statusCode: HttpStatus.OK, data: albums };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  // cache this later on
+  async getAllStockImages() {
+    try {
+      const stockImageUrls = [];
+
+      const albums = await this.prisma.album.findMany();
+
+      // save the first image in every album
+      for (const album of albums) {
+        stockImageUrls.push(album.albumImageUris[0]);
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: {
+          stockImageUrls,
+        },
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(

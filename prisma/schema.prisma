@@ -136,6 +136,7 @@ enum SaleType {
 model Album {
   id                String      @id @default(uuid())
   title             String
+  subTitle          String?
   category          String[]
   profileId         String      
   profile           Profile     @relation(fields: [profileId], references: [id])

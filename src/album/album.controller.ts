@@ -63,6 +63,12 @@ export class AlbumController {
     return this.albumService.createAlbum(dto, req.user.profileId);
   }
 
+  @Get('stock/all')
+  @ApiOperation({ summary: 'Get all stock images' })
+  getAllStockImages() {
+    return this.albumService.getAllStockImages();
+  }
+
   @UseGuards(JwtGuard)
   @ApiSecurity('JWT-auth')
   @Delete('image/:albumId')
