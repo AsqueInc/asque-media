@@ -20,7 +20,7 @@ export class DownloadService {
   async downloadImage(imageId: string) {
     try {
       const imageDetails = await this.prisma.file.findFirst({
-        where: { id: imageId },
+        where: { path: imageId },
       });
 
       if (!imageDetails) {
