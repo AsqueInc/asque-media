@@ -302,7 +302,7 @@ export class AlbumService {
 
       // save the first image in every album
       for (const album of albums) {
-        stockImageUrls.push(album.albumImageUris[0]);
+        stockImageUrls.push(album.albumImageUris);
       }
 
       return {
