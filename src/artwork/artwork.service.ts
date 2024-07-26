@@ -85,7 +85,11 @@ export class ArtworkService {
         where: { id: artworkId },
       });
 
-      if (artwork.artistProfileId !== profileId) {
+      const user = await this.prisma.user.findFirst({
+        where: { profile: { id: profileId } },
+      });
+
+      if (artwork.artistProfileId !== profileId && user.role !== 'ADMIN') {
         throw new HttpException(
           'You cannot update an artwork you do not own',
           HttpStatus.UNAUTHORIZED,
