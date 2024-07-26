@@ -27,9 +27,13 @@ export class DownloadService {
         throw new HttpException('Image does not exist', HttpStatus.NOT_FOUND);
       }
 
-      const writer = fs.createWriteStream('./image.png');
+      const writer = fs.createWriteStream(`./` + imageDetails.title);
 
-      const response = await await axios.get(imageDetails.path);
+      const response = await await axios({
+        url: imageDetails.path,
+        method: 'GET',
+        responseType: 'stream',
+      });
 
       response.data.pipe(writer);
 
