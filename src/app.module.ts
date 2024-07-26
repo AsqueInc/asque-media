@@ -18,6 +18,7 @@ import { UploadModule } from './upload/upload.module';
 import { SearchModule } from './search/search.module';
 import { RatingModule } from './rating/rating.module';
 import { AdvertModule } from './advert/advert.module';
+import { DownloadModule } from './download/download.module';
 
 @Module({
   imports: [
@@ -58,6 +59,7 @@ import { AdvertModule } from './advert/advert.module';
     SearchModule,
     RatingModule,
     AdvertModule,
+    DownloadModule,
   ],
   controllers: [],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
