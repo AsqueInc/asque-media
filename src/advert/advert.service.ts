@@ -121,10 +121,10 @@ export class AdvertService {
     try {
       const profile = await this.prisma.profile.findFirst({
         where: { id: profileId },
-        select: { user: { select: { isAdmin: true } } },
+        select: { user: { select: { role: true } } },
       });
 
-      if (profile.user.isAdmin !== true) {
+      if (profile.user.role !== 'ADMIN') {
         throw new HttpException(
           'Only admins can update adverts',
           HttpStatus.UNAUTHORIZED,
@@ -169,10 +169,10 @@ export class AdvertService {
     try {
       const profile = await this.prisma.profile.findFirst({
         where: { id: profileId },
-        select: { user: { select: { isAdmin: true } } },
+        select: { user: { select: { role: true } } },
       });
 
-      if (profile.user.isAdmin !== true) {
+      if (profile.user.role !== 'ADMIN') {
         throw new HttpException(
           'Only admins can delete adverts',
           HttpStatus.UNAUTHORIZED,
