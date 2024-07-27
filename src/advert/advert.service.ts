@@ -76,8 +76,21 @@ export class AdvertService {
     }
   }
 
-  async getAllAdverts(dto: AdvertPaginationDto): Promise<ApiResponse> {
+  async getAllAdverts(
+    dto: AdvertPaginationDto,
+    role: string,
+  ): Promise<ApiResponse> {
     try {
+      if (role === 'ADMIN') {
+        const adverts = await this.prisma.advert.findMany({});
+
+        return {
+          statusCode: HttpStatus.OK,
+          data: {
+            adverts,
+          },
+        };
+      }
       const totalRecords = await this.prisma.advert.count();
       const totalPages = Math.ceil(totalRecords / dto.pageSize);
 
