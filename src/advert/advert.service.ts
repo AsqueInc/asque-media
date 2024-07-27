@@ -86,7 +86,7 @@ export class AdvertService {
 
       const adverts = await this.prisma.advert.findMany({
         skip: skip,
-        take: dto.pageSize,
+        take: Number(dto.pageSize),
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
