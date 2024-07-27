@@ -7,9 +7,21 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 export class SearchController {
   constructor(private searchService: SearchService) {}
 
-  @Get(':title/:location')
-  @ApiOperation({ summary: 'Search for items ' })
-  search(@Param('title') title: string, @Param('location') location: string) {
-    return this.searchService.search(location, title);
+  @Get('album/:title')
+  @ApiOperation({ summary: 'Search for album via title ' })
+  searchAlbum(@Param('title') title: string) {
+    return this.searchService.searchAlbum(title);
+  }
+
+  @Get('artwork/:title')
+  @ApiOperation({ summary: 'Search for artworks via title ' })
+  searchArtwork(@Param('title') title: string) {
+    return this.searchService.searchArtwork(title);
+  }
+
+  @Get('story/:title')
+  @ApiOperation({ summary: 'Search for stories via title ' })
+  searchStory(@Param('title') title: string) {
+    return this.searchService.searchStory(title);
   }
 }
