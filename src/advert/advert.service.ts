@@ -6,6 +6,7 @@ import { CreateAdvertDto } from './dto/create-advert.dto';
 import { ApiResponse } from 'src/types/response.type';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { AdvertPaginationDto } from './dto/advert-pagination-dto';
+import { shuffle } from 'lodash';
 
 @Injectable()
 export class AdvertService {
@@ -99,10 +100,13 @@ export class AdvertService {
         },
       });
 
+      // Shuffle the adverts
+      const shuffledAdverts = shuffle(adverts);
+
       return {
         statusCode: HttpStatus.OK,
         data: {
-          adverts,
+          shuffledAdverts,
           pageSize: dto.pageSize,
           totalRecords: totalRecords,
         },
