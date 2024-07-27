@@ -30,6 +30,8 @@ export class AdvertController {
     return this.advertService.createAdvert(req.user.profileId, dto);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Get('')
   @ApiOperation({ summary: 'Get all adverts' })
   getAllAdverts(@Query() dto: AdvertPaginationDto, @Req() req) {
