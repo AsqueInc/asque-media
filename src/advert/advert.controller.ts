@@ -32,8 +32,8 @@ export class AdvertController {
 
   @Get('')
   @ApiOperation({ summary: 'Get all adverts' })
-  getAllAdverts(@Query() dto: AdvertPaginationDto) {
-    return this.advertService.getAllAdverts(dto);
+  getAllAdverts(@Query() dto: AdvertPaginationDto, @Req() req) {
+    return this.advertService.getAllAdverts(dto, req.user.role);
   }
 
   @Get(':advertId')
