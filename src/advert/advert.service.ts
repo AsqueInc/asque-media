@@ -4,8 +4,8 @@ import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { ApiResponse } from 'src/types/response.type';
-import { PaginationDto } from 'src/category/dto/pagination.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
+import { AdvertPaginationDto } from './dto/advert-pagination-dto';
 
 @Injectable()
 export class AdvertService {
@@ -75,14 +75,18 @@ export class AdvertService {
     }
   }
 
-  async getAllAdverts(dto: PaginationDto): Promise<ApiResponse> {
+  async getAllAdverts(dto: AdvertPaginationDto): Promise<ApiResponse> {
     try {
       const totalRecords = await this.prisma.advert.count();
-      const skip = (dto.page - 1) * dto.pageSize;
+      const totalPages = Math.ceil(totalRecords / dto.pageSize);
+
+      // randomize the page to return
+      const randomPage = Math.floor(Math.random() * totalPages) + 1;
+      const skip = (randomPage - 1) * dto.pageSize;
 
       const adverts = await this.prisma.advert.findMany({
         skip: skip,
-        take: Number(dto.pageSize),
+        take: dto.pageSize,
         orderBy: { createdAt: 'desc' },
         select: {
           id: true,
@@ -100,8 +104,7 @@ export class AdvertService {
         data: {
           adverts,
           pageSize: dto.pageSize,
-          currentPage: dto.page,
-          totalRecord: totalRecords,
+          totalRecords: totalRecords,
         },
       };
     } catch (error) {
