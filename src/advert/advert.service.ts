@@ -7,6 +7,7 @@ import { ApiResponse } from 'src/types/response.type';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
 import { AdvertPaginationDto } from './dto/advert-pagination-dto';
 import { shuffle } from 'lodash';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AdvertService {
@@ -78,7 +79,7 @@ export class AdvertService {
 
   async getAllAdverts(
     dto: AdvertPaginationDto,
-    role: string,
+    role: Role,
   ): Promise<ApiResponse> {
     try {
       if (role === 'ADMIN') {
