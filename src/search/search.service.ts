@@ -15,32 +15,48 @@ export class SearchService {
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
   ) {}
 
-  async search(location: string, title: string) {
+  async searchArtwork(title: string) {
     try {
-      if (location === 'artworks') {
-        return {
-          statusCode: HttpStatus.OK,
-          data: await this.prisma.artWork.findMany({
-            where: { title: title },
-          }),
-        };
-      }
-      if (location === 'stories') {
-        return {
-          statusCode: HttpStatus.OK,
-          data: await this.prisma.story.findMany({
-            where: { title: title },
-          }),
-        };
-      }
-      if (location === 'albums') {
-        return {
-          statusCode: HttpStatus.OK,
-          data: await this.prisma.album.findMany({
-            where: { title: title },
-          }),
-        };
-      }
+      return {
+        statusCode: HttpStatus.OK,
+        data: await this.prisma.artWork.findMany({
+          where: { title: { contains: title, mode: 'insensitive' } },
+        }),
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async searchAlbum(title: string) {
+    try {
+      return {
+        statusCode: HttpStatus.OK,
+        data: await this.prisma.album.findMany({
+          where: { title: { contains: title, mode: 'insensitive' } },
+        }),
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async searchStory(title: string) {
+    try {
+      return {
+        statusCode: HttpStatus.OK,
+        data: await this.prisma.story.findMany({
+          where: { title: { contains: title, mode: 'insensitive' } },
+        }),
+      };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(

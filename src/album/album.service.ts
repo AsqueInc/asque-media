@@ -25,11 +25,23 @@ export class AlbumService {
     try {
       const album = await this.prisma.album.findFirst({
         where: { id: albumId },
-        include: { profile: { select: { name: true } } },
+        include: {
+          profile: { select: { name: true } },
+          albumChildren: { select: { albumImageUris: true } },
+        },
       });
 
       if (!album) {
         throw new HttpException('Album does not exist', HttpStatus.NOT_FOUND);
+      }
+
+      if (
+        album.albumImageUris.length < 1 &&
+        album.albumChildren.length > 0 &&
+        album.albumChildren[0].albumImageUris.length > 0
+      ) {
+        // if there is no image in the main album, take the first image in the first album children and add
+        album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
       }
 
       return {
@@ -55,7 +67,19 @@ export class AlbumService {
         skip: skip,
         take: Number(dto.pageSize),
         orderBy: { createdAt: 'desc' },
+        include: { albumChildren: { select: { albumImageUris: true } } },
       });
+
+      // if there is no image in the main album, take the first image in the first album children and add
+      for (const album of albums) {
+        if (
+          album.albumImageUris.length < 1 &&
+          album.albumChildren.length > 0 &&
+          album.albumChildren[0].albumImageUris.length > 0
+        ) {
+          album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        }
+      }
 
       return {
         statusCode: HttpStatus.OK,
@@ -93,10 +117,24 @@ export class AlbumService {
 
       const albums = await this.prisma.album.findMany({
         where: { profileId: profileId },
-        include: { profile: { select: { name: true, briefBio: true } } },
+        include: {
+          profile: { select: { name: true, briefBio: true } },
+          albumChildren: { select: { albumImageUris: true } },
+        },
         skip: skip,
         take: Number(dto.pageSize),
       });
+
+      // if there is no image in the main album, take the first image in the first album children and add
+      for (const album of albums) {
+        if (
+          album.albumImageUris.length < 1 &&
+          album.albumChildren.length > 0 &&
+          album.albumChildren[0].albumImageUris.length > 0
+        ) {
+          album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        }
+      }
 
       return {
         statusCode: HttpStatus.OK,
@@ -185,9 +223,34 @@ export class AlbumService {
         },
       });
 
+      // return this if there are no album children
+      if (dto.albumChildren === undefined) {
+        return {
+          statusCode: HttpStatus.CREATED,
+          data: { album },
+        };
+      }
+
+      const albumChildrenArray = [];
+
+      // create sub albums
+      for (const albumChildren of dto.albumChildren) {
+        const albumChild = await this.prisma.albumChildren.create({
+          data: {
+            subTitle: albumChildren.subTitle,
+            description: albumChildren.description,
+            category: albumChildren.category,
+            albumImageUris: albumChildren.albumImageUris,
+            album: { connect: { id: album.id } },
+          },
+        });
+
+        albumChildrenArray.push(albumChild);
+      }
+
       return {
         statusCode: HttpStatus.CREATED,
-        data: album,
+        data: { album, albumChildrenArray },
       };
     } catch (error) {
       this.logger.error(error);
@@ -256,8 +319,19 @@ export class AlbumService {
         where: { category: { has: categoryName } },
         skip: skip,
         take: Number(dto.pageSize),
+        include: { albumChildren: { select: { albumImageUris: true } } },
       });
 
+      // if there is no image in the main album, take the first image in the first album children and add
+      for (const album of albums) {
+        if (
+          album.albumImageUris.length < 1 &&
+          album.albumChildren.length > 0 &&
+          album.albumChildren[0].albumImageUris.length > 0
+        ) {
+          album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        }
+      }
       return {
         statusCode: HttpStatus.OK,
         data: {
@@ -281,7 +355,19 @@ export class AlbumService {
       const albums = await this.prisma.album.findMany({
         take: 10,
         orderBy: { createdAt: 'desc' },
+        include: { albumChildren: { select: { albumImageUris: true } } },
       });
+
+      // if there is no image in the main album, take the first image in the first album children and add
+      for (const album of albums) {
+        if (
+          album.albumImageUris.length < 1 &&
+          album.albumChildren.length > 0 &&
+          album.albumChildren[0].albumImageUris.length > 0
+        ) {
+          album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        }
+      }
 
       return { statusCode: HttpStatus.OK, data: albums };
     } catch (error) {
@@ -302,7 +388,7 @@ export class AlbumService {
 
       // save the first image in every album
       for (const album of albums) {
-        stockImageUrls.push(album.albumImageUris[0]);
+        stockImageUrls.push(album.albumImageUris);
       }
 
       return {

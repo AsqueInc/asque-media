@@ -146,6 +146,20 @@ model Album {
   updatedAt         DateTime    @updatedAt
   numberOfLikes     Int         @default(0)
   audioUrl              String?
+  albumChildren         AlbumChildren[]
+}
+
+model AlbumChildren {
+  id                String      @id @default(uuid())
+  album           Album   @relation(fields: [albumId], references: [id])
+  albumId         String
+  subTitle          String?
+  albumImageUris    String[]
+  description       String?
+  category          String[]
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  audioUrl              String?
 }
 
 model Order {

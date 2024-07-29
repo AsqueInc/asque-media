@@ -4,8 +4,10 @@ import { PrismaService } from 'src/prisma.service';
 import { Logger } from 'winston';
 import { CreateAdvertDto } from './dto/create-advert.dto';
 import { ApiResponse } from 'src/types/response.type';
-import { PaginationDto } from 'src/category/dto/pagination.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
+import { AdvertPaginationDto } from './dto/advert-pagination-dto';
+import { shuffle } from 'lodash';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AdvertService {
@@ -75,10 +77,27 @@ export class AdvertService {
     }
   }
 
-  async getAllAdverts(dto: PaginationDto): Promise<ApiResponse> {
+  async getAllAdverts(
+    dto: AdvertPaginationDto,
+    role: Role,
+  ): Promise<ApiResponse> {
     try {
+      if (role === 'ADMIN') {
+        const adverts = await this.prisma.advert.findMany({});
+
+        return {
+          statusCode: HttpStatus.OK,
+          data: {
+            adverts,
+          },
+        };
+      }
       const totalRecords = await this.prisma.advert.count();
-      const skip = (dto.page - 1) * dto.pageSize;
+      const totalPages = Math.ceil(totalRecords / dto.pageSize);
+
+      // randomize the page to return
+      const randomPage = Math.floor(Math.random() * totalPages) + 1;
+      const skip = (randomPage - 1) * dto.pageSize;
 
       const adverts = await this.prisma.advert.findMany({
         skip: skip,
@@ -95,13 +114,15 @@ export class AdvertService {
         },
       });
 
+      // Shuffle the adverts
+      const shuffledAdverts = shuffle(adverts);
+
       return {
         statusCode: HttpStatus.OK,
         data: {
-          adverts,
+          shuffledAdverts,
           pageSize: dto.pageSize,
-          currentPage: dto.page,
-          totalRecord: totalRecords,
+          totalRecords: totalRecords,
         },
       };
     } catch (error) {
@@ -121,10 +142,10 @@ export class AdvertService {
     try {
       const profile = await this.prisma.profile.findFirst({
         where: { id: profileId },
-        select: { user: { select: { isAdmin: true } } },
+        select: { user: { select: { role: true } } },
       });
 
-      if (profile.user.isAdmin !== true) {
+      if (profile.user.role !== 'ADMIN') {
         throw new HttpException(
           'Only admins can update adverts',
           HttpStatus.UNAUTHORIZED,
@@ -169,10 +190,10 @@ export class AdvertService {
     try {
       const profile = await this.prisma.profile.findFirst({
         where: { id: profileId },
-        select: { user: { select: { isAdmin: true } } },
+        select: { user: { select: { role: true } } },
       });
 
-      if (profile.user.isAdmin !== true) {
+      if (profile.user.role !== 'ADMIN') {
         throw new HttpException(
           'Only admins can delete adverts',
           HttpStatus.UNAUTHORIZED,

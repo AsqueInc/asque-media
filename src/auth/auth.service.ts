@@ -36,7 +36,10 @@ export class AuthService {
   checkUserExistsByEmail = async (email: string) => {
     return await this.prisma.user.findFirst({
       where: { email: email },
-      include: { profile: { select: { id: true } } },
+      include: {
+        profile: { select: { id: true } },
+        referral: { select: { code: true } },
+      },
     });
   };
 
@@ -251,6 +254,7 @@ export class AuthService {
           userId: userExists.id,
           profileId: userExists.profile.id,
           email: userExists.email,
+          referralCode: userExists.referral.code,
         },
       };
     } catch (error) {

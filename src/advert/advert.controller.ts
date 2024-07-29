@@ -14,8 +14,8 @@ import { ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { AdvertService } from './advert.service';
 import { CreateAdvertDto } from './dto/create-advert.dto';
-import { PaginationDto } from 'src/category/dto/pagination.dto';
 import { UpdateAdvertDto } from './dto/update-advert.dto';
+import { AdvertPaginationDto } from './dto/advert-pagination-dto';
 
 @ApiTags('advert-endpoints')
 @Controller('advert')
@@ -30,10 +30,12 @@ export class AdvertController {
     return this.advertService.createAdvert(req.user.profileId, dto);
   }
 
+  @UseGuards(JwtGuard)
+  @ApiSecurity('JWT-auth')
   @Get('')
   @ApiOperation({ summary: 'Get all adverts' })
-  getAllAdverts(@Query() dto: PaginationDto) {
-    return this.advertService.getAllAdverts(dto);
+  getAllAdverts(@Query() dto: AdvertPaginationDto, @Req() req) {
+    return this.advertService.getAllAdverts(dto, req.user.role);
   }
 
   @Get(':advertId')
