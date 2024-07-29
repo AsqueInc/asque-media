@@ -5,5 +5,5 @@
 
 */
 -- DropTable
-DROP TABLE IF EXISTS "StockImage";
+-- DROP TABLE IF EXISTS "StockImage";
 
