@@ -425,9 +425,9 @@ export class AlbumService {
         include: { albumChildren: { select: { albumImageUris: true } } },
       });
 
-      // save the first image in every album
+      // save all the image in every album
       for (const album of albums) {
-        stockImageUrls.push(album.albumChildren[0].albumImageUris[0]);
+        stockImageUrls.push(album.albumChildren[0].albumImageUris);
       }
 
       return {
