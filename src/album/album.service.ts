@@ -6,7 +6,7 @@ import { PrismaService } from 'src/prisma.service';
 import { ApiResponse } from 'src/types/response.type';
 import { Logger } from 'winston';
 import { CreateAlbumDto } from './dto/create-album.dto';
-import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
+// import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
 
 @Injectable()
 export class AlbumService {
@@ -27,7 +27,7 @@ export class AlbumService {
         where: { id: albumId },
         include: {
           profile: { select: { name: true } },
-          albumChildren: { select: { albumImageUris: true } },
+          albumChildren: true,
         },
       });
 
@@ -35,18 +35,20 @@ export class AlbumService {
         throw new HttpException('Album does not exist', HttpStatus.NOT_FOUND);
       }
 
-      if (
-        album.albumImageUris.length < 1 &&
-        album.albumChildren.length > 0 &&
-        album.albumChildren[0].albumImageUris.length > 0
-      ) {
-        // if there is no image in the main album, take the first image in the first album children and add
-        album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
-      }
+      // if (
+      //   album.albumChildren.length > 0 &&
+      //   album.albumChildren[0].albumImageUris.length > 0
+      // ) {
+      // if there is no image in the main album, take the first image in the first album children and add
+      // const updatedAlbum = {
+      //   album,
+      //   albumImageUri: album.albumChildren[0].albumImageUris[0],
+      // };
+      // }
 
       return {
         statusCode: HttpStatus.OK,
-        data: { album },
+        data: album,
       };
     } catch (error) {
       this.logger.error(error);
@@ -70,15 +72,27 @@ export class AlbumService {
         include: { albumChildren: { select: { albumImageUris: true } } },
       });
 
+      const albumsWithImage = [];
+
       // if there is no image in the main album, take the first image in the first album children and add
       for (const album of albums) {
-        if (
-          album.albumImageUris.length < 1 &&
-          album.albumChildren.length > 0 &&
-          album.albumChildren[0].albumImageUris.length > 0
-        ) {
-          album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
-        }
+        // if (
+        //   album.albumImageUris.length < 1 &&
+        //   album.albumChildren.length > 0 &&
+        //   album.albumChildren[0].albumImageUris.length > 0
+        // ) {
+
+        const updatedAlbum = {
+          album,
+          albumImageUri: album.albumChildren[0].albumImageUris[0],
+        };
+        // album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        // }
+
+        delete updatedAlbum.album.albumChildren;
+
+        // add first image to album
+        albumsWithImage.push(updatedAlbum);
       }
 
       return {
@@ -87,7 +101,7 @@ export class AlbumService {
           currentPage: dto.page,
           pageSize: dto.pageSize,
           totalRecord: totalRecords,
-          data: albums,
+          data: albumsWithImage,
         },
       };
     } catch (error) {
@@ -125,15 +139,29 @@ export class AlbumService {
         take: Number(dto.pageSize),
       });
 
+      const albumsWithImage = [];
+
       // if there is no image in the main album, take the first image in the first album children and add
       for (const album of albums) {
-        if (
-          album.albumImageUris.length < 1 &&
-          album.albumChildren.length > 0 &&
-          album.albumChildren[0].albumImageUris.length > 0
-        ) {
-          album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
-        }
+        // if (
+        //   album.albumImageUris.length < 1 &&
+        //   album.albumChildren.length > 0 &&
+        //   album.albumChildren[0].albumImageUris.length > 0
+        // ) {
+
+        const updatedAlbum = {
+          album,
+          albumImageUri: album.albumChildren[0].albumImageUris[0],
+        };
+        // album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        // }
+
+        delete updatedAlbum.album.albumChildren;
+
+        // add first image to album
+        albumsWithImage.push(updatedAlbum);
+        // album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        // }
       }
 
       return {
@@ -142,7 +170,7 @@ export class AlbumService {
           currentPage: dto.page,
           pageSize: dto.pageSize,
           totalRecord: totalRecords,
-          data: albums,
+          data: albumsWithImage,
         },
       };
     } catch (error) {
@@ -211,10 +239,6 @@ export class AlbumService {
       const album = await this.prisma.album.create({
         data: {
           title: dto.title,
-          category: dto.category,
-          subTitle: dto.subTitle,
-          description: dto.description,
-          albumImageUris: dto.albumImageUris,
           profile: {
             connect: {
               id: profileId,
@@ -261,94 +285,94 @@ export class AlbumService {
     }
   }
 
-  /**
-   * delete an album image
-   * @param albumId : album id
-   * @param profileId : profile id
-   * @param dto : delete album image dto
-   */
-  async deleteAlbumImage(
-    albumId: string,
-    profileId: string,
-    dto: DeleteAlbumImageDto,
-  ): Promise<ApiResponse> {
-    const album = await this.prisma.album.findFirst({
-      where: { id: albumId },
-    });
+  // /**
+  //  * delete an album image
+  //  * @param albumId : album id
+  //  * @param profileId : profile id
+  //  * @param dto : delete album image dto
+  //  */
+  // async deleteAlbumImage(
+  //   albumId: string,
+  //   profileId: string,
+  //   dto: DeleteAlbumImageDto,
+  // ): Promise<ApiResponse> {
+  //   const album = await this.prisma.album.findFirst({
+  //     where: { id: albumId },
+  //   });
 
-    if (!album) {
-      throw new HttpException('Album does not exist', HttpStatus.NOT_FOUND);
-    }
+  //   if (!album) {
+  //     throw new HttpException('Album does not exist', HttpStatus.NOT_FOUND);
+  //   }
 
-    // ensure only owner of album can delete album
-    if (album.profileId !== profileId) {
-      throw new HttpException(
-        'You cannot delete images to an album you did not create',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
+  //   // ensure only owner of album can delete album
+  //   if (album.profileId !== profileId) {
+  //     throw new HttpException(
+  //       'You cannot delete images to an album you did not create',
+  //       HttpStatus.UNAUTHORIZED,
+  //     );
+  //   }
 
-    // remove image uri from list
-    const albumImageUriList = album.albumImageUris;
-    const indexToRemove = albumImageUriList.indexOf(dto.imageUri);
+  //   // remove image uri from list
+  //   const albumImageUriList = album.albumImageUris;
+  //   const indexToRemove = albumImageUriList.indexOf(dto.imageUri);
 
-    if (indexToRemove !== -1) {
-      albumImageUriList.splice(indexToRemove, 1);
-    }
+  //   if (indexToRemove !== -1) {
+  //     albumImageUriList.splice(indexToRemove, 1);
+  //   }
 
-    await this.prisma.album.update({
-      where: { id: albumId },
-      data: { albumImageUris: albumImageUriList },
-    });
+  //   await this.prisma.album.update({
+  //     where: { id: albumId },
+  //     data: { albumImageUris: albumImageUriList },
+  //   });
 
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Image removed from list',
-    };
-  }
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: 'Image removed from list',
+  //   };
+  // }
 
-  async getAllAlbumsInACategory(categoryName: string, dto: PaginationDto) {
-    try {
-      const totalRecords = await this.prisma.album.count({
-        where: { category: { has: categoryName } },
-      });
+  // async getAllAlbumsInACategory(categoryName: string, dto: PaginationDto) {
+  //   try {
+  //     const totalRecords = await this.prisma.album.count({
+  //       where: { category: { has: categoryName } },
+  //     });
 
-      const skip = (dto.page - 1) * dto.pageSize;
+  //     const skip = (dto.page - 1) * dto.pageSize;
 
-      const albums = await this.prisma.album.findMany({
-        where: { category: { has: categoryName } },
-        skip: skip,
-        take: Number(dto.pageSize),
-        include: { albumChildren: { select: { albumImageUris: true } } },
-      });
+  //     const albums = await this.prisma.album.findMany({
+  //       where: { category: { has: categoryName } },
+  //       skip: skip,
+  //       take: Number(dto.pageSize),
+  //       include: { albumChildren: { select: { albumImageUris: true } } },
+  //     });
 
-      // if there is no image in the main album, take the first image in the first album children and add
-      for (const album of albums) {
-        if (
-          album.albumImageUris.length < 1 &&
-          album.albumChildren.length > 0 &&
-          album.albumChildren[0].albumImageUris.length > 0
-        ) {
-          album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
-        }
-      }
-      return {
-        statusCode: HttpStatus.OK,
-        data: {
-          currentPage: dto.page,
-          pageSize: dto.pageSize,
-          totalRecord: totalRecords,
-          data: albums,
-        },
-      };
-    } catch (error) {
-      this.logger.error(error);
-      throw new HttpException(
-        error.message,
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //     // if there is no image in the main album, take the first image in the first album children and add
+  //     for (const album of albums) {
+  //       if (
+  //         album.albumImageUris.length < 1 &&
+  //         album.albumChildren.length > 0 &&
+  //         album.albumChildren[0].albumImageUris.length > 0
+  //       ) {
+  //         album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+  //       }
+  //     }
+  //     return {
+  //       statusCode: HttpStatus.OK,
+  //       data: {
+  //         currentPage: dto.page,
+  //         pageSize: dto.pageSize,
+  //         totalRecord: totalRecords,
+  //         data: albums,
+  //       },
+  //     };
+  //   } catch (error) {
+  //     this.logger.error(error);
+  //     throw new HttpException(
+  //       error.message,
+  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   async getNewestAlbums() {
     try {
@@ -358,18 +382,31 @@ export class AlbumService {
         include: { albumChildren: { select: { albumImageUris: true } } },
       });
 
+      const albumsWithImage = [];
+
       // if there is no image in the main album, take the first image in the first album children and add
       for (const album of albums) {
-        if (
-          album.albumImageUris.length < 1 &&
-          album.albumChildren.length > 0 &&
-          album.albumChildren[0].albumImageUris.length > 0
-        ) {
-          album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
-        }
+        // if (
+        //   album.albumImageUris.length < 1 &&
+        //   album.albumChildren.length > 0 &&
+        //   album.albumChildren[0].albumImageUris.length > 0
+        // ) {
+        //   album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        // }
+
+        const updatedAlbum = {
+          album,
+          albumImageUri: album.albumChildren[0].albumImageUris[0],
+        };
+        // album.albumImageUris.push(album.albumChildren[0].albumImageUris[0]);
+        // }
+
+        delete updatedAlbum.album.albumChildren;
+        // add first image to album
+        albumsWithImage.push(updatedAlbum);
       }
 
-      return { statusCode: HttpStatus.OK, data: albums };
+      return { statusCode: HttpStatus.OK, data: albumsWithImage };
     } catch (error) {
       this.logger.error(error);
       throw new HttpException(
@@ -384,11 +421,13 @@ export class AlbumService {
     try {
       const stockImageUrls = [];
 
-      const albums = await this.prisma.album.findMany();
+      const albums = await this.prisma.album.findMany({
+        include: { albumChildren: { select: { albumImageUris: true } } },
+      });
 
       // save the first image in every album
       for (const album of albums) {
-        stockImageUrls.push(album.albumImageUris);
+        stockImageUrls.push(album.albumChildren[0].albumImageUris[0]);
       }
 
       return {
