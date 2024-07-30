@@ -195,6 +195,7 @@ export class AlbumService {
 
       const album = await this.prisma.album.findFirst({
         where: { id: albumId },
+        include: { albumChildren: { select: { id: true } } },
       });
 
       if (!album) {
@@ -207,6 +208,13 @@ export class AlbumService {
           'You cannot delete an album that you did not create',
           HttpStatus.UNAUTHORIZED,
         );
+      }
+
+      // delete children album first, to avoid changing model and creating another migration
+      for (const albumChildId of album.albumChildren) {
+        await this.prisma.albumChildren.delete({
+          where: { id: albumChildId.id },
+        });
       }
 
       await this.prisma.album.delete({ where: { id: albumId } });
@@ -470,15 +478,30 @@ export class AlbumService {
 
       if (dto.albumChildren !== undefined) {
         for (const albumChild of dto.albumChildren) {
-          await this.prisma.albumChildren.update({
-            where: { id: albumChild.id },
-            data: {
-              subTitle: albumChild.subTitle,
-              category: albumChild.category,
-              description: albumChild.description,
-              albumImageUris: albumChild.albumImageUris,
-            },
-          });
+          // if id is not provided, add album child to parent album
+          if (albumChild.id === undefined) {
+            await this.prisma.albumChildren.create({
+              data: {
+                album: { connect: { id: albumId } },
+                subTitle: albumChild.subTitle,
+                description: albumChild.description,
+                category: albumChild.category,
+                albumImageUris: albumChild.albumImageUris,
+              },
+            });
+
+            // update album child if provided
+          } else {
+            await this.prisma.albumChildren.update({
+              where: { id: albumChild.id },
+              data: {
+                subTitle: albumChild.subTitle,
+                category: albumChild.category,
+                description: albumChild.description,
+                albumImageUris: albumChild.albumImageUris,
+              },
+            });
+          }
         }
       }
 
