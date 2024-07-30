@@ -16,7 +16,7 @@ class AlbumChildrenDto {
   @IsString()
   description: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @ApiProperty()
   albumImageUris: string[];
 }
@@ -27,7 +27,7 @@ export class CreateAlbumDto {
   @ApiProperty()
   title: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @ApiProperty({ type: [AlbumChildrenDto] })
   albumChildren: AlbumChildrenDto[];
 }
