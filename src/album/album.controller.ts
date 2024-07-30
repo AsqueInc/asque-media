@@ -14,7 +14,7 @@ import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { AlbumService } from './album.service';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
-import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
+// import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
 
 @ApiTags('album-endpoints')
 @Controller('album')
@@ -69,24 +69,24 @@ export class AlbumController {
     return this.albumService.getAllStockImages();
   }
 
-  @UseGuards(JwtGuard)
-  @ApiSecurity('JWT-auth')
-  @Delete('image/:albumId')
-  @ApiOperation({ summary: 'Delete an album image ' })
-  deleteAlbumImage(
-    @Param('albumId') albumId: string,
-    @Req() req,
-    @Body() dto: DeleteAlbumImageDto,
-  ) {
-    return this.albumService.deleteAlbumImage(albumId, req.user.profileId, dto);
-  }
+  // @UseGuards(JwtGuard)
+  // @ApiSecurity('JWT-auth')
+  // @Delete('image/:albumId')
+  // @ApiOperation({ summary: 'Delete an album image ' })
+  // deleteAlbumImage(
+  //   @Param('albumId') albumId: string,
+  //   @Req() req,
+  //   @Body() dto: DeleteAlbumImageDto,
+  // ) {
+  //   return this.albumService.deleteAlbumImage(albumId, req.user.profileId, dto);
+  // }
 
-  @Get('category/:categoryName')
-  @ApiOperation({ summary: 'Get all albums by category name' })
-  getAllAlbumsInACategory(
-    @Query() dto: PaginationDto,
-    @Param('categoryName') categoryName: string,
-  ) {
-    return this.albumService.getAllAlbumsInACategory(categoryName, dto);
-  }
+  // @Get('category/:categoryName')
+  // @ApiOperation({ summary: 'Get all albums by category name' })
+  // getAllAlbumsInACategory(
+  //   @Query() dto: PaginationDto,
+  //   @Param('categoryName') categoryName: string,
+  // ) {
+  //   return this.albumService.getAllAlbumsInACategory(categoryName, dto);
+  // }
 }
