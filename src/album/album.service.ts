@@ -5,6 +5,7 @@ import { PrismaService } from 'src/prisma.service';
 import { ApiResponse } from 'src/types/response.type';
 import { Logger } from 'winston';
 import { CreateAlbumDto } from './dto/create-album.dto';
+import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Injectable()
 export class AlbumService {
@@ -432,6 +433,58 @@ export class AlbumService {
         data: {
           stockImageUrls,
         },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async updateAlbum(dto: UpdateAlbumDto, profileId: string, albumId: string) {
+    try {
+      const album = await this.prisma.album.findFirst({
+        where: { id: albumId },
+      });
+
+      const user = await this.prisma.user.findFirst({
+        where: { profile: { id: profileId } },
+      });
+
+      if (album.profileId !== profileId && user.role !== 'ADMIN') {
+        throw new HttpException(
+          'You cannot update an album you do not own',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      // update album title if title is passed
+      if (dto.title !== undefined) {
+        await this.prisma.album.update({
+          where: { id: albumId },
+          data: { title: dto.title },
+        });
+      }
+
+      if (dto.albumChildren !== undefined) {
+        for (const albumChild of dto.albumChildren) {
+          await this.prisma.albumChildren.update({
+            where: { id: albumChild.id },
+            data: {
+              subTitle: albumChild.subTitle,
+              category: albumChild.category,
+              description: albumChild.description,
+              albumImageUris: albumChild.albumImageUris,
+            },
+          });
+        }
+      }
+
+      return {
+        statusCode: 200,
+        message: 'update completed',
       };
     } catch (error) {
       this.logger.error(error);
