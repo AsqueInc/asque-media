@@ -1,19 +1,16 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { PaginationDto } from 'src/category/dto/pagination.dto';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PrismaService } from 'src/prisma.service';
 import { ApiResponse } from 'src/types/response.type';
 import { Logger } from 'winston';
 import { CreateAlbumDto } from './dto/create-album.dto';
-// import { DeleteAlbumImageDto } from './dto/delete-album-image.dto';
 
 @Injectable()
 export class AlbumService {
   constructor(
     private prisma: PrismaService,
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
-    private cloudinary: CloudinaryService,
   ) {}
 
   /**
