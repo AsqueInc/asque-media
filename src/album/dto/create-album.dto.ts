@@ -27,24 +27,6 @@ export class CreateAlbumDto {
   @ApiProperty()
   title: string;
 
-  @IsString()
-  @IsOptional()
-  @ApiProperty()
-  subTitle: string;
-
-  @IsNotEmpty()
-  @ApiProperty()
-  category: string[];
-
-  @IsNotEmpty()
-  @ApiProperty()
-  @IsString()
-  description: string;
-
-  @IsOptional()
-  @ApiProperty()
-  albumImageUris: string[];
-
   @IsOptional()
   @ApiProperty({ type: [AlbumChildrenDto] })
   albumChildren: AlbumChildrenDto[];
