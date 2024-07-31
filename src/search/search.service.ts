@@ -82,4 +82,23 @@ export class SearchService {
       );
     }
   }
+
+  async searchAdvert(title: string) {
+    try {
+      const adverts = await this.prisma.advert.findMany({
+        where: { title: { contains: title, mode: 'insensitive' } },
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        data: adverts,
+      };
+    } catch (error) {
+      this.logger.error(error);
+      throw new HttpException(
+        error.message,
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }
