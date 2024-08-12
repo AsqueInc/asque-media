@@ -17,11 +17,12 @@ export class EmailNotificationService {
     this.nodeMailerTransport = createTransport({
       service: configService.get('EMAIL_SERVICE'),
       auth: {
-        type: 'OAuth2',
+        // type: 'OAuth2',
         user: configService.get('USER_EMAIL'),
-        clientId: configService.get('AUTH_CLIENT_ID'),
-        clientSecret: configService.get('AUTH_CLIENT_SECRET'),
-        refreshToken: configService.get('AUTH_REFRESH_TOKEN'),
+        // clientId: configService.get('AUTH_CLIENT_ID'),
+        // clientSecret: configService.get('AUTH_CLIENT_SECRET'),
+        // refreshToken: configService.get('AUTH_REFRESH_TOKEN'),
+        pass: configService.get('EMAIL_PASSWORD'),
       },
     });
   }
