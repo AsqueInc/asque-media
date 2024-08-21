@@ -51,7 +51,8 @@ export class PaymentService {
         );
       }
 
-      if (dto.amount < Number(order.shippingCost) + Number(order.totalPrice)) {
+      if (dto.amount < Number(order.totalPrice)) {
+        // if (dto.amount < Number(order.shippingCost) + Number(order.totalPrice)) {
         throw new HttpException(
           'You did not input the correct amount',
           HttpStatus.BAD_REQUEST,
